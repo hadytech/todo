@@ -15,6 +15,15 @@ const landingRoutes = categories.flatMap((c) =>
     .map((d) => `/toshkent/${d}/${c.slug}`),
 )
 
+/**
+ * One index per district that actually has listings. These sit above the
+ * category x district pages and give every business page a parent worth
+ * linking to. Empty districts are not generated: a page with nothing on
+ * it is thin content and a dead end.
+ */
+const districtRoutes = [...new Set(published.map((b) => b.district))]
+  .map((d) => `/tuman/${d}`)
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
   devtools: { enabled: false },
@@ -49,6 +58,7 @@ export default defineNuxtConfig({
         '/qoshish',
         ...published.map((b) => `/b/${b.slug}`),
         ...landingRoutes,
+        ...districtRoutes,
         '/sitemap.xml',
         '/robots.txt',
       ],

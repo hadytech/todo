@@ -11,6 +11,7 @@ export default defineEventHandler((event) => {
       slug: b.slug,
       name: b.name,
       address: b.address,
+      categoryTop: b.categoryTop,
       categoryName: categoryLabel(b.category),
       districtName: districtLabel(b.district),
       price: b.price,

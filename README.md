@@ -156,6 +156,28 @@ the rest of a business page, so nothing loads until the visitor taps
 "Xaritani koʻrsatiş". Every failure path falls back to a plain
 OpenStreetMap link that works with no JavaScript at all.
 
+## Pages
+
+```
+/                              search, categories, districts
+/qidiruv?q=&kat=&tuman=        search — noindex, thin by nature
+/qoshish                       how to contribute a listing
+/tuman/<district>              everything in one tuman, grouped
+/toshkent/<district>/<cat>     the pages that actually rank
+/b/<slug>                      a business
+```
+
+The browse surface is a real hierarchy, not a flat set of leaves:
+home → district → category × district → business. Every business page
+renders the trail as visible breadcrumbs *and* declares it as
+`BreadcrumbList`, which gives the district and landing pages the internal
+links they need — those are where search traffic lands, so they should not
+depend on the sitemap alone to be found.
+
+Pages with nothing on them are never generated and never linked. An empty
+landing page is thin content that drags on the pages that do rank, and a
+dead end for anyone who taps it.
+
 ## Layout
 
 ```

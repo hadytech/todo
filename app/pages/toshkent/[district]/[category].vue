@@ -27,7 +27,8 @@ const structured = computed(() => [
     '@type': 'BreadcrumbList',
     itemListElement: [
       { name: 'yalp.uz', item: config.public.siteUrl },
-      { name: districtName.value, item: pageUrl },
+      { name: districtName.value, item: `${config.public.siteUrl}/tuman/${district}` },
+      { name: categoryName.value, item: pageUrl },
     ].map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, item: e.item })),
   },
   {
@@ -61,6 +62,14 @@ useHead({
 
 <template>
   <div>
+    <nav class="text-sm opacity-60 mb-2 flex flex-wrap gap-x-1">
+      <NuxtLink to="/" class="hover:text-teal-600">Bosh sahifa</NuxtLink>
+      <span>›</span>
+      <NuxtLink :to="`/tuman/${district}`" class="hover:text-teal-600">{{ districtName }}</NuxtLink>
+      <span>›</span>
+      <span>{{ categoryName }}</span>
+    </nav>
+
     <h1 class="text-xl font-bold mb-1">{{ title }}</h1>
     <p class="opacity-70 text-sm mb-5">{{ data?.items.length ?? 0 }} ta joy</p>
 

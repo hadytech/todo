@@ -9,6 +9,12 @@ function districtsWith(category: string) {
   return (data.value?.districts ?? []).filter((d) => combos.has(`${d.slug}/${category}`))
 }
 
+/** Districts that have at least one listing, in catalogue order. */
+const activeDistricts = computed(() => {
+  const live = new Set((data.value?.combos ?? []).map((c) => c.split('/')[0]))
+  return (data.value?.districts ?? []).filter((d) => live.has(d.slug))
+})
+
 function go() {
   if (q.value.trim()) router.push({ path: '/qidiruv', query: { q: q.value.trim() } })
 }
@@ -65,6 +71,18 @@ useHead({
           class="text-sm rounded-full border border-neutral-300 dark:border-neutral-700 px-3 py-1 hover:border-teal-600"
         >{{ d.name }}</NuxtLink>
         <span v-if="!districtsWith(c.slug).length" class="text-sm opacity-50">hali joy yoʻq</span>
+      </div>
+    </section>
+
+    <section v-if="activeDistricts.length" class="mb-7">
+      <h2 class="font-semibold mb-2">Tumanlar boʻyicha</h2>
+      <div class="flex flex-wrap gap-2">
+        <NuxtLink
+          v-for="d in activeDistricts"
+          :key="d.slug"
+          :to="`/tuman/${d.slug}`"
+          class="text-sm rounded-full border border-neutral-300 dark:border-neutral-700 px-3 py-1 hover:border-teal-600"
+        >{{ d.name }}</NuxtLink>
       </div>
     </section>
 

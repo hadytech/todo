@@ -90,15 +90,27 @@ useSeoMeta({
  * trail, and they tie each business page to its landing page — which is
  * where the ranking actually accrues.
  */
+/**
+ * The trail is rendered as well as declared. Visible breadcrumbs give the
+ * visitor a way up and out, and give the district and landing pages the
+ * internal links they need to rank — those pages are where search traffic
+ * actually lands.
+ */
+const trail = computed(() => [
+  { name: 'Bosh sahifa', ascii: 'yalp.uz', to: '/' },
+  { name: b.value!.districtName, ascii: b.value!.districtAscii, to: `/tuman/${b.value!.district}` },
+  {
+    name: b.value!.categoryName,
+    ascii: b.value!.categoryAscii,
+    to: `/toshkent/${b.value!.district}/${b.value!.categoryTop}`,
+  },
+])
+
 const breadcrumbs = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { name: 'yalp.uz', item: config.public.siteUrl },
-    {
-      name: b.value!.districtAscii,
-      item: `${config.public.siteUrl}/toshkent/${b.value!.district}/${b.value!.categoryTop}`,
-    },
+    ...trail.value.map((t) => ({ name: t.ascii, item: `${config.public.siteUrl}${t.to}` })),
     { name: b.value!.nameAscii, item: pageUrl.value },
   ].map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, item: e.item })),
 }))
@@ -123,6 +135,13 @@ useHead({
 
 <template>
   <article v-if="b">
+    <nav class="text-sm opacity-60 mb-2 flex flex-wrap gap-x-1">
+      <template v-for="(t, i) in trail" :key="t.to">
+        <NuxtLink :to="t.to" class="hover:opacity-100 hover:text-teal-600">{{ t.name }}</NuxtLink>
+        <span v-if="i < trail.length - 1">›</span>
+      </template>
+    </nav>
+
     <h1 class="text-2xl font-bold">{{ b.name }}</h1>
 
     <!-- Visible, indexed, and genuinely useful: the spelling people know. -->
