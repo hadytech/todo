@@ -1,0 +1,76 @@
+import tailwindcss from '@tailwindcss/vite'
+import { loadBusinesses, loadCategories, publishedOnly } from './lib/load'
+
+const { businesses } = loadBusinesses()
+const published = publishedOnly(businesses)
+const categories = loadCategories()
+
+/**
+ * Category x district landing pages. These are the pages that actually
+ * rank in search, and they cost one template — so they are prerendered
+ * from day one rather than bolted on later.
+ */
+const landingRoutes = categories.flatMap((c) =>
+  [...new Set(published.filter((b) => b.categoryTop === c.slug).map((b) => b.district))]
+    .map((d) => `/toshkent/${d}/${c.slug}`),
+)
+
+export default defineNuxtConfig({
+  compatibilityDate: '2025-01-01',
+  devtools: { enabled: false },
+  modules: [],
+  css: ['~/assets/css/main.css'],
+  vite: { plugins: [tailwindcss()] },
+
+  /**
+   * GitHub Pages serves static files only, so everything is prerendered.
+   * Set NUXT_APP_BASE_URL=/<repo>/ for a project site; leave it as "/"
+   * once the custom domain is pointed here.
+   */
+  app: {
+    baseURL: process.env.NUXT_APP_BASE_URL || '/',
+    head: {
+      htmlAttrs: { lang: 'uz' },
+      meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'theme-color', content: '#0f766e' },
+      ],
+      link: [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+    },
+  },
+
+  nitro: {
+    preset: 'static',
+    prerender: {
+      crawlLinks: true,
+      routes: [
+        '/',
+        '/qidiruv',
+        ...published.map((b) => `/b/${b.slug}`),
+        ...landingRoutes,
+        '/sitemap.xml',
+        '/robots.txt',
+      ],
+      // A broken internal link should fail the build, not ship.
+      failOnError: true,
+    },
+  },
+
+  runtimeConfig: {
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://yalp.uz',
+      /**
+       * Swap this to flip the whole site between alphabets. Everything is
+       * derived from one canonical form, so this is the only line that
+       * changes if the data says standard Latin wins.
+       */
+      alphabet: process.env.NUXT_PUBLIC_ALPHABET || 'new',
+      /**
+       * Self-hosted Protomaps archive. Verify Range-request support on
+       * GitHub Pages before relying on this URL; if Pages does not honour
+       * Range, point it at a GitHub Release asset instead.
+       */
+      pmtilesUrl: process.env.NUXT_PUBLIC_PMTILES_URL || '/tiles/toshkent.pmtiles',
+    },
+  },
+})

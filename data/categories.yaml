@@ -1,0 +1,43 @@
+# Uchta asosiy kategoriya bilan boshlaymiz. Bitta sohada chuqur boʻlish
+# hamma sohada yuza boʻlishdan yaxşi — yangi kategoriya qoʻshish oson,
+# boʻş kategoriyani toʻldirish esa qiyin.
+- slug: ovqatlanish
+  name: Ovqatlanish
+  icon: "🍽"
+  children:
+    - slug: restoran
+      name: Restoranlar
+    - slug: kafe
+      name: Kafelar
+    - slug: choyxona
+      name: Çoyxonalar
+    - slug: fast-food
+      name: Fast food
+    - slug: qahvaxona
+      name: Qahvaxonalar
+
+- slug: gozallik
+  name: Gözallik
+  icon: "💇"
+  children:
+    - slug: sartaroshxona
+      name: Sartaroşxonalar
+    - slug: salon
+      name: Gözallik salonlari
+    - slug: manikyur
+      name: Manikyur
+    - slug: spa
+      name: Spa
+
+- slug: sogliq
+  name: Soğliq
+  icon: "🩺"
+  children:
+    - slug: klinika
+      name: Klinikalar
+    - slug: stomatologiya
+      name: Stomatologiya
+    - slug: dorixona
+      name: Dorixonalar
+    - slug: laboratoriya
+      name: Laboratoriyalar

@@ -1,0 +1,35 @@
+{
+  "name": "yalp-uz",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "npm run index && nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "validate": "tsx scripts/validate.ts",
+    "index": "tsx scripts/build-index.ts",
+    "entry": "tsx scripts/entry.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "maplibre-gl": "^5.6.0",
+    "minisearch": "^7.1.2",
+    "nuxt": "^4.0.0",
+    "pmtiles": "^4.3.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
+    "yaml": "^2.7.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.0"
+  }
+}
