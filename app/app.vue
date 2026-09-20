@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { indexable } = useRuntimeConfig().public
+const { indexable, repoUrl } = useRuntimeConfig().public
 
 // robots.txt asks crawlers not to fetch; this tells any that fetched
 // anyway not to index. A page already marked noindex stays noindex.
@@ -33,8 +33,12 @@ if (!indexable) {
     </main>
 
     <footer class="border-t border-neutral-200 dark:border-neutral-800 mt-8">
-      <div class="mx-auto max-w-3xl px-4 py-6 text-sm opacity-60">
-        <p>yalp.uz — Toşkent joylari maʼlumotnomasi. Ochiq kodli.</p>
+      <div class="mx-auto max-w-3xl px-4 py-6 text-sm">
+        <p class="opacity-60 mb-2">Toşkent joylari maʼlumotnomasi — ochiq kodli, ochiq maʼlumotli.</p>
+        <nav class="flex flex-wrap gap-x-4 gap-y-1">
+          <NuxtLink to="/qoshish" class="opacity-70 hover:opacity-100">Joy qoʻşiş</NuxtLink>
+          <a :href="repoUrl" rel="noopener" class="opacity-70 hover:opacity-100">Manba kodi</a>
+        </nav>
       </div>
     </footer>
   </div>

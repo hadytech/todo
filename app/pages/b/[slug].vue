@@ -149,13 +149,17 @@ useHead({
       Boşqa nomi: {{ b.nameAscii }}
     </p>
 
-    <p class="text-sm opacity-75 mt-2">
-      {{ b.categoryName }} · {{ b.districtName }}
-      <span v-if="b.price"> · {{ '$'.repeat(b.price) }}</span>
-      <span v-if="openNow !== null" class="ml-2 font-medium" :class="openNow ? 'text-teal-600' : 'text-neutral-500'">
-        {{ openNow ? '· Hozir ochiq' : '· Hozir yopiq' }}
-      </span>
-    </p>
+    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-sm opacity-75">
+      <span>{{ b.categoryName }} · {{ b.districtName }}</span>
+      <span v-if="b.price">· {{ '$'.repeat(b.price) }}</span>
+      <span
+        v-if="openNow !== null"
+        class="rounded-full px-2 py-0.5 text-xs font-medium"
+        :class="openNow
+          ? 'bg-teal-600/12 text-teal-700 dark:text-teal-300'
+          : 'bg-neutral-500/12 text-neutral-600 dark:text-neutral-400'"
+      >{{ openNow ? 'Hozir ochiq' : 'Hozir yopiq' }}</span>
+    </div>
 
     <div v-if="b.photos?.length" class="mt-4 flex gap-2 overflow-x-auto -mx-4 px-4 snap-x">
       <img

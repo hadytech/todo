@@ -11,6 +11,8 @@ export default defineEventHandler((event) => {
     ...catalog.businesses.map((b) => ({ loc: `/b/${b.slug}`, priority: '0.8' })),
     ...[...new Set(catalog.businesses.map((b) => b.district))]
       .map((d) => ({ loc: `/tuman/${d}`, priority: '0.7' })),
+    ...[...new Set(catalog.businesses.map((b) => b.categoryTop))]
+      .map((c) => ({ loc: `/kategoriya/${c}`, priority: '0.7' })),
     ...catalog.categories.flatMap((c) =>
       [...new Set(catalog.businesses.filter((b) => b.categoryTop === c.slug).map((b) => b.district))]
         .map((d) => ({ loc: `/toshkent/${d}/${c.slug}`, priority: '0.7' })),

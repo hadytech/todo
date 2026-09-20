@@ -24,6 +24,10 @@ const landingRoutes = categories.flatMap((c) =>
 const districtRoutes = [...new Set(published.map((b) => b.district))]
   .map((d) => `/tuman/${d}`)
 
+/** One page per category, city-wide. */
+const categoryRoutes = [...new Set(published.map((b) => b.categoryTop))]
+  .map((c) => `/kategoriya/${c}`)
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
   devtools: { enabled: false },
@@ -59,6 +63,7 @@ export default defineNuxtConfig({
         ...published.map((b) => `/b/${b.slug}`),
         ...landingRoutes,
         ...districtRoutes,
+        ...categoryRoutes,
         '/sitemap.xml',
         '/robots.txt',
       ],

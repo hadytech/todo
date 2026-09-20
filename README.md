@@ -159,13 +159,19 @@ OpenStreetMap link that works with no JavaScript at all.
 ## Pages
 
 ```
-/                              search, categories, districts
+/                              search, three category tiles, districts
 /qidiruv?q=&kat=&tuman=        search — noindex, thin by nature
 /qoshish                       how to contribute a listing
-/tuman/<district>              everything in one tuman, grouped
-/toshkent/<district>/<cat>     the pages that actually rank
+/kategoriya/<cat>              one category, whole city
+/tuman/<district>              one district, all categories
+/toshkent/<district>/<cat>     the intersection — the pages that rank
 /b/<slug>                      a business
 ```
+
+Browsing works on both axes. Without `/kategoriya/<cat>` the home page had
+to enumerate every district under every category to reach anything, which
+is what made it dense — roughly twenty chips before the first listing.
+Three tiles with counts replaced all of it.
 
 The browse surface is a real hierarchy, not a flat set of leaves:
 home → district → category × district → business. Every business page
