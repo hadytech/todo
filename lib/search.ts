@@ -12,13 +12,15 @@ export interface IndexedBusiness {
   address: string
   category: string
   district: string
+  /** Alternative names for the category — see lib/synonyms.ts. */
+  terms: string
   lat: number
   lng: number
   price?: number
 }
 
 export const searchOptions: MiniSearchOptions = {
-  fields: ['name', 'address', 'category', 'district'],
+  fields: ['name', 'address', 'category', 'district', 'terms'],
   storeFields: ['name', 'address', 'category', 'district', 'lat', 'lng', 'price'],
   /**
    * The whole cross-alphabet story lives here. Folding inside the
@@ -28,7 +30,9 @@ export const searchOptions: MiniSearchOptions = {
   tokenize: (text: string) => toSearchKey(text).split(' ').filter(Boolean),
   processTerm: (term: string) => term || null,
   searchOptions: {
-    boost: { name: 3, category: 2 },
+    // Synonyms are a fallback, not a headline: a place actually named
+    // "Apteka" should outrank every pharmacy matched through the word.
+    boost: { name: 3, category: 2, terms: 0.5 },
     prefix: true,
     // Typo tolerance. Worth having when people are typing an alphabet
     // their keyboard does not have.

@@ -49,6 +49,7 @@ npm test           # alphabet + coordinate tests
 npm run validate   # check every YAML file
 npm run generate   # build the static site into .output/public
 npm run check:budget  # fail if any page exceeds its weight budget
+npm run check:html    # static HTML and accessibility audit
 ```
 
 ## Adding a business
@@ -194,6 +195,23 @@ server/        API routes + sitemap; run at build time only
 app/           Nuxt pages and components
 ```
 
+## Search in other languages
+
+The alphabet layer solves *scripts* — `çoyxona`, `choyxona` and `чойхона`
+fold to one key. It does nothing for different *words*: someone searching
+`аптека` is not misspelling `dorixona`, they are using another language,
+and Tashkent runs on both.
+
+`lib/synonyms.ts` maps each category to its Russian, English and
+colloquial Uzbek equivalents, expanded at index time — one pass at build,
+nothing extra shipped to the browser. Synonyms are boosted *down*, so a
+place actually named "Apteka" still outranks every pharmacy matched
+through the word.
+
+`lib/search.test.ts` builds a real index and searches it, which is also
+what catches the build script and the browser drifting apart — if they
+ever tokenize differently, search fails silently rather than erroring.
+
 ## Indexing
 
 Search engines are blocked by default — `robots.txt` says `Disallow: /`
@@ -252,6 +270,15 @@ gate rather than an aspiration.
 Chunks reached only through a dynamic import are reported separately
 rather than charged to the page; if one ever becomes eager, it lands in
 the page total and the gate fails.
+
+`npm run check:html` audits the generated HTML — missing alt text and
+input labels, duplicate ids, heading order, empty links, and words fused
+by a collapsed space between adjacent elements. That last one has shipped
+twice ("yuboringyokixabar", "Çilonzor2"), which is why it is a check
+rather than a note. It is deliberately not a browser run: axe in CI means
+installing Chromium on every pull request, and these faults need no
+renderer. Two lowercase words fusing is indistinguishable from a long
+word, so looking at the pages is still the backstop.
 
 ## Licence
 

@@ -27,3 +27,5 @@ jobs:
         run: npm run generate
       - name: Sahifa byudjeti
         run: npm run check:budget
+      - name: HTML tekşiruvi
+        run: npm run check:html

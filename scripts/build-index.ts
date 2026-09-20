@@ -10,6 +10,7 @@ import { join } from 'node:path'
 import MiniSearch from 'minisearch'
 import { loadBusinesses, loadCategories, loadDistricts, publishedOnly } from '../lib/load'
 import { searchOptions, type IndexedBusiness } from '../lib/search'
+import { synonymsFor } from '../lib/synonyms'
 
 const { businesses, issues } = loadBusinesses()
 const errors = issues.filter((i) => i.level === 'error')
@@ -30,6 +31,7 @@ const docs: IndexedBusiness[] = publishedOnly(businesses).map((b) => ({
   address: b.address,
   category: categoryNames.get(b.category) ?? b.category,
   district: districtNames.get(b.district) ?? b.district,
+  terms: synonymsFor(b.category).join(' '),
   lat: b.location.lat,
   lng: b.location.lng,
   price: b.price,
