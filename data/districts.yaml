@@ -1,0 +1,26 @@
+# Toshkent shahri tumanlari. Nomlar yangi alifboda (ö ğ ç ş),
+# sluglar esa ASCII — chunki ular URL'ga tushadi.
+- slug: bektemir
+  name: Bektemir
+- slug: chilonzor
+  name: Çilonzor
+- slug: mirobod
+  name: Mirobod
+- slug: mirzo-ulugbek
+  name: Mirzo Uluğbek
+- slug: olmazor
+  name: Olmazor
+- slug: sergeli
+  name: Sergeli
+- slug: shayxontohur
+  name: Şayxontohur
+- slug: uchtepa
+  name: Uçtepa
+- slug: yakkasaroy
+  name: Yakkasaroy
+- slug: yangihayot
+  name: Yangihayot
+- slug: yashnobod
+  name: Yaşnobod
+- slug: yunusobod
+  name: Yunusobod
