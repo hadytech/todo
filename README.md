@@ -188,6 +188,17 @@ server/        API routes + sitemap; run at build time only
 app/           Nuxt pages and components
 ```
 
+## Indexing
+
+Search engines are blocked by default — `robots.txt` says `Disallow: /`
+and every page carries `noindex`. Turn it on with repository variable
+`INDEXABLE=true` once there is real content.
+
+The default is the safe one on purpose: a directory crawled while it
+holds a handful of placeholder listings makes its first impression as a
+near-empty site, and early quality signals are sticky. You want indexing
+to begin at ~50 real listings, not before.
+
 ## Deployment
 
 Push to `main` → GitHub Actions builds and deploys to Pages.

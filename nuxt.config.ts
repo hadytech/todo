@@ -70,6 +70,16 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://yalp.uz',
+      /**
+       * Search engines are kept out unless this is explicitly turned on.
+       *
+       * The default is deliberately the safe one: a directory crawled
+       * while it holds a handful of placeholder listings makes its first
+       * impression as a near-empty site, and early quality signals are
+       * sticky. Opt in (repo variable INDEXABLE=true) once there is real
+       * content worth finding.
+       */
+      indexable: process.env.NUXT_PUBLIC_INDEXABLE === 'true',
       /** Source repository. Update here if the repo is renamed. */
       repoUrl: process.env.NUXT_PUBLIC_REPO_URL || 'https://github.com/hadytech/todo',
       /**

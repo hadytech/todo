@@ -1,3 +1,13 @@
+<script setup lang="ts">
+const { indexable } = useRuntimeConfig().public
+
+// robots.txt asks crawlers not to fetch; this tells any that fetched
+// anyway not to index. A page already marked noindex stays noindex.
+if (!indexable) {
+  useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
+}
+</script>
+
 <template>
   <div class="min-h-dvh flex flex-col bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
     <a

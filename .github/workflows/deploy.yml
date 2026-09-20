@@ -36,6 +36,9 @@ jobs:
           # GitHub project site loads its assets.
           NUXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://yalp.uz' }}
           NUXT_APP_BASE_URL: ${{ vars.BASE_URL || '/' }}
+          # Set repository variable INDEXABLE=true when the directory has
+          # real content and should start being crawled.
+          NUXT_PUBLIC_INDEXABLE: ${{ vars.INDEXABLE || 'false' }}
       - name: Sahifa byudjeti
         run: npm run check:budget
       - uses: actions/configure-pages@v5
