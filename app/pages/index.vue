@@ -87,8 +87,16 @@ useHead({
     </section>
 
     <section v-if="data?.items?.length">
-      <h2 class="font-semibold mb-3">Yangi qoʻşilganlar</h2>
+      <div class="flex items-baseline justify-between mb-3">
+        <h2 class="font-semibold">Joylar</h2>
+        <span class="text-sm opacity-60">{{ data.total }} ta</span>
+      </div>
       <BusinessCard v-for="b in data.items.slice(0, 8)" :key="b.slug" :business="b" />
+      <NuxtLink
+        v-if="data.total > 8"
+        to="/qidiruv"
+        class="inline-block mt-3 text-sm text-teal-600 dark:text-teal-400"
+      >Hammasini koʻriş →</NuxtLink>
     </section>
   </div>
 </template>

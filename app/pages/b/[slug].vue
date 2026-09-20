@@ -219,7 +219,7 @@ useHead({
       Maʼlumot notoʻğrimi?
       <a :href="`${config.public.repoUrl}/edit/main/data/businesses/${b.slug}.yaml`"
          rel="noopener" class="text-teal-600 dark:text-teal-400">Tuzatiş yuboring</a>
-      <span class="opacity-50">yoki</span>
+      <span class="opacity-50">&nbsp;yoki&nbsp;</span>
       <a :href="`${config.public.repoUrl}/issues/new?template=tuzatish.yml`"
          rel="noopener" class="text-teal-600 dark:text-teal-400">xabar bering</a>
     </p>
