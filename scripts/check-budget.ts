@@ -34,6 +34,24 @@ function walk(dir: string): string[] {
 
 const gzipKb = (buf: Buffer | string) => gzipSync(buf).length / 1024
 
+/**
+ * Maps a URL from the HTML back to a file on disk.
+ *
+ * Under a project-site base URL the page asks for "/todo/_nuxt/x.js"
+ * while the file sits at "_nuxt/x.js", so leading segments are dropped
+ * until something matches. Resolving only the literal path made every
+ * page measure as 0 KB and still print "ok" — a budget gate that passes
+ * because it found nothing is worse than no gate.
+ */
+function resolve(ref: string): string | null {
+  const parts = ref.replace(/^\//, '').split('/')
+  for (let i = 0; i < parts.length; i++) {
+    const candidate = join(ROOT, ...parts.slice(i))
+    if (existsSync(candidate)) return candidate
+  }
+  return null
+}
+
 const pages = walk(ROOT).filter((f) => f.endsWith('.html'))
 let failed = false
 
@@ -54,8 +72,8 @@ for (const page of pages) {
   let jsKb = 0
   const missing: string[] = []
   for (const ref of refs) {
-    const file = join(ROOT, ref.replace(/^\//, ''))
-    if (!existsSync(file)) { missing.push(ref); continue }
+    const file = resolve(ref)
+    if (!file) { missing.push(ref); continue }
     jsKb += gzipKb(readFileSync(file))
   }
 
@@ -64,7 +82,7 @@ for (const page of pages) {
   const htmlOver = htmlKb > HTML_BUDGET_KB
   if (jsOver || htmlOver || missing.length) failed = true
 
-  const mark = jsOver || htmlOver ? 'XATO ' : '  ok '
+  const mark = jsOver || htmlOver || missing.length ? 'XATO ' : '  ok '
   console.log(
     `${mark} ${route.padEnd(42)} JS ${jsKb.toFixed(1).padStart(6)} KB   ` +
     `HTML ${htmlKb.toFixed(1).padStart(5)} KB`,

@@ -31,11 +31,14 @@ jobs:
       - run: npm run validate
       - run: npm run generate
         env:
-          # Point NUXT_PUBLIC_SITE_URL at the custom domain once it
-          # resolves. Until then, set NUXT_APP_BASE_URL to /<repo>/ so a
-          # GitHub project site loads its assets.
+          # Point NUXT_PUBLIC_SITE_URL at the custom domain once it resolves.
           NUXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://yalp.uz' }}
-          NUXT_APP_BASE_URL: ${{ vars.BASE_URL || '/' }}
+          # A GitHub project site is served from /<repo>/, so assets need
+          # that prefix. Deriving it from the repository name means the
+          # deploy keeps working across a rename with nothing to update by
+          # hand. Set repository variable BASE_URL to "/" once a custom
+          # domain serves the site from the root.
+          NUXT_APP_BASE_URL: ${{ vars.BASE_URL || format('/{0}/', github.event.repository.name) }}
           # Set repository variable INDEXABLE=true when the directory has
           # real content and should start being crawled.
           NUXT_PUBLIC_INDEXABLE: ${{ vars.INDEXABLE || 'false' }}
@@ -44,6 +47,11 @@ jobs:
       - name: HTML tekşiruvi
         run: npm run check:html
       - uses: actions/configure-pages@v5
+        with:
+          # Turn Pages on from here rather than requiring someone to find
+          # the setting. Without this the whole build runs green and then
+          # fails at the last step with "Get Pages site failed".
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .output/public
