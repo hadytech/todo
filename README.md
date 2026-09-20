@@ -229,9 +229,17 @@ Push to `main` → GitHub Actions builds and deploys to Pages.
 
 Repository settings → Pages → Source: **GitHub Actions**.
 
-For a project site (`user.github.io/repo/`), set repository variable
-`BASE_URL` to `/repo/`. Once `yalp.uz` resolves, set `SITE_URL` to
-`https://yalp.uz`, drop `BASE_URL` back to `/`, and add `public/CNAME`
+This step cannot be automated. Creating a Pages site needs repository
+admin rights, which `GITHUB_TOKEN` does not have and no `permissions:`
+block can grant — `actions/configure-pages` with `enablement: true` fails
+with "Resource not accessible by integration" unless the workflow is given
+an admin-scoped personal access token. Until Pages is enabled by hand,
+every build step passes and the deploy fails on the last one.
+
+A project site is served from `/<repo>/`, and the base URL is derived
+from the repository name automatically — a rename needs nothing updated.
+Once `yalp.uz` resolves, set repository variables `SITE_URL` to
+`https://yalp.uz` and `BASE_URL` to `/`, and add `public/CNAME`
 containing `yalp.uz`.
 
 ## Open items
