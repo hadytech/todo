@@ -17,7 +17,8 @@
     "photos": "tsx scripts/photos.ts",
     "tiles": "scripts/build-tiles.sh",
     "vendor:glyphs": "scripts/vendor-glyphs.sh",
-    "check:range": "scripts/check-pages-range.sh"
+    "check:range": "scripts/check-pages-range.sh",
+    "check:budget": "tsx scripts/check-budget.ts"
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",

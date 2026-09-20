@@ -48,6 +48,7 @@ npm run dev        # http://localhost:3000
 npm test           # alphabet + coordinate tests
 npm run validate   # check every YAML file
 npm run generate   # build the static site into .output/public
+npm run check:budget  # fail if any page exceeds its weight budget
 ```
 
 ## Adding a business
@@ -82,6 +83,19 @@ broken data cannot reach the site.
 
 > The two `namuna-*.yaml` files are **placeholders, not real businesses**.
 > Delete them once real listings are in.
+
+## Contributing data
+
+Three routes in, easiest first:
+
+1. **[Issue form](.github/ISSUE_TEMPLATE/joy-qoshish.yml)** — no YAML, no
+   git. Paste a maps link, pick a district, done. Linked from `/qoshish`.
+2. **Edit on GitHub** — every business page links to its own YAML file.
+3. **`npm run entry`** — the local form, for entering many at once.
+
+All three land as a pull request or an issue, and CI validates before
+anything merges. That is the whole moderation model: no accounts, no
+admin panel, and the review history is public.
 
 ## Photos
 
@@ -159,15 +173,23 @@ containing `yalp.uz`.
 
 ## Performance budget
 
-Enforced by reading the build output, not by hoping:
+`npm run check:budget` walks every prerendered page, sums the gzipped
+weight of the scripts that page actually loads, and exits non-zero if any
+page is over. It runs in CI on every pull request, so the budget is a
+gate rather than an aspiration.
 
 | | |
 |---|---|
-| Business page JS | ~86KB gzipped (budget: 100KB) |
-| Search index | lazy, first keystroke only |
-| MapLibre | lazy, 264KB gzipped, on tap only |
+| Any page, eager JS | ≤ 100KB gzipped (currently ~80KB) |
+| Any page, HTML | ≤ 40KB gzipped (currently ~2.5KB) |
+| Search index | lazy — first keystroke only |
+| MapLibre | lazy — 264KB gzipped, on tap only |
 | Photos | ~60KB AVIF each |
 | Fonts | none — system stack, which covers `ö ğ ç ş` everywhere |
+
+Chunks reached only through a dynamic import are reported separately
+rather than charged to the page; if one ever becomes eager, it lands in
+the page total and the gate fails.
 
 ## Licence
 

@@ -23,3 +23,5 @@ jobs:
         run: npm run validate
       - name: Sayt qurilişini sinash
         run: npm run generate
+      - name: Sahifa byudjeti
+        run: npm run check:budget

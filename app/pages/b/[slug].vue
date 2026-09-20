@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const route = useRoute()
 const config = useRuntimeConfig()
+const asset = useAssetUrl()
 const { data: b } = await useFetch(`/api/business/${route.params.slug}`)
 
 if (!b.value) throw createError({ statusCode: 404, statusMessage: 'Joy topilmadi' })
@@ -99,6 +100,24 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
 })
 
+/**
+ * Breadcrumbs are what turn a SERP entry from a bare URL into a readable
+ * trail, and they tie each business page to its landing page — which is
+ * where the ranking actually accrues.
+ */
+const breadcrumbs = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { name: 'yalp.uz', item: config.public.siteUrl },
+    {
+      name: b.value!.districtAscii,
+      item: `${config.public.siteUrl}/toshkent/${b.value!.district}/${b.value!.categoryTop}`,
+    },
+    { name: b.value!.nameAscii, item: pageUrl.value },
+  ].map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, item: e.item })),
+}))
+
 useHead({
   title: `${b.value.name} — ${b.value.districtName}, Toşkent | yalp.uz`,
   meta: [
@@ -110,7 +129,10 @@ useHead({
     },
   ],
   link: [{ rel: 'canonical', href: `${config.public.siteUrl}/b/${b.value.slug}` }],
-  script: [{ type: 'application/ld+json', innerHTML: JSON.stringify(jsonLd.value) }],
+  script: [
+    { type: 'application/ld+json', innerHTML: JSON.stringify(jsonLd.value) },
+    { type: 'application/ld+json', innerHTML: JSON.stringify(breadcrumbs.value) },
+  ],
 })
 </script>
 
@@ -135,7 +157,7 @@ useHead({
       <img
         v-for="(p, i) in b.photos"
         :key="p.file"
-        :src="`/photos/${p.file}`"
+        :src="asset(`photos/${p.file}`)"
         :alt="p.alt"
         width="320"
         height="213"
@@ -195,8 +217,11 @@ useHead({
 
     <p class="mt-8 text-sm opacity-60">
       Maʼlumot notoʻğrimi?
-      <a :href="`https://github.com/hadytech/todo/edit/main/data/businesses/${b.slug}.yaml`"
+      <a :href="`${config.public.repoUrl}/edit/main/data/businesses/${b.slug}.yaml`"
          rel="noopener" class="text-teal-600 dark:text-teal-400">Tuzatiş yuboring</a>
+      <span class="opacity-50">yoki</span>
+      <a :href="`${config.public.repoUrl}/issues/new?template=tuzatish.yml`"
+         rel="noopener" class="text-teal-600 dark:text-teal-400">xabar bering</a>
     </p>
   </article>
 </template>

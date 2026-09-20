@@ -1,0 +1,19 @@
+name: Maʼlumotni tuzatiş
+description: Nomi, manzili, telefoni yoki iş vaqti notoʻğri
+title: "Tuzatiş: "
+labels: ["tuzatiş"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Qaysi joy
+      description: Saytdagi havola yoki joy nomi
+      placeholder: https://yalp.uz/b/chorsu-restorani
+    validations: { required: true }
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Nimasi notoʻğri
+      placeholder: Telefon raqami oʻzgargan, yangisi +998 …
+    validations: { required: true }

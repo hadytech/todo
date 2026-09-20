@@ -1,0 +1,96 @@
+name: Yangi joy qoʻşiş
+description: Toşkentdagi joyni maʼlumotnomaga qoʻşiş
+title: "Yangi joy: "
+labels: ["yangi-joy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Rahmat! Quyidagi maydonlarni toʻldiring — qolganini biz qilamiz.
+
+        Nomlarni **yangi alifboda** yozing: `ö ğ ç ş`.
+        Bilmasangiz, odatdagiça yozing — biz tuzatamiz.
+
+  - type: input
+    id: name
+    attributes:
+      label: Joy nomi
+      placeholder: Çorsu Restorani
+    validations: { required: true }
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Turi
+      options:
+        - Restoran
+        - Kafe
+        - Çoyxona
+        - Fast food
+        - Qahvaxona
+        - Sartaroşxona
+        - Gözallik saloni
+        - Manikyur
+        - Spa
+        - Klinika
+        - Stomatologiya
+        - Dorixona
+        - Laboratoriya
+    validations: { required: true }
+
+  - type: dropdown
+    id: district
+    attributes:
+      label: Tuman
+      options:
+        - Bektemir
+        - Çilonzor
+        - Mirobod
+        - Mirzo Uluğbek
+        - Olmazor
+        - Sergeli
+        - Şayxontohur
+        - Uçtepa
+        - Yakkasaroy
+        - Yangihayot
+        - Yaşnobod
+        - Yunusobod
+    validations: { required: true }
+
+  - type: input
+    id: address
+    attributes:
+      label: Manzil
+      placeholder: Bunyodkor şoh koʻçasi 12
+    validations: { required: true }
+
+  - type: input
+    id: coords
+    attributes:
+      label: Xaritadagi joyi
+      description: >
+        Google yoki Yandex Maps'da joyni toping va havolani şu yerga qoʻying.
+        Yoki koordinatani yozing: 41.3264, 69.2347
+      placeholder: https://yandex.uz/maps/?ll=69.2347%2C41.3264
+    validations: { required: true }
+
+  - type: input
+    id: phone
+    attributes:
+      label: Telefon
+      placeholder: "+998 71 123 45 67"
+
+  - type: textarea
+    id: hours
+    attributes:
+      label: Iş vaqti
+      placeholder: |
+        Dush–Juma: 09:00–22:00
+        Şanba: 10:00–23:00
+        Yakşanba: yopiq
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Qoʻşimça
+      description: Tavsif, Telegram, Instagram, sayt — bilganingizça.

@@ -34,6 +34,8 @@ jobs:
           # GitHub project site loads its assets.
           NUXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://yalp.uz' }}
           NUXT_APP_BASE_URL: ${{ vars.BASE_URL || '/' }}
+      - name: Sahifa byudjeti
+        run: npm run check:budget
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

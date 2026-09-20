@@ -46,6 +46,7 @@ export default defineNuxtConfig({
       routes: [
         '/',
         '/qidiruv',
+        '/qoshish',
         ...published.map((b) => `/b/${b.slug}`),
         ...landingRoutes,
         '/sitemap.xml',
@@ -59,6 +60,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://yalp.uz',
+      /** Source repository. Update here if the repo is renamed. */
+      repoUrl: process.env.NUXT_PUBLIC_REPO_URL || 'https://github.com/hadytech/todo',
       /**
        * Swap this to flip the whole site between alphabets. Everything is
        * derived from one canonical form, so this is the only line that

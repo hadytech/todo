@@ -16,6 +16,7 @@ const props = withDefaults(defineProps<{
 }>(), { zoom: 15, height: '20rem' })
 
 const config = useRuntimeConfig().public
+const asset = useAssetUrl()
 const el = ref<HTMLElement | null>(null)
 const state = ref<'idle' | 'loading' | 'ready' | 'failed'>('idle')
 const failure = ref('')
@@ -63,7 +64,11 @@ async function show() {
         sources: {
           protomaps: {
             type: 'vector',
-            url: `pmtiles://${config.pmtilesUrl}`,
+            // An absolute URL (a Release asset) is used as-is; a
+            // root-relative default still needs the baseURL prefix.
+            url: `pmtiles://${/^https?:/.test(config.pmtilesUrl as string)
+              ? config.pmtilesUrl
+              : asset(String(config.pmtilesUrl).replace(/^\//, ''))}`,
             attribution: '<a href="https://openstreetmap.org">OpenStreetMap</a>',
           },
         },
@@ -79,7 +84,7 @@ async function show() {
       const marker = new maplibregl.Marker({ color: '#0f766e' }).setLngLat([m.lng, m.lat])
       if (props.markers.length > 1 && m.slug) {
         marker.setPopup(new maplibregl.Popup({ offset: 24 }).setHTML(
-          `<a href="/b/${m.slug}" style="color:#0f766e;font-weight:600">${escapeHtml(m.name)}</a>`,
+          `<a href="${asset(`b/${m.slug}`)}" style="color:#0f766e;font-weight:600">${escapeHtml(m.name)}</a>`,
         ))
       }
       marker.addTo(map)

@@ -14,8 +14,42 @@ const categoryName = computed(() => data.value?.categories.find((c) => c.slug ==
 
 const title = computed(() => `${districtName.value} tumanidagi ${categoryName.value.toLowerCase()} — Toşkent`)
 
+const pageUrl = `${config.public.siteUrl}/toshkent/${district}/${category}`
+
+/**
+ * ItemList tells search engines this page IS the list, rather than
+ * leaving them to infer it from markup. Paired with BreadcrumbList it is
+ * what earns the richer SERP treatment these pages depend on.
+ */
+const structured = computed(() => [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { name: 'yalp.uz', item: config.public.siteUrl },
+      { name: districtName.value, item: pageUrl },
+    ].map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, item: e.item })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: title.value,
+    numberOfItems: data.value?.items.length ?? 0,
+    itemListElement: (data.value?.items ?? []).map((b, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${config.public.siteUrl}/b/${b.slug}`,
+      name: b.name,
+    })),
+  },
+])
+
 useHead({
   title: () => `${title.value} | yalp.uz`,
+  script: () => structured.value.map((o) => ({
+    type: 'application/ld+json',
+    innerHTML: JSON.stringify(o),
+  })),
   meta: [{ name: 'description', content: () =>
     `${districtName.value}, Toşkentdagi ${categoryName.value.toLowerCase()} roʻyxati — manzil, telefon va iş vaqti.` }],
   link: [{ rel: 'canonical', href: `${config.public.siteUrl}/toshkent/${district}/${category}` }],
@@ -34,9 +68,7 @@ useHead({
 
     <p v-if="!data?.items.length" class="opacity-70 text-sm">
       Bu tumanda hali joy qoʻşilmagan.
-      <a href="https://github.com/hadytech/todo" rel="noopener" class="text-teal-600 dark:text-teal-400">
-        Birinchi boʻlib qoʻşing
-      </a>.
+      <NuxtLink to="/qoshish" class="text-teal-600 dark:text-teal-400">Birinchi boʻlib qoʻşing</NuxtLink>.
     </p>
   </div>
 </template>

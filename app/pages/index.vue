@@ -48,6 +48,7 @@ useHead({
       <input
         v-model="q"
         type="search"
+        aria-label="Joy qidiriş"
         placeholder="Nom, tuman yoki turi…"
         class="flex-1 rounded-lg border border-neutral-300 dark:border-neutral-700 px-4 py-3 bg-transparent"
       >

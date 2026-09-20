@@ -1,15 +1,24 @@
 <template>
   <div class="min-h-dvh flex flex-col bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+    <a
+      href="#asosiy"
+      class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-lg
+             focus:bg-teal-600 focus:px-4 focus:py-2 focus:text-white"
+    >Asosiy qismga oʻtiş</a>
+
     <header class="border-b border-neutral-200 dark:border-neutral-800">
       <div class="mx-auto max-w-3xl px-4 h-14 flex items-center gap-4">
         <NuxtLink to="/" class="font-bold text-lg tracking-tight">
           yalp<span class="text-teal-600 dark:text-teal-400">.uz</span>
         </NuxtLink>
-        <NuxtLink to="/qidiruv" class="ml-auto text-sm opacity-70 hover:opacity-100">Qidiruv</NuxtLink>
+        <nav class="ml-auto flex gap-4 text-sm">
+          <NuxtLink to="/qidiruv" class="opacity-70 hover:opacity-100">Qidiruv</NuxtLink>
+          <NuxtLink to="/qoshish" class="opacity-70 hover:opacity-100">Joy qoʻşiş</NuxtLink>
+        </nav>
       </div>
     </header>
 
-    <main class="flex-1 mx-auto w-full max-w-3xl px-4 py-6">
+    <main id="asosiy" class="flex-1 mx-auto w-full max-w-3xl px-4 py-6">
       <NuxtPage />
     </main>
 
