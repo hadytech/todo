@@ -12,7 +12,7 @@
 import { createServer } from 'node:http'
 import { writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { stringify } from 'yaml'
+import { Document, Scalar, isSeq, isMap } from 'yaml'
 import { businessSchema } from '../lib/schema'
 import { loadCategories, loadDistricts, DATA_DIR } from '../lib/load'
 import { toSlug, findLegacySpellings } from '../lib/alphabet'
@@ -35,8 +35,10 @@ function page(): string {
   const dayRows = DAYS.map(([k, label]) => `
     <tr>
       <td>${label}</td>
-      <td><input name="h_${k}_open" value="09:00" size="5"></td>
-      <td><input name="h_${k}_close" value="22:00" size="5"></td>
+      <td><input name="h_${k}_open" value="09:00" size="5" aria-label="${label} ochilish"></td>
+      <td><input name="h_${k}_close" value="22:00" size="5" aria-label="${label} yopilish"></td>
+      <td class="brk"><input name="h_${k}_bstart" placeholder="—" size="5" aria-label="${label} tanaffus boşi"></td>
+      <td class="brk"><input name="h_${k}_bend" placeholder="—" size="5" aria-label="${label} tanaffus oxiri"></td>
       <td><label><input type="checkbox" name="h_${k}_closed"> yopiq</label></td>
     </tr>`).join('')
 
@@ -49,7 +51,9 @@ function page(): string {
   label.f { display:block; margin:.6rem 0; } label.f span { display:block; font-size:.8rem; opacity:.7; }
   input,select,textarea { width:100%; padding:.45rem; font:inherit; border:1px solid var(--line);
     border-radius:6px; background:transparent; color:inherit; }
-  table input { width:auto; } td { padding:.15rem .4rem; }
+  table input { width:auto; } td, th { padding:.15rem .4rem; }
+  th { font-weight:500; font-size:.75rem; opacity:.6; text-align:left; }
+  .brk { opacity:.8; } .hint { font-size:.78rem; opacity:.6; margin:.5rem 0 0; }
   button { padding:.6rem 1.2rem; font:inherit; border-radius:6px; cursor:pointer; }
   #out { white-space:pre-wrap; font-family:ui-monospace,monospace; font-size:.85rem;
     padding:.75rem; border-radius:6px; background:#8881; margin-top:1rem; }
@@ -83,7 +87,14 @@ Saqlash — <kbd>Ctrl</kbd>+<kbd>Enter</kbd>.</p>
       <label class="f">Narx (1–4)<input name="price" type="number" min="1" max="4"></label>
     </div>
   </fieldset>
-  <fieldset><legend>Iş vaqti</legend><table>${dayRows}</table></fieldset>
+  <fieldset><legend>Iş vaqti</legend>
+    <table>
+      <thead><tr><th></th><th>oçiladi</th><th>yopiladi</th>
+        <th colspan="2" class="brk">tanaffus</th><th></th></tr></thead>
+      <tbody>${dayRows}</tbody>
+    </table>
+    <p class="hint">Tanaffus — kun oʻrtasida yopiladigan vaqt. Boʻş qoldirsangiz, kun yaxlit boʻladi.</p>
+  </fieldset>
   <button type="submit">Saqlash</button>
 </form>
 <div id="out" hidden></div>
@@ -123,12 +134,21 @@ function buildRecord(body: Record<string, string>) {
   // Only emit a day we actually have data for. Emitting [undefined,
   // undefined] for a blank field buries the real error under seven
   // spurious ones.
+  /**
+   * A break is entered as the gap in the middle of the day, because that
+   * is how people think about it, and turned into the two ranges the
+   * schema stores. Entering nested arrays by hand would be miserable.
+   */
   const hours: Record<string, unknown> = {}
   for (const [k] of DAYS) {
     if (body[`h_${k}_closed`]) { hours[k] = 'closed'; continue }
     const open = body[`h_${k}_open`]?.trim()
     const close = body[`h_${k}_close`]?.trim()
-    if (open && close) hours[k] = [open, close]
+    if (!open || !close) continue
+
+    const bStart = body[`h_${k}_bstart`]?.trim()
+    const bEnd = body[`h_${k}_bend`]?.trim()
+    hours[k] = bStart && bEnd ? [[open, bStart], [bEnd, close]] : [open, close]
   }
 
   const record = {
@@ -153,6 +173,41 @@ function buildRecord(body: Record<string, string>) {
     return { errors: parsed.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`) }
   }
   return { record: parsed.data }
+}
+
+/**
+ * Renders the record as YAML with opening hours in flow style.
+ *
+ * The default block style turns a day with a break into
+ *   mon:
+ *     - - 09:00
+ *       - 15:00
+ * which is correct and almost unreadable. People edit these files by
+ * hand and review them in diffs, so hours are written as
+ *   mon: [["09:00", "15:00"], ["18:00", "23:00"]]
+ * with times quoted, so no other YAML tool can mistake them for numbers.
+ */
+function toYaml(record: unknown): string {
+  const doc = new Document(record)
+  const hours = doc.get('hours')
+
+  if (isMap(hours)) {
+    for (const entry of hours.items) {
+      const value = entry.value
+      if (!isSeq(value)) continue
+      value.flow = true
+      for (const inner of value.items) {
+        if (isSeq(inner)) {
+          inner.flow = true
+          for (const t of inner.items) if (t instanceof Scalar) t.type = Scalar.QUOTE_DOUBLE
+        } else if (inner instanceof Scalar) {
+          inner.type = Scalar.QUOTE_DOUBLE
+        }
+      }
+    }
+  }
+
+  return doc.toString({ lineWidth: 0 })
 }
 
 const server = createServer((req, res) => {
@@ -185,7 +240,7 @@ const server = createServer((req, res) => {
         const header = legacy.length
           ? `# Diqqat: nom eski alifboda koʻrinadi (${legacy.join(', ')}). Yangi alifboda yozing: ö ğ ç ş.\n`
           : ''
-        writeFileSync(file, header + stringify(built.record), 'utf8')
+        writeFileSync(file, header + toYaml(built.record), 'utf8')
         reply(200, { ok: true, file: `data/businesses/${slug}.yaml` })
       } catch (e) {
         reply(500, { ok: false, errors: [(e as Error).message] })

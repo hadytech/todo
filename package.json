@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
-    "generate": "npm run index && nuxt generate",
+    "generate": "npm run index && npm run og && nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "validate": "tsx scripts/validate.ts",
@@ -18,7 +18,8 @@
     "tiles": "scripts/build-tiles.sh",
     "vendor:glyphs": "scripts/vendor-glyphs.sh",
     "check:range": "scripts/check-pages-range.sh",
-    "check:budget": "tsx scripts/check-budget.ts"
+    "check:budget": "tsx scripts/check-budget.ts",
+    "og": "tsx scripts/build-og.ts"
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",

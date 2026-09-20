@@ -24,18 +24,34 @@ const timeRange = z
   })
 
 /**
- * A day is either closed, or one open..close range.
+ * Several ranges in one day — a lunch break, typically. Ranges must be in
+ * order and must not overlap, or "open now" becomes ambiguous.
+ */
+const timeRanges = z
+  .array(timeRange)
+  .min(1)
+  .max(3)
+  .refine(
+    (rs) => rs.every((r, i) => i === 0 || rs[i - 1]![1] <= r[0]!),
+    { message: 'vaqt oraliqlari tartib boʻyicha va bir-birining ustiga tuşmasin' },
+  )
+
+/**
+ * A day is closed, one range, or several.
  *
  * The union needs an explicit errorMap: Zod's default for a failed union
  * is the bare "Invalid input", which tells a first-time PR contributor
  * nothing about what shape the field wants.
  */
-const day = z.union([z.literal('closed'), timeRange], {
-  errorMap: () => ({ message: 'kun "closed" yoki ["HH:MM", "HH:MM"] koʻrinişida boʻlsin' }),
+const day = z.union([z.literal('closed'), timeRange, timeRanges], {
+  errorMap: () => ({
+    message:
+      'kun "closed", ["HH:MM", "HH:MM"], yoki tanaffusli boʻlsa '
+      + '[["09:00","15:00"], ["18:00","23:00"]] koʻrinişida boʻlsin',
+  }),
 })
 
-export const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
-export type Weekday = (typeof WEEKDAYS)[number]
+export { WEEKDAYS, type Weekday } from './hours'
 
 const hours = z.object({
   mon: day, tue: day, wed: day, thu: day,

@@ -72,9 +72,17 @@ location: { lat: 41.3264, lng: 69.2347 }
 phones: ["+998 71 123 45 67"]
 hours:
   mon: ["09:00", "22:00"]
+  fri: [["09:00", "15:00"], ["18:00", "23:00"]]   # tanaffus bilan
   sun: closed
 status: published
 ```
+
+A day is `closed`, one range, or several. The third form is not an edge
+case: a great many restaurants and clinics close between lunch and
+dinner, and a schema that cannot say so forces whoever enters the data to
+lie. Closing at or after midnight is written as `"24:00"` on the day it
+starts, which keeps every range comparable as plain minutes and avoids a
+wrap-around special case everywhere downstream.
 
 `npm run validate` checks the category and district exist, the
 coordinates fall inside Tashkent, the phone format is right, and every
@@ -109,10 +117,25 @@ Originals are never committed. Each image is squeezed toward ~60KB of AVIF
 a flat one) and written to `public/photos/`, then recorded in the
 business's YAML with the comments and field order preserved.
 
-The first photo also gets a `<slug>-og.jpg` at 1200x630. That one exists
+Businesses **without** photos get a generated card instead — `npm run og`
+draws their name, category and district onto a 1200x630 PNG. Early on
+almost nothing has photos, and without this every share in Telegram shows
+the same generic logo, indistinguishable from every other link. A missing
+font would render those cards blank rather than erroring, so the script
+checks that glyphs actually rasterise before generating any.
+
+The first photo of a business that has one gets a `<slug>-og.jpg` at 1200x630. That one exists
 purely for link previews: Telegram and most other scrapers cannot decode
 AVIF, and an `og:image` they cannot read produces a preview card with no
 picture — which matters, because Telegram is where most sharing happens.
+
+## Near me
+
+The search page can sort by distance. Geolocation is requested only on an
+explicit tap, never on page load; the position stays in memory, is not
+stored, is not put in the URL and never leaves the browser. A position
+outside Tashkent disables the sort and says so, rather than silently
+ranking the whole directory by how far away it is.
 
 ## Map
 

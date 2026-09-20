@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { WEEKDAYS, normalizeDay, formatDay, isOpenAt, tashkentNow } from '../../../lib/hours'
+
 const route = useRoute()
 const config = useRuntimeConfig()
 const asset = useAssetUrl()
@@ -14,30 +16,8 @@ const SCHEMA_DAYS: Record<string, string> = {
   mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday',
   fri: 'Friday', sat: 'Saturday', sun: 'Sunday',
 }
-const ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
-/**
- * Tashkent is UTC+5 year-round with no DST. Computing against the
- * visitor's own clock would tell a traveller the wrong answer, so pin
- * the offset.
- */
-function tashkentNow() {
-  const utc = Date.now() + new Date().getTimezoneOffset() * 60_000
-  return new Date(utc + 5 * 3_600_000)
-}
-
-const openNow = computed(() => {
-  const hours = b.value?.hours
-  if (!hours) return null
-  const now = tashkentNow()
-  const today = ORDER[(now.getDay() + 6) % 7]
-  const entry = (hours as Record<string, unknown>)[today]
-  if (!entry || entry === 'closed') return false
-  const [open, close] = entry as [string, string]
-  const mins = now.getHours() * 60 + now.getMinutes()
-  const toMins = (t: string) => +t.slice(0, 2) * 60 + +t.slice(3, 5)
-  return mins >= toMins(open) && mins < toMins(close)
-})
+const openNow = computed(() => isOpenAt(b.value?.hours, tashkentNow()))
 
 const jsonLd = computed(() => ({
   '@context': 'https://schema.org',
@@ -64,20 +44,25 @@ const jsonLd = computed(() => ({
   },
   ...(b.value!.phones?.length ? { telephone: b.value!.phones[0] } : {}),
   ...(b.value!.website ? { url: b.value!.website } : {}),
+  // One specification per range. A day with a break produces two, which
+  // is exactly how schema.org expects it to be said.
   openingHoursSpecification: Object.entries(b.value!.hours ?? {})
-    .filter(([, v]) => v !== 'closed')
-    .map(([day, v]) => ({
+    .flatMap(([day, v]) => normalizeDay(v as never).map(([opens, closes]) => ({
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: SCHEMA_DAYS[day],
-      opens: (v as [string, string])[0],
-      closes: (v as [string, string])[1],
-    })),
+      opens,
+      closes,
+    }))),
 }))
 
 const ogImage = computed(() => {
-  // The JPEG variant written by `npm run photos`, not the AVIF the page
-  // displays — scrapers largely cannot decode AVIF.
-  const path = b.value?.photos?.length ? `/photos/${b.value.slug}-og.jpg` : '/og.png'
+  // With photos: the JPEG variant from `npm run photos`, not the AVIF the
+  // page displays — scrapers largely cannot decode AVIF.
+  // Without: the generated card from `npm run og`, which at least names
+  // the business rather than showing the same logo as every other link.
+  const path = b.value?.photos?.length
+    ? `/photos/${b.value.slug}-og.jpg`
+    : `/og/${b.value!.slug}.png`
   return `${config.public.siteUrl}${path}`
 })
 
@@ -196,15 +181,11 @@ useHead({
 
     <section v-if="b.hours" class="mt-6">
       <h2 class="font-semibold mb-2">Iş vaqti</h2>
-      <table class="text-sm w-full max-w-xs">
+      <table class="text-sm w-full max-w-sm">
         <tbody>
-          <tr v-for="d in ORDER" :key="d">
+          <tr v-for="d in WEEKDAYS" :key="d">
             <td class="py-0.5 opacity-70">{{ DAY_LABELS[d] }}</td>
-            <td class="py-0.5 text-right tabular-nums">
-              <template v-if="!b.hours[d]">—</template>
-              <template v-else-if="b.hours[d] === 'closed'">Yopiq</template>
-              <template v-else>{{ b.hours[d][0] }}–{{ b.hours[d][1] }}</template>
-            </td>
+            <td class="py-0.5 text-right tabular-nums">{{ formatDay(b.hours[d]) }}</td>
           </tr>
         </tbody>
       </table>
