@@ -83,6 +83,42 @@ broken data cannot reach the site.
 > The two `namuna-*.yaml` files are **placeholders, not real businesses**.
 > Delete them once real listings are in.
 
+## Photos
+
+```bash
+# put originals in photos-src/<slug>/, then:
+npm run photos
+```
+
+Originals are never committed. Each image is squeezed toward ~60KB of AVIF
+(quality steps down until it fits, so a busy photo costs about the same as
+a flat one) and written to `public/photos/`, then recorded in the
+business's YAML with the comments and field order preserved.
+
+The first photo also gets a `<slug>-og.jpg` at 1200x630. That one exists
+purely for link previews: Telegram and most other scrapers cannot decode
+AVIF, and an `og:image` they cannot read produces a preview card with no
+picture — which matters, because Telegram is where most sharing happens.
+
+## Map
+
+MapLibre + a self-hosted PMTiles archive. No API key, no tile server, no
+per-request cost.
+
+```bash
+BUILD=20260901 npm run tiles      # extracts a Toshkent slice, ~tens of MB
+npm run vendor:glyphs             # optional: serve label fonts yourself
+```
+
+The archive is gitignored — it would eat the repo budget. Build it locally
+for development, or attach it to a GitHub Release and point
+`NUXT_PUBLIC_PMTILES_URL` at that asset.
+
+The map is strictly opt-in: MapLibre is 264KB gzipped, more than triple
+the rest of a business page, so nothing loads until the visitor taps
+"Xaritani koʻrsatiş". Every failure path falls back to a plain
+OpenStreetMap link that works with no JavaScript at all.
+
 ## Layout
 
 ```
@@ -106,10 +142,12 @@ containing `yalp.uz`.
 
 ## Open items
 
-- [ ] **Verify GitHub Pages honours HTTP `Range`** before building the map
-      on PMTiles: `scripts/check-pages-range.sh <url>`. If it fails, host
-      the archive as a GitHub Release asset and set
-      `NUXT_PUBLIC_PMTILES_URL`.
+- [ ] **Verify GitHub Pages honours HTTP `Range`**: `npm run check:range <url>`.
+      The map code is written and falls back gracefully, but it has not
+      been run against a real archive — PMTiles fetches byte ranges out of
+      one large file, so if Pages ignores `Range` the archive must move to
+      a GitHub Release asset (set `NUXT_PUBLIC_PMTILES_URL`, and check
+      CORS from the Pages origin).
 - [ ] `.uz` DNS — confirm the registrar can set apex `A` records for Pages
       *before* paying for the domain.
 - [ ] **Reviews need a write endpoint**, which static hosting cannot
@@ -118,6 +156,18 @@ containing `yalp.uz`.
       VPS with the site staying on Pages.
 - [ ] Photo budget: Pages repos have a ~1GB soft limit. Keep photos AVIF
       and under ~60KB; split them into a second repo around 2,000 listings.
+
+## Performance budget
+
+Enforced by reading the build output, not by hoping:
+
+| | |
+|---|---|
+| Business page JS | ~86KB gzipped (budget: 100KB) |
+| Search index | lazy, first keystroke only |
+| MapLibre | lazy, 264KB gzipped, on tap only |
+| Photos | ~60KB AVIF each |
+| Fonts | none — system stack, which covers `ö ğ ç ş` everywhere |
 
 ## Licence
 

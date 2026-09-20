@@ -13,9 +13,14 @@
     "index": "tsx scripts/build-index.ts",
     "entry": "tsx scripts/entry.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "photos": "tsx scripts/photos.ts",
+    "tiles": "scripts/build-tiles.sh",
+    "vendor:glyphs": "scripts/vendor-glyphs.sh",
+    "check:range": "scripts/check-pages-range.sh"
   },
   "dependencies": {
+    "@protomaps/basemaps": "^5.7.2",
     "maplibre-gl": "^5.6.0",
     "minisearch": "^7.1.2",
     "nuxt": "^4.0.0",
@@ -27,6 +32,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",

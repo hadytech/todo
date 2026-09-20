@@ -13,6 +13,19 @@ function go() {
   if (q.value.trim()) router.push({ path: '/qidiruv', query: { q: q.value.trim() } })
 }
 
+const config = useRuntimeConfig()
+
+useSeoMeta({
+  ogType: 'website',
+  ogSiteName: 'yalp.uz',
+  ogLocale: 'uz_UZ',
+  ogTitle: 'yalp.uz — Toşkentdagi joylar',
+  ogDescription: 'Toshkentdagi restoran, kafe, gozallik saloni va klinikalar maʼlumotnomasi.',
+  ogUrl: config.public.siteUrl as string,
+  ogImage: `${config.public.siteUrl}/og.png`,
+  twitterCard: 'summary_large_image',
+})
+
 useHead({
   title: 'yalp.uz — Toşkentdagi joylar',
   meta: [{

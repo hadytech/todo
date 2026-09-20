@@ -71,6 +71,13 @@ export default defineNuxtConfig({
        * Range, point it at a GitHub Release asset instead.
        */
       pmtilesUrl: process.env.NUXT_PUBLIC_PMTILES_URL || '/tiles/toshkent.pmtiles',
+      /**
+       * Label fonts for the basemap. Defaults to the Protomaps asset set
+       * (open, free, GitHub Pages hosted). `npm run vendor:glyphs` copies
+       * them into public/ if you would rather depend on nothing.
+       */
+      glyphsUrl: process.env.NUXT_PUBLIC_GLYPHS_URL
+        || 'https://protomaps.github.io/basemaps-assets/fonts',
     },
   },
 })

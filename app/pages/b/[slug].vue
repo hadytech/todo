@@ -73,6 +73,32 @@ const jsonLd = computed(() => ({
     })),
 }))
 
+const ogImage = computed(() => {
+  // The JPEG variant written by `npm run photos`, not the AVIF the page
+  // displays — scrapers largely cannot decode AVIF.
+  const path = b.value?.photos?.length ? `/photos/${b.value.slug}-og.jpg` : '/og.png'
+  return `${config.public.siteUrl}${path}`
+})
+
+const pageUrl = computed(() => `${config.public.siteUrl}/b/${b.value!.slug}`)
+
+/**
+ * Link previews carry a lot of weight here — most sharing happens in
+ * Telegram, where the card is often all anyone sees before deciding to
+ * tap. The description uses the ASCII spelling for the same reason the
+ * meta description does.
+ */
+useSeoMeta({
+  ogType: 'website',
+  ogSiteName: 'yalp.uz',
+  ogLocale: 'uz_UZ',
+  ogTitle: () => `${b.value!.name} — ${b.value!.districtName}`,
+  ogDescription: () => `${b.value!.categoryAscii}, ${b.value!.districtAscii}, Toshkent. ${b.value!.address}`,
+  ogUrl: () => pageUrl.value,
+  ogImage: () => ogImage.value,
+  twitterCard: 'summary_large_image',
+})
+
 useHead({
   title: `${b.value.name} — ${b.value.districtName}, Toşkent | yalp.uz`,
   meta: [
@@ -104,6 +130,20 @@ useHead({
         {{ openNow ? '· Hozir ochiq' : '· Hozir yopiq' }}
       </span>
     </p>
+
+    <div v-if="b.photos?.length" class="mt-4 flex gap-2 overflow-x-auto -mx-4 px-4 snap-x">
+      <img
+        v-for="(p, i) in b.photos"
+        :key="p.file"
+        :src="`/photos/${p.file}`"
+        :alt="p.alt"
+        width="320"
+        height="213"
+        :loading="i === 0 ? 'eager' : 'lazy'"
+        decoding="async"
+        class="h-40 w-auto rounded-lg object-cover snap-start shrink-0"
+      >
+    </div>
 
     <p v-if="b.description" class="mt-4 leading-relaxed">{{ b.description }}</p>
 
@@ -148,16 +188,9 @@ useHead({
       </table>
     </section>
 
-    <!-- The map is deliberately a link, not an embed: MapLibre is ~200KB
-         and this is the page that must stay fast. It becomes a real map
-         in Phase 2, lazy-loaded on tap. -->
     <section class="mt-6">
       <h2 class="font-semibold mb-2">Xaritada</h2>
-      <a
-        :href="`https://www.openstreetmap.org/?mlat=${b.location.lat}&mlon=${b.location.lng}#map=17/${b.location.lat}/${b.location.lng}`"
-        rel="noopener"
-        class="text-teal-600 dark:text-teal-400 text-sm"
-      >{{ b.location.lat.toFixed(5) }}, {{ b.location.lng.toFixed(5) }} — xaritada koʻriş</a>
+      <MapView :markers="[{ lat: b.location.lat, lng: b.location.lng, name: b.name }]" height="16rem" />
     </section>
 
     <p class="mt-8 text-sm opacity-60">

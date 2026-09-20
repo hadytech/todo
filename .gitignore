@@ -14,3 +14,7 @@ public/search-index.json
 # Map archive — too large for the 1GB repo budget. Build it locally with
 # scripts/build-tiles.sh, or attach it to a GitHub Release.
 public/tiles/
+
+# Original photos before compression. Only the compressed output in
+# public/photos/ is committed — originals would blow the repo budget.
+photos-src/
