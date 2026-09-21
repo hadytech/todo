@@ -261,11 +261,42 @@ with "Resource not accessible by integration" unless the workflow is given
 an admin-scoped personal access token. Until Pages is enabled by hand,
 every build step passes and the deploy fails on the last one.
 
-A project site is served from `/<repo>/`, and the base URL is derived
-from the repository name automatically — a rename needs nothing updated.
-Once `yalp.uz` resolves, set repository variables `SITE_URL` to
-`https://yalp.uz` and `BASE_URL` to `/`, and add `public/CNAME`
-containing `yalp.uz`.
+By default the site builds for its project URL,
+`<owner>.github.io/<repo>/`, derived from the repository itself — a
+rename needs nothing updated.
+
+To move it to a custom domain, set **one** repository variable:
+
+```
+CUSTOM_DOMAIN = yalp.uz
+```
+
+That switches the canonical URLs, the asset prefix and the `CNAME` file
+together. They are one setting because changing one without the others is
+how this usually breaks: canonical tags and a sitemap pointing at a domain
+that does not serve yet are worse than not having the domain at all.
+
+`SITE_URL` and `BASE_URL` still override individually if a setup ever
+needs them apart.
+
+### Attaching the domain
+
+Verify the domain with GitHub first (Settings → Pages → Add a verified
+domain). Note that most DNS panels — aHOST's included — treat the Name
+field as **relative to the zone** and append the domain themselves. Enter
+
+```
+_github-pages-challenge-<user>
+```
+
+and not `_github-pages-challenge-<user>.yalp.uz`, which lands the record
+at `...yalp.uz.yalp.uz` and never verifies. The existing `_dmarc` record
+in the same panel is the tell: it is entered bare. Drop the TTL to 300
+while verifying so a failed lookup is not cached for hours.
+
+Then point the domain at Pages — apex `A` records to `185.199.108.153`,
+`185.199.109.153`, `185.199.110.153`, `185.199.111.153`, and a `CNAME` on
+`www` to `<owner>.github.io`.
 
 ## Open items
 
