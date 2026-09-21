@@ -212,6 +212,31 @@ through the word.
 what catches the build script and the browser drifting apart — if they
 ever tokenize differently, search fails silently rather than erroring.
 
+## Measuring
+
+The plan for the new alphabet is to ship it, watch which spellings people
+actually search, and flip `NUXT_PUBLIC_ALPHABET` if the data disagrees.
+That decision cannot be made without numbers — only argued about — so two
+repository variables turn measurement on:
+
+| Variable | Effect |
+|---|---|
+| `ANALYTICS` | GoatCounter site code, e.g. `yalp` for `yalp.goatcounter.com` |
+| `SITE_VERIFICATION` | `google-site-verification` token for Search Console |
+
+Both are empty by default: nothing is loaded and no request leaves the
+page until they are set, and analytics never load in dev, so local views
+do not pollute the numbers.
+
+GoatCounter is open source, free for non-commercial use, sets no cookies
+and collects no personal data — which is why it needs no consent banner.
+A tracker that required one would cost more in friction than these
+numbers are worth.
+
+Search Console is the more important half: it reports impressions *by
+query*, which is the only way to see people searching `chorsu` and not
+reaching a page that renders `Çorsu`.
+
 ## Indexing
 
 Search engines are blocked by default — `robots.txt` says `Disallow: /`
@@ -256,6 +281,9 @@ containing `yalp.uz`.
       provide. Deferred until the directory has traction. Options are in
       the project plan; the cheapest real one is a small API on a ~€4/mo
       VPS with the site staying on Pages.
+- [ ] Turn on `ANALYTICS` and `SITE_VERIFICATION` when the site goes
+      live — the alphabet decision depends on ~8 weeks of query data, and
+      that clock only starts once they are set.
 - [ ] Photo budget: Pages repos have a ~1GB soft limit. Keep photos AVIF
       and under ~60KB; split them into a second repo around 2,000 listings.
 

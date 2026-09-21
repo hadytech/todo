@@ -20,6 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Full history: the sitemap reads each listing's last commit date
+          # for <lastmod>. A shallow clone has no per-file history, so every
+          # lastmod would silently disappear rather than fail.
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -42,6 +47,9 @@ jobs:
           # Set repository variable INDEXABLE=true when the directory has
           # real content and should start being crawled.
           NUXT_PUBLIC_INDEXABLE: ${{ vars.INDEXABLE || 'false' }}
+          # Both empty by default — nothing is loaded until they are set.
+          NUXT_PUBLIC_ANALYTICS: ${{ vars.ANALYTICS || '' }}
+          NUXT_PUBLIC_SITE_VERIFICATION: ${{ vars.SITE_VERIFICATION || '' }}
       - name: Sahifa byudjeti
         run: npm run check:budget
       - name: HTML tekşiruvi
