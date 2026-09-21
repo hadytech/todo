@@ -15,6 +15,7 @@ import { join } from 'node:path'
 import sharp from 'sharp'
 import { loadBusinesses, loadCategories, loadDistricts, publishedOnly } from '../lib/load'
 import { toDisplay } from '../lib/alphabet'
+import { MINT, LIGHT } from '../lib/brand'
 
 const OUT = join(process.cwd(), 'public', 'og')
 const W = 1200
@@ -63,10 +64,10 @@ function card(name: string, subtitle: string): string {
   const startY = lines.length > 1 ? 280 : 330
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
-  <rect width="${W}" height="${H}" fill="#0f766e"/>
-  <rect x="0" y="${H - 12}" width="${W}" height="12" fill="#5eead4"/>
+  <rect width="${W}" height="${H}" fill="${MINT[800]}"/>
+  <rect x="0" y="${H - 14}" width="${W}" height="14" fill="${MINT[400]}"/>
   ${lines.map((l, i) => `<text x="80" y="${startY + i * (titleSize + 14)}" font-family="${FONT}" font-size="${titleSize}" font-weight="bold" fill="#ffffff">${escapeXml(l)}</text>`).join('\n  ')}
-  <text x="80" y="${startY + lines.length * (titleSize + 14) + 30}" font-family="${FONT}" font-size="40" fill="#a7f3d0">${escapeXml(subtitle)}</text>
+  <text x="80" y="${startY + lines.length * (titleSize + 14) + 30}" font-family="${FONT}" font-size="40" fill="{MINT[200]}">${escapeXml(subtitle)}</text>
   <text x="80" y="${H - 60}" font-family="${FONT}" font-size="34" font-weight="bold" fill="#ffffff" opacity="0.85">yalp.uz</text>
 </svg>`
 }

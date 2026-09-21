@@ -157,6 +157,36 @@ the rest of a business page, so nothing loads until the visitor taps
 "Xaritani koʻrsatiş". Every failure path falls back to a plain
 OpenStreetMap link that works with no JavaScript at all.
 
+## Identity
+
+Everything visual comes from `lib/brand.ts`, and `lib/brand.test.ts`
+asserts two things about it: that the palette meets WCAG AA in both
+themes, and that `main.css` still matches the definition. Change one
+without the other and a test fails — which is the only reliable way to
+stop a stylesheet and a design definition drifting apart.
+
+| | |
+|---|---|
+| Accent | **Mint.** `#0B6D5B` on light, `#6BDBBF` on dark |
+| Neutrals | Slightly green-biased, so they read as chosen next to the mint rather than inherited |
+| Type | **Manrope** — flat terminals, open counters, and it carries `ö ğ ç ş` *and* Cyrillic, which this site cannot do without |
+| Mark | A map pin on a rounded mint tile |
+
+The contrast test earned its place immediately: mint-600 measures 4.29:1
+on white and fails AA for text, which is not a thing the eye reliably
+catches. The light accent is mint-700.
+
+`npm run brand` generates the favicon, the app icons, the default share
+image and the web manifest from that one definition, so they cannot drift
+— the usual failure being a favicon still showing last year's logo
+because it was exported by hand once and never again.
+
+The mark is a pin because the site is about places, and because it has to
+survive being 16 pixels wide in a browser tab. The first version did not:
+at 16px the pin thinned out and its hole closed up. The pin is now
+heavier and the ring thicker, which was worth one more pass because the
+tab is where a favicon is actually seen.
+
 ## Theme and colour
 
 Components never name a colour. They use semantic tokens — `bg-canvas`,
@@ -409,7 +439,7 @@ gate rather than an aspiration.
 | Search index | lazy — first keystroke only |
 | MapLibre | lazy — 264KB gzipped, on tap only |
 | Photos | ~60KB AVIF each |
-| Fonts | none — system stack, which covers `ö ğ ç ş` everywhere |
+| Fonts | one — Manrope, `display=swap`, from Google Fonts. `npm run vendor:font` self-hosts it instead |
 
 Chunks reached only through a dynamic import are reported separately
 rather than charged to the page; if one ever becomes eager, it lands in

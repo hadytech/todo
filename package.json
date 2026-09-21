@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
-    "generate": "npm run index && npm run og && nuxt generate",
+    "generate": "npm run brand && npm run index && npm run og && nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "validate": "tsx scripts/validate.ts",
@@ -22,7 +22,9 @@
     "og": "tsx scripts/build-og.ts",
     "check:html": "tsx scripts/check-html.ts",
     "check:live": "tsx scripts/check-live.ts",
-    "todo": "tsx scripts/todo.ts"
+    "todo": "tsx scripts/todo.ts",
+    "brand": "tsx scripts/build-brand.ts",
+    "vendor:font": "scripts/vendor-font.sh"
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",

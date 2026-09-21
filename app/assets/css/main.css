@@ -4,12 +4,14 @@
  * Semantic tokens, not raw colours.
  *
  * Components reference `bg-canvas`, `text-ink`, `border-line` and so on;
- * the tokens themselves swap per theme. That means no `dark:` variant
- * anywhere in the markup — a component cannot be styled correctly in one
- * theme and wrong in the other, because it only ever names a role.
+ * the tokens swap per theme. That means no `dark:` variant anywhere in
+ * the markup — a component cannot be right in one theme and wrong in the
+ * other, because it only ever names a role.
  *
- * `@theme inline` is what makes this work at runtime: the utilities
- * resolve to var(--…) rather than baking a hex value in at build time.
+ * The values below are the brand, and `lib/brand.test.ts` asserts they
+ * still match lib/brand.ts. Change one without the other and a test
+ * fails, which is the only reliable way to keep a stylesheet and a design
+ * definition honest with each other.
  */
 @theme inline {
   --color-canvas: var(--canvas);
@@ -22,61 +24,65 @@
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
 
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  /* Manrope for its flat terminals and open counters — it stays legible
+     small, and it carries ö ğ ç ş and Cyrillic, both of which this site
+     cannot do without. The stack behind it is what actually renders
+     until the file arrives. */
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
 
   --radius-soft: 0.875rem;
   --radius-pill: 999px;
 }
 
-/* Light — warm off-white rather than clinical white, which is what makes
-   a directory of places feel approachable instead of administrative. */
+/* LIGHT-TOKENS */
 :root {
-  --canvas: #faf8f5;
-  --surface: #ffffff;
-  --raised: #f3efe9;
-  --ink: #1b1a17;
-  --muted: #6d675e;
-  --line: #e7e1d8;
-  --accent: #0e7c6f;
-  --accent-ink: #ffffff;
-  --accent-soft: #e2f2ef;
+  --canvas: #F6F9F7;
+  --surface: #FFFFFF;
+  --raised: #EBF2EE;
+  --ink: #0F1A17;
+  --muted: #5A6A64;
+  --line: #DCE8E3;
+  --accent: #0B6D5B;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #D1F5EA;
   color-scheme: light;
 }
 
-/* Dark — warm charcoal, not blue-black, so the two themes read as the
-   same product at different times of day. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --canvas: #16151a;
-    --surface: #1e1d23;
-    --raised: #26252c;
-    --ink: #eceae5;
-    --muted: #a09a91;
-    --line: #2f2d35;
-    --accent: #4fd4c4;
-    --accent-ink: #10221f;
-    --accent-soft: #1b3330;
-    color-scheme: dark;
-  }
+/* DARK-TOKENS */
+:root[data-theme="dark"] {
+  --canvas: #0E1513;
+  --surface: #16211E;
+  --raised: #1F2C28;
+  --ink: #E9F1EE;
+  --muted: #90A49E;
+  --line: #27342F;
+  --accent: #6BDBBF;
+  --accent-ink: #062019;
+  --accent-soft: #123029;
+  color-scheme: dark;
 }
 
-:root[data-theme="dark"] {
-  --canvas: #16151a;
-  --surface: #1e1d23;
-  --raised: #26252c;
-  --ink: #eceae5;
-  --muted: #a09a91;
-  --line: #2f2d35;
-  --accent: #4fd4c4;
-  --accent-ink: #10221f;
-  --accent-soft: #1b3330;
-  color-scheme: dark;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #0E1513;
+    --surface: #16211E;
+    --raised: #1F2C28;
+    --ink: #E9F1EE;
+    --muted: #90A49E;
+    --line: #27342F;
+    --accent: #6BDBBF;
+    --accent-ink: #062019;
+    --accent-soft: #123029;
+    color-scheme: dark;
+  }
 }
 
 html {
   -webkit-text-size-adjust: 100%;
   background: var(--canvas);
 }
+
+body { font-feature-settings: "cv11"; }
 
 /* Keyboard focus in the site's own colour. The browser default on a
    search input is an amber ring that reads as a validation error. */
@@ -86,8 +92,8 @@ html {
   border-radius: 6px;
 }
 
-/* Theme changes should feel like a dimmer, not a strobe. Kept to colour
-   only — animating layout would cost far more than it looks worth. */
+/* Theme changes should feel like a dimmer, not a strobe. Colour only —
+   animating layout would cost far more than it looks worth. */
 @media (prefers-reduced-motion: no-preference) {
   body, header, footer, a, button, input, select, .card {
     transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;

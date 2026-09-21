@@ -18,8 +18,9 @@ if (!indexable) {
 
     <header class="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur">
       <div class="mx-auto max-w-4xl px-4 h-14 flex items-center gap-3">
-        <NuxtLink to="/" class="font-bold text-lg tracking-tight">
-          yalp<span class="text-accent">.uz</span>
+        <NuxtLink to="/" class="flex items-center gap-2 font-extrabold text-lg tracking-tight">
+          <BrandMark />
+          <span>yalp<span class="text-accent">.uz</span></span>
         </NuxtLink>
 
         <nav class="ml-auto flex items-center gap-1 text-sm">

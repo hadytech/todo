@@ -46,9 +46,30 @@ export default defineNuxtConfig({
       htmlAttrs: { lang: 'uz' },
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'theme-color', content: '#0f766e' },
+        // Two theme-colors so the phone browser chrome matches the page
+        // it is framing instead of one of them always being wrong.
+        { name: 'theme-color', content: '#F6F9F7', media: '(prefers-color-scheme: light)' },
+        { name: 'theme-color', content: '#0E1513', media: '(prefers-color-scheme: dark)' },
+        { name: 'apple-mobile-web-app-title', content: 'yalp.uz' },
       ],
-      link: [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+      link: [
+        { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+        { rel: 'apple-touch-icon', href: '/icon-180.png' },
+        { rel: 'manifest', href: '/site.webmanifest' },
+        // Google Fonts serves the stylesheet from one host and the font
+        // file from another, so both need warming or the file waits on a
+        // second connection it could have opened in parallel.
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        {
+          rel: 'stylesheet',
+          // display=swap renders the fallback immediately rather than
+          // holding the text blank while the font downloads — on a slow
+          // connection that is the difference between a readable page and
+          // an empty one.
+          href: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap',
+        },
+      ],
       script: [{
         /**
          * Applies a stored theme before the first paint.
