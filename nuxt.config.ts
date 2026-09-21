@@ -85,6 +85,24 @@ export default defineNuxtConfig({
        * content worth finding.
        */
       indexable: process.env.NUXT_PUBLIC_INDEXABLE === 'true',
+      /**
+       * GoatCounter site code, e.g. "yalp" for yalp.goatcounter.com.
+       *
+       * Empty by default: nothing is loaded and no request leaves the
+       * page until this is set. GoatCounter is open source, free for
+       * non-commercial use, sets no cookies and collects no personal
+       * data, which is why it needs no consent banner — a tracker that
+       * required one would cost more in friction than the numbers are
+       * worth.
+       *
+       * This is not optional decoration. The plan for the new alphabet is
+       * to ship it, watch which spellings people actually search, and
+       * flip `alphabet` if the data disagrees. Without numbers that
+       * decision can never be made, only argued about.
+       */
+      analytics: process.env.NUXT_PUBLIC_ANALYTICS || '',
+      /** google-site-verification token, for Search Console. */
+      siteVerification: process.env.NUXT_PUBLIC_SITE_VERIFICATION || '',
       /** Source repository. Update here if the repo is renamed. */
       repoUrl: process.env.NUXT_PUBLIC_REPO_URL || 'https://github.com/hadytech/todo',
       /**

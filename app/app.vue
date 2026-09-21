@@ -1,10 +1,29 @@
 <script setup lang="ts">
-const { indexable, repoUrl } = useRuntimeConfig().public
+const { indexable, repoUrl, analytics, siteVerification } = useRuntimeConfig().public
 
 // robots.txt asks crawlers not to fetch; this tells any that fetched
 // anyway not to index. A page already marked noindex stays noindex.
 if (!indexable) {
   useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
+}
+
+if (siteVerification) {
+  useHead({ meta: [{ name: 'google-site-verification', content: siteVerification as string }] })
+}
+
+/**
+ * Analytics load only when a site code is configured, and never in dev —
+ * otherwise local page views pollute the numbers the alphabet decision
+ * will rest on.
+ */
+if (analytics && !import.meta.dev) {
+  useHead({
+    script: [{
+      'data-goatcounter': `https://${analytics}.goatcounter.com/count`,
+      'src': 'https://gc.zgo.at/count.js',
+      'async': true,
+    }],
+  })
 }
 </script>
 

@@ -20,6 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Full history: the sitemap reads each listing's last commit date
+          # for <lastmod>. A shallow clone has no per-file history, so every
+          # lastmod would silently disappear rather than fail.
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -29,23 +34,49 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run validate
+      # One variable switches the whole site between the project URL and a
+      # custom domain: CUSTOM_DOMAIN=yalp.uz. It decides the canonical
+      # URLs, the asset prefix and the CNAME file together, because
+      # setting one without the others is the way this usually breaks —
+      # canonical tags and a sitemap pointing at a domain that does not
+      # serve yet are worse than not having the domain at all.
+      - name: Domen sozlamalari
+        id: site
+        env:
+          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          if [ -n "$CUSTOM_DOMAIN" ]; then
+            echo "site_url=https://$CUSTOM_DOMAIN" >> "$GITHUB_OUTPUT"
+            echo "base_url=/" >> "$GITHUB_OUTPUT"
+          else
+            # Default to where the site genuinely is, not where it will be.
+            echo "site_url=https://$OWNER.github.io/$REPO" >> "$GITHUB_OUTPUT"
+            echo "base_url=/$REPO/" >> "$GITHUB_OUTPUT"
+          fi
+
       - run: npm run generate
         env:
-          # Point NUXT_PUBLIC_SITE_URL at the custom domain once it resolves.
-          NUXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://yalp.uz' }}
-          # A GitHub project site is served from /<repo>/, so assets need
-          # that prefix. Deriving it from the repository name means the
-          # deploy keeps working across a rename with nothing to update by
-          # hand. Set repository variable BASE_URL to "/" once a custom
-          # domain serves the site from the root.
-          NUXT_APP_BASE_URL: ${{ vars.BASE_URL || format('/{0}/', github.event.repository.name) }}
+          NUXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || steps.site.outputs.site_url }}
+          NUXT_APP_BASE_URL: ${{ vars.BASE_URL || steps.site.outputs.base_url }}
           # Set repository variable INDEXABLE=true when the directory has
           # real content and should start being crawled.
           NUXT_PUBLIC_INDEXABLE: ${{ vars.INDEXABLE || 'false' }}
+          # Both empty by default — nothing is loaded until they are set.
+          NUXT_PUBLIC_ANALYTICS: ${{ vars.ANALYTICS || '' }}
+          NUXT_PUBLIC_SITE_VERIFICATION: ${{ vars.SITE_VERIFICATION || '' }}
       - name: Sahifa byudjeti
         run: npm run check:budget
       - name: HTML tekşiruvi
         run: npm run check:html
+
+      # Pages reads this file from the artifact to attach the domain.
+      - name: CNAME
+        if: vars.CUSTOM_DOMAIN != ''
+        env:
+          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
+        run: printf '%s\n' "$CUSTOM_DOMAIN" > .output/public/CNAME
       # Pages must already be enabled: Settings -> Pages -> Source:
       # GitHub Actions. This cannot be automated from here — creating a
       # Pages site needs repository admin rights, which GITHUB_TOKEN does
