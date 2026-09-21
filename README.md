@@ -157,6 +157,58 @@ the rest of a business page, so nothing loads until the visitor taps
 "Xaritani koʻrsatiş". Every failure path falls back to a plain
 OpenStreetMap link that works with no JavaScript at all.
 
+## Identity
+
+Everything visual comes from `lib/brand.ts`, and `lib/brand.test.ts`
+asserts two things about it: that the palette meets WCAG AA in both
+themes, and that `main.css` still matches the definition. Change one
+without the other and a test fails — which is the only reliable way to
+stop a stylesheet and a design definition drifting apart.
+
+| | |
+|---|---|
+| Accent | **Mint.** `#0B6D5B` on light, `#6BDBBF` on dark |
+| Neutrals | Slightly green-biased, so they read as chosen next to the mint rather than inherited |
+| Type | **Manrope** — flat terminals, open counters, and it carries `ö ğ ç ş` *and* Cyrillic, which this site cannot do without |
+| Mark | A map pin on a rounded mint tile |
+
+The contrast test earned its place immediately: mint-600 measures 4.29:1
+on white and fails AA for text, which is not a thing the eye reliably
+catches. The light accent is mint-700.
+
+`npm run brand` generates the favicon, the app icons, the default share
+image and the web manifest from that one definition, so they cannot drift
+— the usual failure being a favicon still showing last year's logo
+because it was exported by hand once and never again.
+
+The mark is a pin because the site is about places, and because it has to
+survive being 16 pixels wide in a browser tab. The first version did not:
+at 16px the pin thinned out and its hole closed up. The pin is now
+heavier and the ring thicker, which was worth one more pass because the
+tab is where a favicon is actually seen.
+
+## Theme and colour
+
+Components never name a colour. They use semantic tokens — `bg-canvas`,
+`text-ink`, `border-line`, `bg-accent` — and the tokens swap per theme, so
+there is not a single `dark:` variant in the markup. A component cannot be
+right in one theme and wrong in the other, because it only ever names a
+role.
+
+The day/night switch layers an explicit choice over the system
+preference: no stored value means follow the system, which is the right
+default — someone whose phone is already in dark mode should not have to
+tell this site as well.
+
+Two details that are easy to get wrong and obvious when they are:
+
+- The stored theme is applied by a small **inline, blocking** script in
+  the head. Anything deferred runs after the first paint, and the visitor
+  sees a white flash before their dark theme arrives.
+- The toggle's icon is chosen by **CSS, not JavaScript**. The page is
+  prerendered with no knowledge of the visitor's theme, so picking the
+  icon in script would mean the server guesses and hydration flips it.
+
 ## Pages
 
 ```
@@ -184,6 +236,28 @@ depend on the sitemap alone to be found.
 Pages with nothing on them are never generated and never linked. An empty
 landing page is thin content that drags on the pages that do rank, and a
 dead end for anyone who taps it.
+
+## The verification queue
+
+```bash
+npm run todo    # what still needs details, grouped by category
+```
+
+`status: draft` is a queue of known names waiting on details, not a
+staging area for invented data. A draft may omit district, address and
+location; a **published** listing may not. So a name that is a matter of
+public record can be written down immediately, while the facts someone
+has to actually confirm stay empty until they do.
+
+Drafts never reach the site: they are absent from the pages, the sitemap
+and the search index. Verify one, fill in the details, set
+`status: published`.
+
+The repository ships ~32 such drafts — Tashkent universities and major
+bazaars — seeded from their names alone. **No address, phone or opening
+hours was guessed for any of them.** Categories like barber shops and
+computer shops are deliberately empty: there is no public record to seed
+them from, and inventing entries would be worse than an empty category.
 
 ## Layout
 
@@ -281,6 +355,19 @@ disagree with it.
 `SITE_URL` and `BASE_URL` still override individually if a setup ever
 needs them apart.
 
+### HTTPS
+
+After DNS resolves, tick **Enforce HTTPS** in Settings → Pages. GitHub
+issues a Let's Encrypt certificate automatically, which can take up to an
+hour; the checkbox stays disabled until it is ready, and that wait is
+normal rather than a failure.
+
+Do not skip it. The failure mode is a site that works perfectly and
+quietly stays on http — browsers label it "Not Secure", and a directory
+asking to be trusted with addresses and phone numbers cannot afford that.
+`npm run check:live` fails if the site is not on https or if http does not
+redirect to it, so it is a check rather than something to remember.
+
 ### Attaching the domain
 
 Verify the domain with GitHub first (Settings → Pages → Add a verified
@@ -352,7 +439,7 @@ gate rather than an aspiration.
 | Search index | lazy — first keystroke only |
 | MapLibre | lazy — 264KB gzipped, on tap only |
 | Photos | ~60KB AVIF each |
-| Fonts | none — system stack, which covers `ö ğ ç ş` everywhere |
+| Fonts | one — Manrope, `display=swap`, from Google Fonts. `npm run vendor:font` self-hosts it instead |
 
 Chunks reached only through a dynamic import are reported separately
 rather than charged to the page; if one ever becomes eager, it lands in

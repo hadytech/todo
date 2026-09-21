@@ -13,6 +13,9 @@ export function lastModified(slug: string): string | undefined {
   return modified.get(`data/businesses/${slug}.yaml`)
 }
 
+/** Listings recorded but not yet verified. See `npm run todo`. */
+export const pendingCount = businesses.filter((b) => b.status !== 'published').length
+
 export const catalog = {
   businesses: publishedOnly(businesses),
   categories: loadCategories(),

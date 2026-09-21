@@ -69,15 +69,15 @@ export const businessSchema = z.object({
   name: z.string().min(2).max(120),
   /** "top/sub", matching data/categories.yaml. */
   category: z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+$/, 'kategoriya "asosiy/ichki" koʻrinishida boʻlsin'),
-  /** Slug from data/districts.yaml. */
-  district: z.string().regex(/^[a-z0-9-]+$/),
-  address: z.string().min(4).max(300),
+  /** Slug from data/districts.yaml. Optional on a draft. */
+  district: z.string().regex(/^[a-z0-9-]+$/).optional(),
+  address: z.string().min(4).max(300).optional(),
   location: z.object({
     // Tashkent bounding box. A typo'd coordinate lands the pin in the
     // ocean and nobody notices until launch, so fail the build instead.
     lat: z.number().min(41.15).max(41.45),
     lng: z.number().min(69.10).max(69.55),
-  }),
+  }).optional(),
   description: z.string().max(1200).optional(),
   phones: z.array(
     z.string().regex(/^\+998 \d{2} \d{3} \d{2} \d{2}$/, 'telefon "+998 XX XXX XX XX" formatida boʻlsin'),
@@ -92,7 +92,28 @@ export const businessSchema = z.object({
   status: z.enum(['published', 'draft', 'hidden']).default('published'),
   /** Free-form note for maintainers. Never rendered. */
   note: z.string().optional(),
-}).strict()
+}).strict().superRefine((b, ctx) => {
+  /**
+   * Address and location are optional only for drafts.
+   *
+   * That makes `status: draft` a to-verify queue rather than a staging
+   * area for invented data: a name and a district can be recorded from
+   * something known, and the details someone has to actually confirm stay
+   * empty until they do. A published listing still cannot exist without
+   * them, so nothing half-known can reach the site.
+   */
+  if (b.status !== 'published') return
+
+  for (const field of ['address', 'location', 'district'] as const) {
+    if (!b[field]) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [field],
+        message: `"published" joy uchun ${field} majburiy (tekşirilmagan boʻlsa: status: draft)`,
+      })
+    }
+  }
+})
 
 export type BusinessInput = z.infer<typeof businessSchema>
 

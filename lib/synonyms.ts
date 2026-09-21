@@ -32,6 +32,18 @@ export const SYNONYMS: Record<string, string[]> = {
   'sogliq/stomatologiya': ['стоматология', 'зубной', 'dentist', 'dental', 'tiş', 'tiş şifokori'],
   'sogliq/dorixona': ['аптека', 'pharmacy', 'drugstore', 'dori', 'лекарство'],
   'sogliq/laboratoriya': ['лаборатория', 'laboratory', 'анализ', 'analiz', 'tahlil'],
+
+  // Taʼlim
+  'talim/universitet': ['университет', 'university', 'oliy taʼlim', 'вуз', 'institut', 'институт'],
+  'talim/oquv-markaz': ['учебный центр', 'курсы', 'kurs', 'training', 'course', 'oʻquv kurs'],
+  'talim/til-markazi': ['языковой центр', 'английский', 'ingliz tili', 'language', 'ielts'],
+  'talim/maktab': ['школа', 'school', 'maktab', 'litsey', 'лицей'],
+
+  // Savdo
+  'savdo/bozor': ['базар', 'рынок', 'bazar', 'market', 'bozor'],
+  'savdo/kompyuter': ['компьютер', 'computer', 'noutbuk', 'ноутбук', 'laptop', 'pc'],
+  'savdo/savdo-markazi': ['торговый центр', 'mall', 'savdo markaz', 'тц'],
+  'savdo/texnika': ['бытовая техника', 'техника', 'electronics', 'maişiy texnika'],
 }
 
 /** Every alternative term for a "top/sub" category path. */

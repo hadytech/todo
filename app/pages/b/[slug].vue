@@ -135,9 +135,9 @@ useHead({
 
 <template>
   <article v-if="b">
-    <nav class="text-sm opacity-60 mb-2 flex flex-wrap gap-x-1">
+    <nav class="text-sm text-muted mb-2 flex flex-wrap gap-x-1">
       <template v-for="(t, i) in trail" :key="t.to">
-        <NuxtLink :to="t.to" class="hover:opacity-100 hover:text-teal-600">{{ t.name }}</NuxtLink>
+        <NuxtLink :to="t.to" class="hover:opacity-100 hover:text-accent">{{ t.name }}</NuxtLink>
         <span v-if="i < trail.length - 1">›</span>
       </template>
     </nav>
@@ -145,19 +145,19 @@ useHead({
     <h1 class="text-2xl font-bold">{{ b.name }}</h1>
 
     <!-- Visible, indexed, and genuinely useful: the spelling people know. -->
-    <p v-if="b.nameAscii !== b.name" class="text-sm opacity-60 mt-1">
+    <p v-if="b.nameAscii !== b.name" class="text-sm text-muted mt-1">
       Boşqa nomi: {{ b.nameAscii }}
     </p>
 
-    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-sm opacity-75">
+    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-sm text-muted">
       <span>{{ b.categoryName }} · {{ b.districtName }}</span>
       <span v-if="b.price">· {{ '$'.repeat(b.price) }}</span>
       <span
         v-if="openNow !== null"
-        class="rounded-full px-2 py-0.5 text-xs font-medium"
+        class="rounded-pill px-2 py-0.5 text-xs font-medium"
         :class="openNow
-          ? 'bg-teal-600/12 text-teal-700 dark:text-teal-300'
-          : 'bg-neutral-500/12 text-neutral-600 dark:text-neutral-400'"
+          ? 'bg-accent-soft text-accent'
+          : 'bg-raised text-muted'"
       >{{ openNow ? 'Hozir ochiq' : 'Hozir yopiq' }}</span>
     </div>
 
@@ -171,7 +171,7 @@ useHead({
         height="213"
         :loading="i === 0 ? 'eager' : 'lazy'"
         decoding="async"
-        class="h-40 w-auto rounded-lg object-cover snap-start shrink-0"
+        class="h-40 w-auto rounded-soft object-cover snap-start shrink-0"
       >
     </div>
 
@@ -179,25 +179,25 @@ useHead({
 
     <dl class="mt-6 space-y-2 text-sm">
       <div>
-        <dt class="opacity-60">Manzil</dt>
+        <dt class="text-muted">Manzil</dt>
         <dd>{{ b.address }}</dd>
       </div>
       <div v-if="b.phones?.length">
-        <dt class="opacity-60">Telefon</dt>
+        <dt class="text-muted">Telefon</dt>
         <dd>
           <a v-for="p in b.phones" :key="p" :href="`tel:${p.replace(/\s/g, '')}`"
-             class="text-teal-600 dark:text-teal-400 mr-3">{{ p }}</a>
+             class="text-accent mr-3">{{ p }}</a>
         </dd>
       </div>
       <div v-if="b.telegram || b.instagram || b.website">
-        <dt class="opacity-60">Havolalar</dt>
+        <dt class="text-muted">Havolalar</dt>
         <dd class="flex gap-3">
           <a v-if="b.telegram" :href="`https://t.me/${b.telegram.slice(1)}`" rel="noopener"
-             class="text-teal-600 dark:text-teal-400">Telegram</a>
+             class="text-accent">Telegram</a>
           <a v-if="b.instagram" :href="`https://instagram.com/${b.instagram}`" rel="noopener"
-             class="text-teal-600 dark:text-teal-400">Instagram</a>
+             class="text-accent">Instagram</a>
           <a v-if="b.website" :href="b.website" rel="noopener"
-             class="text-teal-600 dark:text-teal-400">Sayt</a>
+             class="text-accent">Sayt</a>
         </dd>
       </div>
     </dl>
@@ -207,7 +207,7 @@ useHead({
       <table class="text-sm w-full max-w-sm">
         <tbody>
           <tr v-for="d in WEEKDAYS" :key="d">
-            <td class="py-0.5 opacity-70">{{ DAY_LABELS[d] }}</td>
+            <td class="py-0.5 text-muted">{{ DAY_LABELS[d] }}</td>
             <td class="py-0.5 text-right tabular-nums">{{ formatDay(b.hours[d]) }}</td>
           </tr>
         </tbody>
@@ -219,13 +219,13 @@ useHead({
       <MapView :markers="[{ lat: b.location.lat, lng: b.location.lng, name: b.name }]" height="16rem" />
     </section>
 
-    <p class="mt-8 text-sm opacity-60">
+    <p class="mt-8 text-sm text-muted">
       Maʼlumot notoʻğrimi?
       <a :href="`${config.public.repoUrl}/edit/main/data/businesses/${b.slug}.yaml`"
-         rel="noopener" class="text-teal-600 dark:text-teal-400">Tuzatiş yuboring</a>
-      <span class="opacity-50">&nbsp;yoki&nbsp;</span>
+         rel="noopener" class="text-accent">Tuzatiş yuboring</a>
+      <span class="text-muted">&nbsp;yoki&nbsp;</span>
       <a :href="`${config.public.repoUrl}/issues/new?template=tuzatish.yml`"
-         rel="noopener" class="text-teal-600 dark:text-teal-400">xabar bering</a>
+         rel="noopener" class="text-accent">xabar bering</a>
     </p>
   </article>
 </template>

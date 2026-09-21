@@ -1,4 +1,4 @@
-import { catalog, categoryLabel, districtLabel } from '../utils/catalog'
+import { catalog, categoryLabel, districtLabel, pendingCount } from '../utils/catalog'
 
 /** Lightweight list for the home page and the browse pages. */
 export default defineEventHandler((event) => {
@@ -34,6 +34,13 @@ export default defineEventHandler((event) => {
     categories: catalog.categories,
     districts: catalog.districts,
     total: matching.length,
+    /**
+     * Entries whose names are recorded but whose details are unverified.
+     * A count only — an unverified listing is not something to show, but
+     * a directory that is visibly being built reads very differently from
+     * one that looks abandoned.
+     */
+    pending: pendingCount,
     counts: {
       categories: tally(catalog.businesses.map((b) => b.categoryTop)),
       districts: tally(catalog.businesses.map((b) => b.district)),

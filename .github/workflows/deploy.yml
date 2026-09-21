@@ -51,7 +51,14 @@ jobs:
           PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
           PAGES_HOST: ${{ steps.pages.outputs.host }}
         run: |
+          # Force https. Before a custom domain's certificate is issued,
+          # configure-pages reports the origin as http:// — and baking that
+          # into canonical tags, og:url and the sitemap means every one of
+          # them names a scheme the site will not be served on once the
+          # cert lands. Pages is https for github.io hosts always and for
+          # custom domains eventually, so https is the only correct answer.
           site_url="${PAGES_BASE_URL%/}"
+          site_url="https://${site_url#*://}"
           base_path="${PAGES_BASE_PATH:-/}"
           echo "site_url=$site_url" >> "$GITHUB_OUTPUT"
           echo "base_path=$base_path" >> "$GITHUB_OUTPUT"

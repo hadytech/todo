@@ -108,8 +108,43 @@ async function checkSearchIndex() {
   }
 }
 
+/**
+ * HTTPS, checked rather than assumed.
+ *
+ * A directory people are meant to trust with addresses and phone numbers
+ * cannot be served over plain http, and browsers now label it "Not
+ * Secure" in the address bar. GitHub Pages issues the certificate
+ * automatically once DNS resolves, but "Enforce HTTPS" is a separate
+ * switch that has to be turned on — so the failure mode is a site that
+ * works perfectly and quietly stays insecure.
+ */
+async function checkHttps() {
+  if (!base.startsWith('https://')) {
+    add('https', false, `${base} — https:// manzilini tekşiring`)
+    return
+  }
+
+  const res = await fetch(base, { redirect: 'follow' })
+  add('https ustidan işlaydi', res.ok && res.url.startsWith('https://'), res.url)
+
+  // http:// must not simply serve: it has to redirect, or every link
+  // shared over http stays on http forever.
+  const insecure = base.replace(/^https:/, 'http:')
+  try {
+    const plain = await fetch(insecure, { redirect: 'follow' })
+    add(
+      'http https ga yoʻnaltiradi',
+      plain.url.startsWith('https://'),
+      plain.url.startsWith('https://') ? 'yoʻnaltirildi' : `http'da qoldi: ${plain.url}`,
+    )
+  } catch (e) {
+    add('http https ga yoʻnaltiradi', false, (e as Error).message)
+  }
+}
+
 const expectIndexable = process.env.EXPECT_INDEXABLE === 'true'
 
+await checkHttps()
 const home = await checkPages()
 if (home) await checkAssets(home.body)
 await checkRobots(expectIndexable)
