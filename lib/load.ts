@@ -96,7 +96,7 @@ export function loadBusinesses(): { businesses: Business[]; issues: Issue[] } {
     if (!categoryPairs.has(b.category)) {
       issues.push({ file: rel, message: `notaʼnish kategoriya: "${b.category}"`, level: 'error' })
     }
-    if (!districts.has(b.district)) {
+    if (b.district && !districts.has(b.district)) {
       issues.push({ file: rel, message: `notaʼnish tuman: "${b.district}"`, level: 'error' })
     }
     for (const p of b.photos) {
@@ -121,7 +121,7 @@ export function loadBusinesses(): { businesses: Business[]; issues: Issue[] } {
       nameAscii: toAscii(b.name),
       // Address and category feed the index too, so "yunusobod kafe" works
       // as a query without a separate filter.
-      searchKey: toSearchKey([b.name, b.address, b.district, categorySub].join(' ')),
+      searchKey: toSearchKey([b.name, b.address ?? '', b.district ?? '', categorySub].join(' ')),
       categoryTop,
       categorySub,
     })

@@ -41,3 +41,29 @@
       name: Dorixonalar
     - slug: laboratoriya
       name: Laboratoriyalar
+
+- slug: talim
+  name: Taʼlim
+  icon: "🎓"
+  children:
+    - slug: universitet
+      name: Universitetlar
+    - slug: oquv-markaz
+      name: Oʻquv markazlari
+    - slug: til-markazi
+      name: Til markazlari
+    - slug: maktab
+      name: Maktablar
+
+- slug: savdo
+  name: Savdo
+  icon: "🛒"
+  children:
+    - slug: bozor
+      name: Bozorlar
+    - slug: kompyuter
+      name: Kompyuter doʻkonlari
+    - slug: savdo-markazi
+      name: Savdo markazlari
+    - slug: texnika
+      name: Maişiy texnika

@@ -185,6 +185,28 @@ Pages with nothing on them are never generated and never linked. An empty
 landing page is thin content that drags on the pages that do rank, and a
 dead end for anyone who taps it.
 
+## The verification queue
+
+```bash
+npm run todo    # what still needs details, grouped by category
+```
+
+`status: draft` is a queue of known names waiting on details, not a
+staging area for invented data. A draft may omit district, address and
+location; a **published** listing may not. So a name that is a matter of
+public record can be written down immediately, while the facts someone
+has to actually confirm stay empty until they do.
+
+Drafts never reach the site: they are absent from the pages, the sitemap
+and the search index. Verify one, fill in the details, set
+`status: published`.
+
+The repository ships ~32 such drafts — Tashkent universities and major
+bazaars — seeded from their names alone. **No address, phone or opening
+hours was guessed for any of them.** Categories like barber shops and
+computer shops are deliberately empty: there is no public record to seed
+them from, and inventing entries would be worse than an empty category.
+
 ## Layout
 
 ```
