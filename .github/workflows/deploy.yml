@@ -34,32 +34,39 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run validate
-      # One variable switches the whole site between the project URL and a
-      # custom domain: CUSTOM_DOMAIN=yalp.uz. It decides the canonical
-      # URLs, the asset prefix and the CNAME file together, because
-      # setting one without the others is the way this usually breaks —
-      # canonical tags and a sitemap pointing at a domain that does not
-      # serve yet are worse than not having the domain at all.
+      # Read the Pages configuration itself rather than keeping a second
+      # copy of it in a repository variable. configure-pages resolves the
+      # custom domain set in Settings, so the build can never disagree
+      # with where the site is actually served — and the CNAME written
+      # below comes from the same answer.
+      #
+      # This runs before the build because the build needs its outputs.
+      - uses: actions/configure-pages@v5
+        id: pages
+
       - name: Domen sozlamalari
         id: site
         env:
-          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
-          OWNER: ${{ github.repository_owner }}
-          REPO: ${{ github.event.repository.name }}
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          PAGES_HOST: ${{ steps.pages.outputs.host }}
         run: |
-          if [ -n "$CUSTOM_DOMAIN" ]; then
-            echo "site_url=https://$CUSTOM_DOMAIN" >> "$GITHUB_OUTPUT"
-            echo "base_url=/" >> "$GITHUB_OUTPUT"
-          else
-            # Default to where the site genuinely is, not where it will be.
-            echo "site_url=https://$OWNER.github.io/$REPO" >> "$GITHUB_OUTPUT"
-            echo "base_url=/$REPO/" >> "$GITHUB_OUTPUT"
-          fi
+          site_url="${PAGES_BASE_URL%/}"
+          base_path="${PAGES_BASE_PATH:-/}"
+          echo "site_url=$site_url" >> "$GITHUB_OUTPUT"
+          echo "base_path=$base_path" >> "$GITHUB_OUTPUT"
+          # A *.github.io host is the default project site and needs no
+          # CNAME file; anything else is a custom domain and does.
+          case "$PAGES_HOST" in
+            ''|*.github.io) echo "cname=" >> "$GITHUB_OUTPUT" ;;
+            *)              echo "cname=$PAGES_HOST" >> "$GITHUB_OUTPUT" ;;
+          esac
+          echo "Sayt: $site_url   asset prefiksi: $base_path"
 
       - run: npm run generate
         env:
           NUXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || steps.site.outputs.site_url }}
-          NUXT_APP_BASE_URL: ${{ vars.BASE_URL || steps.site.outputs.base_url }}
+          NUXT_APP_BASE_URL: ${{ vars.BASE_URL || steps.site.outputs.base_path }}
           # Set repository variable INDEXABLE=true when the directory has
           # real content and should start being crawled.
           NUXT_PUBLIC_INDEXABLE: ${{ vars.INDEXABLE || 'false' }}
@@ -71,20 +78,14 @@ jobs:
       - name: HTML tekşiruvi
         run: npm run check:html
 
-      # Pages reads this file from the artifact to attach the domain.
+      # Pages reads this file from the artifact to attach the domain. With
+      # an Actions deploy the artifact wins, so omitting it would clear a
+      # domain configured in Settings.
       - name: CNAME
-        if: vars.CUSTOM_DOMAIN != ''
+        if: steps.site.outputs.cname != ''
         env:
-          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
-        run: printf '%s\n' "$CUSTOM_DOMAIN" > .output/public/CNAME
-      # Pages must already be enabled: Settings -> Pages -> Source:
-      # GitHub Actions. This cannot be automated from here — creating a
-      # Pages site needs repository admin rights, which GITHUB_TOKEN does
-      # not have and no `permissions:` block can grant. Passing
-      # `enablement: true` fails with "Resource not accessible by
-      # integration" unless the workflow is given an admin-scoped PAT.
-      # Until it is enabled, every step above passes and this one fails.
-      - uses: actions/configure-pages@v5
+          CNAME: ${{ steps.site.outputs.cname }}
+        run: printf '%s\n' "$CNAME" > .output/public/CNAME
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .output/public
