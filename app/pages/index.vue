@@ -132,6 +132,27 @@ useHead({
       </div>
     </section>
 
+    <!--
+      Nothing published yet. An empty directory is the truth right now, so
+      the page says so and offers the one useful action, rather than
+      rendering a bare search box over nothing — which reads as broken
+      rather than new.
+    -->
+    <section v-if="!data?.items?.length" class="rounded-soft border border-line bg-surface p-6">
+      <h2 class="font-semibold">Maʼlumotnoma toʻldirilmoqda</h2>
+      <p class="mt-1.5 text-muted text-pretty">
+        Hozircha tekşirilgan joy yoʻq.
+        <template v-if="data?.pending">
+          {{ data.pending }} ta joy nomi yozib qoʻyilgan — manzil, telefon va iş vaqti
+          tekşirilgaç, şu yerda paydo boʻladi.
+        </template>
+      </p>
+      <NuxtLink
+        to="/qoshish"
+        class="mt-4 inline-block rounded-soft bg-accent text-accent-ink px-5 py-2.5 font-medium"
+      >Joy qoʻşiş</NuxtLink>
+    </section>
+
     <section v-if="data?.items?.length">
       <div class="flex items-baseline justify-between mb-2.5">
         <h2 class="text-sm font-semibold text-muted">Joylar</h2>

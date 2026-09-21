@@ -325,6 +325,19 @@ disagree with it.
 `SITE_URL` and `BASE_URL` still override individually if a setup ever
 needs them apart.
 
+### HTTPS
+
+After DNS resolves, tick **Enforce HTTPS** in Settings → Pages. GitHub
+issues a Let's Encrypt certificate automatically, which can take up to an
+hour; the checkbox stays disabled until it is ready, and that wait is
+normal rather than a failure.
+
+Do not skip it. The failure mode is a site that works perfectly and
+quietly stays on http — browsers label it "Not Secure", and a directory
+asking to be trusted with addresses and phone numbers cannot afford that.
+`npm run check:live` fails if the site is not on https or if http does not
+redirect to it, so it is a check rather than something to remember.
+
 ### Attaching the domain
 
 Verify the domain with GitHub first (Settings → Pages → Add a verified

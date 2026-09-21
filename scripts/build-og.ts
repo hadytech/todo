@@ -115,10 +115,13 @@ async function main() {
     bytes += png.length
   }
 
+  const published = publishedOnly(businesses).length
   console.log(
     needCards.length
       ? `Havola kartalari: ${needCards.length} ta, ${(bytes / 1024).toFixed(0)} KB jami.`
-      : 'Havola kartalari kerak emas — hamma joyda rasm bor.',
+      : published
+        ? 'Havola kartalari kerak emas — hamma joyda rasm bor.'
+        : 'Naşr qilingan joy yoʻq — havola kartalari kerak emas.',
   )
 }
 
