@@ -67,29 +67,31 @@ useHead({
 
 <template>
   <div>
-    <nav class="text-sm opacity-60 mb-2">
+    <nav class="text-sm text-muted mb-2">
       <NuxtLink to="/" class="hover:opacity-100">Bosh sahifa</NuxtLink>
       <span class="mx-1">›</span>
       <span>{{ districtName }}</span>
     </nav>
 
     <h1 class="text-xl font-bold mb-1">{{ title }}</h1>
-    <p class="opacity-70 text-sm mb-6">{{ total }} ta joy</p>
+    <p class="text-muted text-sm mb-6">{{ total }} ta joy</p>
 
     <section v-for="g in groups" :key="g.slug" class="mb-8">
       <div class="flex items-baseline justify-between mb-2">
         <h2 class="font-semibold">{{ g.icon }} {{ g.name }}</h2>
         <NuxtLink
           :to="`/toshkent/${district}/${g.slug}`"
-          class="text-sm text-teal-600 dark:text-teal-400"
+          class="text-sm text-accent"
         >Hammasi ({{ g.items.length }})</NuxtLink>
       </div>
-      <BusinessCard v-for="b in g.items.slice(0, 5)" :key="b.slug" :business="b" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        <BusinessCard v-for="b in g.items.slice(0, 5)" :key="b.slug" :business="b" />
+      </div>
     </section>
 
-    <p v-if="!groups.length" class="opacity-70 text-sm">
+    <p v-if="!groups.length" class="text-muted text-sm">
       Bu tumanda hali joy qoʻşilmagan.
-      <NuxtLink to="/qoshish" class="text-teal-600 dark:text-teal-400">Birinchi boʻlib qoʻşing</NuxtLink>.
+      <NuxtLink to="/qoshish" class="text-accent">Birinchi boʻlib qoʻşing</NuxtLink>.
     </p>
   </div>
 </template>

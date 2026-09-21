@@ -120,24 +120,24 @@ useHead({
       aria-label="Joy qidiriş"
       autofocus
       placeholder="Nom, tuman yoki turi…"
-      class="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 px-4 py-3 bg-transparent mb-4"
+      class="w-full rounded-soft border border-line px-4 py-3 bg-transparent mb-4"
     >
 
     <div v-if="results.length" class="flex flex-wrap gap-2 mb-3 text-sm">
       <select
         v-model="category"
         aria-label="Turi boʻyicha filtr"
-        class="rounded-lg border border-neutral-300 dark:border-neutral-700 px-2 py-1 bg-transparent"
+        class="rounded-soft border border-line px-2 py-1 bg-transparent"
       >
         <option value="">Hamma turi</option>
         <option v-for="c in facets?.categories" :key="c.slug" :value="c.slug">{{ c.name }}</option>
       </select>
       <button
         type="button"
-        class="rounded-lg border px-3 py-1"
+        class="rounded-soft border px-3 py-1"
         :class="here
-          ? 'border-teal-600 text-teal-600'
-          : 'border-neutral-300 dark:border-neutral-700 opacity-80'"
+          ? 'border-accent text-accent'
+          : 'border-line opacity-80'"
         :disabled="locating"
         @click="here ? (here = null) : locate()"
       >{{ locating ? 'Aniqlanmoqda…' : here ? '✓ Yaqinimdagi' : 'Yaqinimdagi' }}</button>
@@ -145,7 +145,7 @@ useHead({
       <select
         v-model="district"
         aria-label="Tuman boʻyicha filtr"
-        class="rounded-lg border border-neutral-300 dark:border-neutral-700 px-2 py-1 bg-transparent"
+        class="rounded-soft border border-line px-2 py-1 bg-transparent"
       >
         <option value="">Hamma tuman</option>
         <option v-for="d in facets?.districts" :key="d.slug" :value="d.slug">{{ d.name }}</option>
@@ -157,19 +157,19 @@ useHead({
         v-for="v in (['list', 'map'] as const)"
         :key="v"
         type="button"
-        class="px-3 py-1 rounded-full border"
+        class="px-3 py-1 rounded-pill border"
         :class="view === v
-          ? 'border-teal-600 text-teal-600'
-          : 'border-neutral-300 dark:border-neutral-700 opacity-70'"
+          ? 'border-accent text-accent'
+          : 'border-line text-muted'"
         @click="view = v"
       >{{ v === 'list' ? 'Roʻyxat' : 'Xarita' }}</button>
     </div>
 
-    <p v-if="locateError" class="text-sm opacity-70 mb-3">{{ locateError }}</p>
+    <p v-if="locateError" class="text-sm text-muted mb-3">{{ locateError }}</p>
 
-    <p v-if="loading" class="opacity-60 text-sm">Qidirilmoqda…</p>
+    <p v-if="loading" class="text-muted text-sm">Qidirilmoqda…</p>
 
-    <p v-else-if="q.trim() && ready && !shown.length" class="opacity-70 text-sm">
+    <p v-else-if="q.trim() && ready && !shown.length" class="text-muted text-sm">
       <template v-if="results.length">
         Filtrga mos joy yoʻq. Filtrni kengaytirib koʻring.
       </template>
@@ -180,20 +180,20 @@ useHead({
 
     <MapView v-else-if="view === 'map'" :key="shown.length" :markers="markers" height="24rem" />
 
-    <ul v-else>
+    <ul v-else class="grid gap-3 sm:grid-cols-2">
       <li v-for="r in shown" :key="r.id">
         <NuxtLink
           :to="`/b/${r.id}`"
-          class="block py-3 border-b border-neutral-200 dark:border-neutral-800 hover:opacity-80"
+          class="card block h-full rounded-soft border border-line bg-surface p-4 hover:border-accent hover:shadow-sm"
         >
           <div class="font-medium">{{ r.name }}</div>
-          <div class="text-sm opacity-70">
+          <div class="text-sm text-muted">
             {{ r.category }} · {{ r.district }}
-            <span v-if="r.metres !== null" class="text-teal-600 dark:text-teal-400">
+            <span v-if="r.metres !== null" class="text-accent">
               · {{ formatDistance(r.metres) }}
             </span>
           </div>
-          <div class="text-sm opacity-55">{{ r.address }}</div>
+          <div class="text-sm text-muted">{{ r.address }}</div>
         </NuxtLink>
       </li>
     </ul>

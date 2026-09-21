@@ -1,19 +1,97 @@
 @import "tailwindcss";
 
-/* One font family, system stack — no webfont request, and full coverage
-   for ö ğ ç ş on every platform that matters. */
-@theme {
+/**
+ * Semantic tokens, not raw colours.
+ *
+ * Components reference `bg-canvas`, `text-ink`, `border-line` and so on;
+ * the tokens themselves swap per theme. That means no `dark:` variant
+ * anywhere in the markup — a component cannot be styled correctly in one
+ * theme and wrong in the other, because it only ever names a role.
+ *
+ * `@theme inline` is what makes this work at runtime: the utilities
+ * resolve to var(--…) rather than baking a hex value in at build time.
+ */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+
+  --radius-soft: 0.875rem;
+  --radius-pill: 999px;
 }
 
-html { -webkit-text-size-adjust: 100%; }
+/* Light — warm off-white rather than clinical white, which is what makes
+   a directory of places feel approachable instead of administrative. */
+:root {
+  --canvas: #faf8f5;
+  --surface: #ffffff;
+  --raised: #f3efe9;
+  --ink: #1b1a17;
+  --muted: #6d675e;
+  --line: #e7e1d8;
+  --accent: #0e7c6f;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2f2ef;
+  color-scheme: light;
+}
+
+/* Dark — warm charcoal, not blue-black, so the two themes read as the
+   same product at different times of day. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #16151a;
+    --surface: #1e1d23;
+    --raised: #26252c;
+    --ink: #eceae5;
+    --muted: #a09a91;
+    --line: #2f2d35;
+    --accent: #4fd4c4;
+    --accent-ink: #10221f;
+    --accent-soft: #1b3330;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --canvas: #16151a;
+  --surface: #1e1d23;
+  --raised: #26252c;
+  --ink: #eceae5;
+  --muted: #a09a91;
+  --line: #2f2d35;
+  --accent: #4fd4c4;
+  --accent-ink: #10221f;
+  --accent-soft: #1b3330;
+  color-scheme: dark;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--canvas);
+}
 
 /* Keyboard focus in the site's own colour. The browser default on a
-   search input is an amber ring that looks like a validation error. */
+   search input is an amber ring that reads as a validation error. */
 :focus-visible {
-  outline: 2px solid var(--color-teal-600);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
+}
+
+/* Theme changes should feel like a dimmer, not a strobe. Kept to colour
+   only — animating layout would cost far more than it looks worth. */
+@media (prefers-reduced-motion: no-preference) {
+  body, header, footer, a, button, input, select, .card {
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

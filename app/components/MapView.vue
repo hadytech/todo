@@ -122,33 +122,33 @@ function escapeHtml(s: string) {
     <div
       v-show="state === 'loading' || state === 'ready'"
       ref="el"
-      class="w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800"
+      class="w-full rounded-soft overflow-hidden border border-line"
       :style="{ height }"
     />
 
     <button
       v-if="state === 'idle'"
       type="button"
-      class="w-full rounded-lg border border-dashed border-neutral-300 dark:border-neutral-700
-             text-sm py-6 hover:border-teal-600 hover:text-teal-600"
+      class="w-full rounded-soft border border-dashed border-line
+             text-sm py-6 hover:border-accent hover:text-accent"
       @click="show"
     >
       Xaritani koʻrsatiş
     </button>
 
-    <p v-if="state === 'loading'" class="text-sm opacity-60 mt-2">Xarita yuklanmoqda…</p>
+    <p v-if="state === 'loading'" class="text-sm text-muted mt-2">Xarita yuklanmoqda…</p>
 
-    <p v-if="state === 'failed'" class="text-sm opacity-70">
+    <p v-if="state === 'failed'" class="text-sm text-muted">
       Xaritani yuklab boʻlmadi.
-      <a :href="osmLink" rel="noopener" class="text-teal-600 dark:text-teal-400">
+      <a :href="osmLink" rel="noopener" class="text-accent">
         OpenStreetMap'da oçiş
       </a>
-      <span class="block opacity-50 text-xs mt-1">{{ failure }}</span>
+      <span class="block text-muted text-xs mt-1">{{ failure }}</span>
     </p>
 
     <!-- Always present, works without JavaScript. -->
     <p v-if="state !== 'failed'" class="text-sm mt-2">
-      <a :href="osmLink" rel="noopener" class="text-teal-600 dark:text-teal-400 opacity-70">
+      <a :href="osmLink" rel="noopener" class="text-accent text-muted">
         OpenStreetMap'da oçiş
       </a>
     </p>

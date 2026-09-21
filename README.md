@@ -157,6 +157,28 @@ the rest of a business page, so nothing loads until the visitor taps
 "Xaritani koʻrsatiş". Every failure path falls back to a plain
 OpenStreetMap link that works with no JavaScript at all.
 
+## Theme and colour
+
+Components never name a colour. They use semantic tokens — `bg-canvas`,
+`text-ink`, `border-line`, `bg-accent` — and the tokens swap per theme, so
+there is not a single `dark:` variant in the markup. A component cannot be
+right in one theme and wrong in the other, because it only ever names a
+role.
+
+The day/night switch layers an explicit choice over the system
+preference: no stored value means follow the system, which is the right
+default — someone whose phone is already in dark mode should not have to
+tell this site as well.
+
+Two details that are easy to get wrong and obvious when they are:
+
+- The stored theme is applied by a small **inline, blocking** script in
+  the head. Anything deferred runs after the first paint, and the visitor
+  sees a white flash before their dark theme arrives.
+- The toggle's icon is chosen by **CSS, not JavaScript**. The page is
+  prerendered with no knowledge of the visitor's theme, so picking the
+  icon in script would mean the server guesses and hydration flips it.
+
 ## Pages
 
 ```

@@ -49,6 +49,20 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#0f766e' },
       ],
       link: [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+      script: [{
+        /**
+         * Applies a stored theme before the first paint.
+         *
+         * This has to be inline and blocking. Anything deferred — a
+         * bundled script, a hydration hook — runs after the browser has
+         * already painted the default theme, and the visitor sees a white
+         * flash before their dark theme arrives.
+         */
+        innerHTML:
+          "try{var t=localStorage.getItem('yalp-theme');"
+          + "if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}",
+        tagPosition: 'head',
+      }],
     },
   },
 

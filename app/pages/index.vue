@@ -20,14 +20,46 @@ const liveCategories = computed(() =>
 const liveDistricts = computed(() =>
   (data.value?.districts ?? []).filter((d) => (counts.value?.districts[d.slug] ?? 0) > 0))
 
+const site = config.public.siteUrl as string
+
+/**
+ * WebSite + SearchAction is what lets a search engine offer this site's
+ * own search box directly in the results, and Organization is what ties
+ * the name to the domain. Both belong on the home page only — repeating
+ * them per page is noise, not signal.
+ */
+const structured = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'yalp.uz',
+    alternateName: ['yalp uz', 'yalp'],
+    url: site,
+    inLanguage: 'uz',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${site}/qidiruv?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'yalp.uz',
+    url: site,
+    logo: `${site}/og.png`,
+    areaServed: { '@type': 'City', name: 'Toshkent' },
+  },
+]
+
 useSeoMeta({
   ogType: 'website',
   ogSiteName: 'yalp.uz',
   ogLocale: 'uz_UZ',
   ogTitle: 'yalp.uz — Toşkentdagi joylar',
-  ogDescription: 'Toshkentdagi restoran, kafe, gozallik saloni va klinikalar maʼlumotnomasi.',
-  ogUrl: config.public.siteUrl as string,
-  ogImage: `${config.public.siteUrl}/og.png`,
+  ogDescription: 'Toshkentdagi restoran, kafe, gozallik saloni, universitet va bozorlar maʼlumotnomasi.',
+  ogUrl: site,
+  ogImage: `${site}/og.png`,
   twitterCard: 'summary_large_image',
 })
 
@@ -35,73 +67,99 @@ useHead({
   title: 'yalp.uz — Toşkentdagi joylar',
   meta: [{
     name: 'description',
-    content: 'Toshkentdagi restoran, kafe, gozallik saloni va klinikalar maʼlumotnomasi. Chorsu, Yunusobod, Chilonzor va boshqa tumanlar.',
+    content: 'Toshkentdagi restoran, kafe, gozallik saloni, universitet va bozorlar maʼlumotnomasi. Chorsu, Yunusobod, Chilonzor va boshqa tumanlar boʻyicha qidiring.',
   }],
+  link: [{ rel: 'canonical', href: site }],
+  script: structured.map((o) => ({ type: 'application/ld+json', innerHTML: JSON.stringify(o) })),
 })
 </script>
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-1">Toşkentda nima qidiryapsiz?</h1>
-    <p class="opacity-70 text-sm mb-4">
-      Istagan alifboda yozing — <span class="font-medium">çoyxona</span>,
-      <span class="font-medium">choyxona</span> yoki
-      <span class="font-medium">чойхона</span> bir xil natija beradi.
-    </p>
+    <section class="mb-9">
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
+        Toşkentda nima qidiryapsiz?
+      </h1>
+      <p class="mt-2 text-muted text-pretty max-w-2xl">
+        Istagan alifboda yozing — <span class="text-ink">çoyxona</span>,
+        <span class="text-ink">choyxona</span> yoki
+        <span class="text-ink">чойхона</span> bir xil natija beradi.
+      </p>
 
-    <form class="flex gap-2 mb-8" @submit.prevent="go">
-      <input
-        v-model="q"
-        type="search"
-        aria-label="Joy qidiriş"
-        placeholder="Nom, tuman yoki turi…"
-        class="flex-1 rounded-lg border border-neutral-300 dark:border-neutral-700 px-4 py-3 bg-transparent"
-      >
-      <button class="rounded-lg bg-teal-600 text-white px-5 font-medium">Qidiruv</button>
-    </form>
+      <form class="mt-5 flex flex-col sm:flex-row gap-2" @submit.prevent="go">
+        <input
+          v-model="q"
+          type="search"
+          aria-label="Joy qidiriş"
+          placeholder="Nom, tuman yoki turi…"
+          class="flex-1 rounded-soft border border-line bg-surface px-4 py-3.5
+                 placeholder:text-muted"
+        >
+        <button class="rounded-soft bg-accent text-accent-ink px-6 py-3.5 font-medium">
+          Qidiruv
+        </button>
+      </form>
+    </section>
 
-    <!-- Three tiles, not three sections of district chips. Each is a
-         whole-city category page; narrowing to a tuman happens there. -->
-    <section v-if="liveCategories.length" class="mb-8">
-      <div class="grid grid-cols-3 gap-2">
+    <section v-if="liveCategories.length" class="mb-9">
+      <div class="tiles grid grid-cols-2 sm:grid-cols-3 gap-3">
         <NuxtLink
           v-for="c in liveCategories"
           :key="c.slug"
           :to="`/kategoriya/${c.slug}`"
-          class="rounded-xl border border-neutral-200 dark:border-neutral-800 p-3
-                 hover:border-teal-600 flex flex-col gap-1"
+          class="card rounded-soft border border-line bg-surface p-4
+                 hover:border-accent hover:shadow-sm"
         >
-          <span class="text-xl leading-none">{{ c.icon }}</span>
-          <span class="font-medium text-sm leading-tight">{{ c.name }}</span>
-          <span class="text-xs opacity-55 tabular-nums">{{ counts?.categories[c.slug] }} ta</span>
+          <span class="block text-2xl leading-none">{{ c.icon }}</span>
+          <span class="mt-2 block font-medium leading-tight">{{ c.name }}</span>
+          <span class="mt-0.5 block text-sm text-muted tabular-nums">
+            {{ counts?.categories[c.slug] }} ta joy
+          </span>
         </NuxtLink>
       </div>
     </section>
 
-    <section v-if="liveDistricts.length" class="mb-8">
-      <h2 class="text-sm font-semibold opacity-70 mb-2">Tumanlar</h2>
+    <section v-if="liveDistricts.length" class="mb-9">
+      <h2 class="text-sm font-semibold text-muted mb-2.5">Tumanlar</h2>
       <div class="flex flex-wrap gap-2">
         <NuxtLink
           v-for="d in liveDistricts"
           :key="d.slug"
           :to="`/tuman/${d.slug}`"
-          class="text-sm rounded-full border border-neutral-300 dark:border-neutral-700
-                 px-3 py-1 hover:border-teal-600"
-        >{{ d.name }}<span class="ml-1 opacity-45 tabular-nums">{{ counts?.districts[d.slug] }}</span></NuxtLink>
+          class="rounded-pill border border-line bg-surface px-3.5 py-1.5 text-sm
+                 hover:border-accent"
+        >{{ d.name }}<span class="ml-1.5 text-muted tabular-nums">{{ counts?.districts[d.slug] }}</span></NuxtLink>
       </div>
     </section>
 
     <section v-if="data?.items?.length">
-      <div class="flex items-baseline justify-between mb-2">
-        <h2 class="text-sm font-semibold opacity-70">Joylar</h2>
-        <span class="text-sm opacity-55 tabular-nums">{{ data.total }} ta</span>
+      <div class="flex items-baseline justify-between mb-2.5">
+        <h2 class="text-sm font-semibold text-muted">Joylar</h2>
+        <span class="text-sm text-muted tabular-nums">{{ data.total }} ta</span>
       </div>
-      <BusinessCard v-for="b in data.items" :key="b.slug" :business="b" />
+
+      <!-- One column on a phone, two once there is room. -->
+      <div class="grid gap-3 sm:grid-cols-2">
+        <BusinessCard v-for="b in data.items" :key="b.slug" :business="b" />
+      </div>
+
       <NuxtLink
         v-if="data.total > data.items.length"
         to="/qidiruv"
-        class="inline-block mt-3 text-sm text-teal-600 dark:text-teal-400"
+        class="inline-block mt-4 text-sm text-accent"
       >Hammasini koʻriş →</NuxtLink>
     </section>
   </div>
 </template>
+
+<style scoped>
+/**
+ * With an odd number of categories the last tile would sit alone in a
+ * half-empty row, which reads as a layout bug rather than a choice. At
+ * two columns it stretches to fill the row instead; at three columns the
+ * browser handles it, so the rule is scoped to the narrow layout.
+ */
+@media (max-width: 639px) {
+  .tiles > :last-child:nth-child(odd) { grid-column: span 2; }
+}
+</style>
