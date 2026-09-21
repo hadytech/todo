@@ -20,7 +20,8 @@
     "check:range": "scripts/check-pages-range.sh",
     "check:budget": "tsx scripts/check-budget.ts",
     "og": "tsx scripts/build-og.ts",
-    "check:html": "tsx scripts/check-html.ts"
+    "check:html": "tsx scripts/check-html.ts",
+    "check:live": "tsx scripts/check-live.ts"
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",
