@@ -265,16 +265,18 @@ By default the site builds for its project URL,
 `<owner>.github.io/<repo>/`, derived from the repository itself — a
 rename needs nothing updated.
 
-To move it to a custom domain, set **one** repository variable:
+To move it to a custom domain, set it in **Settings → Pages → Custom
+domain**. Nothing else needs changing: the workflow asks
+`actions/configure-pages` what the Pages configuration actually is and
+derives the canonical URLs, the asset prefix and the `CNAME` file from
+that one answer.
 
-```
-CUSTOM_DOMAIN = yalp.uz
-```
-
-That switches the canonical URLs, the asset prefix and the `CNAME` file
-together. They are one setting because changing one without the others is
-how this usually breaks: canonical tags and a sitemap pointing at a domain
-that does not serve yet are worse than not having the domain at all.
+Keeping a second copy of the domain in a repository variable was the
+earlier design and it was wrong in a way worth remembering: with an
+Actions deploy the uploaded artifact is authoritative, so a build whose
+artifact had no `CNAME` file would have *cleared* a domain configured in
+Settings. Reading the configuration instead means the build cannot
+disagree with it.
 
 `SITE_URL` and `BASE_URL` still override individually if a setup ever
 needs them apart.
