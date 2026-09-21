@@ -298,6 +298,24 @@ Then point the domain at Pages — apex `A` records to `185.199.108.153`,
 `185.199.109.153`, `185.199.110.153`, `185.199.111.153`, and a `CNAME` on
 `www` to `<owner>.github.io`.
 
+## After a deploy
+
+```bash
+npm run check:live https://yalp.uz
+# EXPECT_INDEXABLE=true npm run check:live https://yalp.uz   # once indexing is on
+```
+
+Every other check in this repo inspects the build. This one inspects what
+actually serves, which is where a correct build can still reach nobody: a
+base URL that does not match where the site landed, a canonical naming
+the wrong host, a robots.txt opening a site that was meant to stay
+private.
+
+It follows a real link from the home page rather than guessing a slug, so
+it also proves internal links resolve under whatever base URL is in play,
+and it fetches the assets the page references — a 404 there is the classic
+base-URL mismatch. Exits non-zero on any failure, so it can gate a deploy.
+
 ## Open items
 
 - [ ] **Verify GitHub Pages honours HTTP `Range`**: `npm run check:range <url>`.
