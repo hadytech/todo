@@ -101,3 +101,60 @@ create or replace view review_stats as
     from reviews
    where hidden_at is null
 group by business_slug;
+
+-- ------------------------------------------------------- submissions
+--
+-- A place somebody suggested from the site itself.
+--
+-- Deliberately NOT the same table as the directory. Business records
+-- live in data/businesses/*.yaml, under review in git, because a
+-- directory's facts should be auditable and revertable by anyone. This
+-- table is the inbox in front of that: anyone can post to it, a
+-- maintainer turns the good ones into YAML drafts with
+-- `npm run submissions`, and the repository stays the source of truth.
+--
+-- Nothing here is ever rendered on the site. A row is a suggestion, not
+-- a listing.
+
+create table if not exists submissions (
+  id           uuid primary key default gen_random_uuid(),
+
+  name         text not null check (length(btrim(name)) between 2 and 120),
+  category     text not null,
+  district     text,
+  address      text,
+  lat          double precision,
+  lng          double precision,
+
+  -- Contact details, all optional. A submission with only a name and a
+  -- pin is still worth having: the rest can be looked up, the location
+  -- cannot.
+  phone        text,
+  website      text,
+  telegram     text,
+  instagram    text,
+
+  -- Free text on purpose. Asking someone who is doing you a favour to
+  -- fill in a seven-day opening schedule is how a form gets abandoned
+  -- halfway. A maintainer normalises this into the real `hours` shape.
+  hours_note   text,
+  comment      text,
+  -- How to reach the submitter, if they want to be reachable. Never
+  -- shown on the site.
+  contact      text,
+
+  -- Set when the submitter happened to be signed in. Not required:
+  -- demanding an account before someone may suggest a shop is exactly
+  -- the barrier this table exists to remove.
+  user_id      uuid references users (id) on delete set null,
+  submitted_ip text,
+
+  status       text not null default 'pending'
+                 check (status in ('pending', 'imported', 'rejected')),
+  reviewed_at  timestamptz,
+  review_note  text,
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists submissions_status_idx on submissions (status, created_at);
+create index if not exists submissions_ip_idx     on submissions (submitted_ip, created_at desc);

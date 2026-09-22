@@ -33,5 +33,26 @@ export function useAuth() {
     user.value = null
   }
 
-  return { user, enabled, loaded, refresh, logout }
+  /**
+   * The same answer, but resolved during server rendering.
+   *
+   * `refresh` runs from onMounted, which is fine for a header chip that
+   * can appear a moment late. It is wrong for a page whose whole content
+   * depends on the answer: the server would render the "unavailable"
+   * branch, and a crawler — or anyone with JavaScript off — would never
+   * see anything else. `useFetch` runs on both sides and transfers its
+   * result in the payload, so the first paint is already correct.
+   */
+  async function ensure() {
+    const { data } = await useFetch<{ user: Me | null; enabled: boolean }>('/api/auth/me', {
+      key: 'auth-me',
+      default: () => ({ user: null, enabled: false }),
+    })
+    user.value = data.value?.user ?? null
+    enabled.value = data.value?.enabled ?? false
+    loaded.value = true
+    return data
+  }
+
+  return { user, enabled, loaded, refresh, ensure, logout }
 }

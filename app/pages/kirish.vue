@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { user, enabled, refresh, logout } = useAuth()
+const { user, enabled, ensure, logout } = useAuth()
 const route = useRoute()
 
 const email = ref('')
@@ -8,7 +8,7 @@ const sent = ref(false)
 const busy = ref(false)
 const error = ref('')
 
-onMounted(refresh)
+await ensure()
 
 /**
  * The magic link comes back to `/?kirish=…`, but people also land here

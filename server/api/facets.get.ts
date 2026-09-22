@@ -6,6 +6,13 @@ import { catalog } from '../utils/catalog'
  * with every listing added.
  */
 export default defineEventHandler(() => ({
-  categories: catalog.categories.map((c) => ({ slug: c.slug, name: c.name })),
+  // Children are carried too: /qoshish needs the full "asosiy/ichki"
+  // vocabulary to build its category picker, and a second endpoint for
+  // the same tree would be one more thing to keep in step.
+  categories: catalog.categories.map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    children: c.children.map((ch) => ({ slug: ch.slug, name: ch.name })),
+  })),
   districts: catalog.districts,
 }))

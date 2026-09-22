@@ -109,16 +109,59 @@ broken data cannot reach the site.
 
 ## Contributing data
 
-Three routes in, easiest first:
+Four routes in, easiest first:
 
-1. **[Issue form](.github/ISSUE_TEMPLATE/joy-qoshish.yml)** — no YAML, no
-   git. Paste a maps link, pick a district, done. Linked from `/qoshish`.
-2. **Edit on GitHub** — every business page links to its own YAML file.
-3. **`npm run entry`** — the local form, for entering many at once.
+1. **`/qoshish` — the form on the site.** No account, no GitHub, no
+   technical knowledge. A name and a category are the only required
+   fields; everything else is optional, because a half-filled suggestion
+   about a real shop beats a complete one nobody bothered to send.
+2. **[Issue form](.github/ISSUE_TEMPLATE/joy-qoshish.yml)** — needs a
+   GitHub account, but keeps the discussion in the open.
+3. **Edit on GitHub** — every business page links to its own YAML file.
+4. **`npm run entry`** — the local form, for entering many at once.
 
-All three land as a pull request or an issue, and CI validates before
-anything merges. That is the whole moderation model: no accounts, no
-admin panel, and the review history is public.
+### Where the site form goes
+
+Suggestions land in a `submissions` table, not in the directory. Nothing
+posted there is ever rendered. A maintainer reviews the inbox and turns
+the good ones into YAML drafts:
+
+```bash
+npm run submissions                 # what is waiting
+npm run submissions import <id>     # write a draft, mark imported
+npm run submissions reject <id> [why]
+```
+
+Imported rows become `status: draft`, never `published` — a stranger's
+suggestion is a lead, not a verified listing, and it joins the same queue
+as everything else in `npm run todo`. Anything that does not fit a field
+(opening hours as free text, the submitter's comment, how to reach them)
+is written into the draft's `note`, where whoever verifies it can see it.
+
+The point of the round trip is that business facts stay in git, where
+anyone can see who changed what and revert it, while the person who knows
+which barber is good never has to learn what a pull request is.
+
+### Making the pin easy
+
+Coordinates are the field that kills a form like this, so `/qoshish`
+offers three ways and requires none of them:
+
+- **Paste a Yandex or Google Maps link.** Most people already have the
+  place open on their phone and can share it; `lib/coords.ts` parses
+  both, including Yandex's reversed `ll=LNG,LAT`.
+- **"I'm here"** — geolocation, for someone standing in the doorway. A
+  position outside Tashkent is refused rather than pinned.
+- **Tap the map** — MapLibre, lazy-loaded only if the first two were not
+  used, with a draggable marker so a near-enough pin can be nudged.
+
+### Spam, without an account gate
+
+Requiring a login before someone may suggest a shop would cost more
+listings than it saves. Instead: a per-IP daily cap, a honeypot field,
+and the fact that nothing reaches the site without a human importing it.
+The honeypot is accepted by the schema on purpose and answered with a
+plain `ok` — a 400 would tell a bot the form noticed.
 
 ## Photos
 

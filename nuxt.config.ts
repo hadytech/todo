@@ -114,8 +114,13 @@ export default defineNuxtConfig({
       routes: [
         '/',
         '/qidiruv',
-        '/qoshish',
-        '/kirish',
+        /**
+         * Only on the static build. Both of these render differently
+         * depending on whether a database is reachable, and CI has no
+         * DATABASE_URL — prerendering them under Vercel would bake "the
+         * form is unavailable" into the deployed page for good.
+         */
+        ...(staticBuild ? ['/qoshish', '/kirish'] : []),
         /**
          * Business pages carry reviews, and reviews are the content
          * people actually search for. Freezing them at build time would
@@ -146,6 +151,10 @@ export default defineNuxtConfig({
      * free Postgres tier comfortably inside its compute allowance.
      */
     '/b/**': { isr: 600 },
+    // Rendered per request: a form must not be served from a cache that
+    // predates the database it posts to.
+    '/qoshish': { isr: false },
+    '/kirish': { isr: false },
     // Writes must never be cached, by anything, ever.
     '/api/auth/**': { cache: false, headers: { 'cache-control': 'no-store' } },
     '/api/reviews/**': { cache: false, headers: { 'cache-control': 'no-store' } },

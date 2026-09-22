@@ -73,3 +73,31 @@ export async function checkReviewRate(userId: string): Promise<void> {
     })
   }
 }
+
+/** Submissions accepted from one address per day. */
+const SUBMISSIONS_DAILY = 15
+
+/**
+ * Throttles anonymous submissions.
+ *
+ * The limit is generous because the failure modes are asymmetric: a
+ * neighbourhood enthusiast adding fifteen shops in an evening is the
+ * best thing that can happen to this directory, and a bot that gets
+ * fifteen rows in before being stopped has cost a maintainer one glance
+ * at `npm run submissions`.
+ */
+export async function checkSubmissionRate(ip: string): Promise<void> {
+  const sql = db()
+  const [row] = await sql<{ n: number }[]>`
+    select count(*)::int as n
+      from submissions
+     where submitted_ip = ${ip}
+       and created_at > now() - interval '1 day'
+  `
+  if ((row?.n ?? 0) >= SUBMISSIONS_DAILY) {
+    throw createError({
+      statusCode: 429,
+      statusMessage: 'Bugunga yetarli taklif yuborildi. Ertaga davom eting.',
+    })
+  }
+}
