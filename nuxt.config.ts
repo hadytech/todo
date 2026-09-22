@@ -28,6 +28,16 @@ const districtRoutes = [...new Set(published.map((b) => b.district))]
 const categoryRoutes = [...new Set(published.map((b) => b.categoryTop))]
   .map((c) => `/kategoriya/${c}`)
 
+/**
+ * Whether this is the no-server build.
+ *
+ * Nitro already honours NITRO_PRESET on its own; it is read here as well
+ * because the prerender list and the route rules have to agree with the
+ * preset, and disagreeing silently produces a build that looks fine and
+ * serves stale reviews.
+ */
+const staticBuild = process.env.NITRO_PRESET === 'static'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
   devtools: { enabled: false },
@@ -88,14 +98,37 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    preset: 'static',
+    /**
+     * Vercel by default, because reviews need somewhere to POST to and
+     * GitHub Pages has nowhere.
+     *
+     * `NITRO_PRESET=static` still produces the old Pages build — Nitro
+     * reads that variable itself, so nothing here has to be edited. That
+     * build is not crippled, it is honest: with no database behind it the
+     * review section renders as unavailable rather than offering a form
+     * that cannot submit.
+     */
+    preset: staticBuild ? 'static' : 'vercel',
     prerender: {
-      crawlLinks: true,
+      crawlLinks: staticBuild,
       routes: [
         '/',
         '/qidiruv',
-        '/qoshish',
-        ...published.map((b) => `/b/${b.slug}`),
+        /**
+         * Only on the static build. Both of these render differently
+         * depending on whether a database is reachable, and CI has no
+         * DATABASE_URL — prerendering them under Vercel would bake "the
+         * form is unavailable" into the deployed page for good.
+         */
+        ...(staticBuild ? ['/qoshish', '/kirish'] : []),
+        /**
+         * Business pages carry reviews, and reviews are the content
+         * people actually search for. Freezing them at build time would
+         * mean a crawler only ever sees the reviews that existed when CI
+         * last ran, so under Vercel they are rendered on demand and
+         * cached (see routeRules) instead of prerendered.
+         */
+        ...(staticBuild ? published.map((b) => `/b/${b.slug}`) : []),
         ...landingRoutes,
         ...districtRoutes,
         ...categoryRoutes,
@@ -105,6 +138,26 @@ export default defineNuxtConfig({
       // A broken internal link should fail the build, not ship.
       failOnError: true,
     },
+  },
+
+  routeRules: staticBuild ? {} : {
+    /**
+     * Rendered once, then served from cache for ten minutes.
+     *
+     * The window is the trade: a review posted now is visible to its
+     * author immediately (their own request revalidates), to everyone
+     * else within ten minutes, and the database is asked at most once per
+     * page per window rather than once per visit. That is what keeps a
+     * free Postgres tier comfortably inside its compute allowance.
+     */
+    '/b/**': { isr: 600 },
+    // Rendered per request: a form must not be served from a cache that
+    // predates the database it posts to.
+    '/qoshish': { isr: false },
+    '/kirish': { isr: false },
+    // Writes must never be cached, by anything, ever.
+    '/api/auth/**': { cache: false, headers: { 'cache-control': 'no-store' } },
+    '/api/reviews/**': { cache: false, headers: { 'cache-control': 'no-store' } },
   },
 
   runtimeConfig: {

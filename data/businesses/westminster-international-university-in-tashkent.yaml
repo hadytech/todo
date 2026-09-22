@@ -1,4 +1,8 @@
-name: Westminster International University in Tashkent
-category: talim/universitet
+name: "Westminster International University in Tashkent"
+category: "talim/universitet"
+district: mirobod
+address: "Istiqbol koʻçasi 12, Toşkent"
+phones: ["+998 71 238 74 00"]
+website: "https://www.wiut.uz"
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring)."

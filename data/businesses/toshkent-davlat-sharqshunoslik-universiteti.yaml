@@ -1,4 +1,8 @@
-name: Toşkent Davlat Şarqşunoslik Universiteti
-category: talim/universitet
+name: "Toşkent Davlat Şarqşunoslik Universiteti"
+category: "talim/universitet"
+district: mirzo-ulugbek
+address: "Amir Temur şoh koʻçasi 20, Toşkent"
+phones: ["+998 71 233 34 24"]
+website: "https://tsuos.uz"
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); ikki manzil uçraydi: Amir Temur 20 va Ziyolilar 33 — qaysi bino asosiy ekanini tekşiring."

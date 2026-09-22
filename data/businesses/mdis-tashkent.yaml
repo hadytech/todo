@@ -1,4 +1,8 @@
-name: MDIS Tashkent
-category: talim/universitet
+name: "MDIS Tashkent"
+category: "talim/universitet"
+district: chilonzor
+address: "Bunyodkor şoh koʻçasi 28, Toşkent"
+phones: ["+998 71 271 77 01"]
+website: "https://mdis.uz"
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring)."

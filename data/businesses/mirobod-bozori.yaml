@@ -1,5 +1,8 @@
-name: Mirobod Bozori
-category: savdo/bozor
+name: "Mirobod Bozori"
+category: "savdo/bozor"
 district: mirobod
+address: "Nukus koʻçasi, Toşkent"
+description: "XIX asr oʻrtalarida harbiy gospital yonida paydo boʻlgan bozor. Katta soyabon ostida — meva-sabzavot, ziravor va mahalliy mahsulotlar."
+phones: ["+998 90 132 10 35"]
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); iş vaqti bitta manbadan: har kuni 07:00–20:00 — tasdiqlang."

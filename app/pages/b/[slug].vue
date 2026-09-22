@@ -22,6 +22,13 @@ const openNow = computed(() => isOpenAt(b.value?.hours, tashkentNow()))
 const jsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
+  /**
+   * Stable node id. ReviewSection emits the ratings as a second block
+   * carrying this same id, and search engines merge nodes by it — that
+   * is what lets the reviews live with the component that fetches them
+   * instead of being threaded back up into this object.
+   */
+  '@id': `${config.public.siteUrl}/b/${b.value!.slug}#business`,
   name: b.value!.name,
   /**
    * The SEO rescue for the new alphabet. Rendered text is new Latin, so
@@ -218,6 +225,8 @@ useHead({
       <h2 class="font-semibold mb-2">Xaritada</h2>
       <MapView :markers="[{ lat: b.location.lat, lng: b.location.lng, name: b.name }]" height="16rem" />
     </section>
+
+    <ReviewSection :slug="b.slug" :business-name="b.name" />
 
     <p class="mt-8 text-sm text-muted">
       Maʼlumot notoʻğrimi?

@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "nuxt dev",
-    "build": "nuxt build",
-    "generate": "npm run brand && npm run index && npm run og && nuxt generate",
+    "build": "npm run prep && nuxt build",
+    "generate": "NITRO_PRESET=static npm run prep && NITRO_PRESET=static nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "validate": "tsx scripts/validate.ts",
@@ -24,7 +24,10 @@
     "check:live": "tsx scripts/check-live.ts",
     "todo": "tsx scripts/todo.ts",
     "brand": "tsx scripts/build-brand.ts",
-    "vendor:font": "scripts/vendor-font.sh"
+    "vendor:font": "scripts/vendor-font.sh",
+    "prep": "npm run brand && npm run index && npm run og",
+    "db:schema": "psql \"$DATABASE_URL\" -f db/schema.sql",
+    "submissions": "tsx scripts/submissions.ts"
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",
@@ -32,6 +35,7 @@
     "minisearch": "^7.1.2",
     "nuxt": "^4.0.0",
     "pmtiles": "^4.3.0",
+    "postgres": "^3.4.9",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
     "yaml": "^2.7.0",

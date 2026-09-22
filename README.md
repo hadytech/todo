@@ -3,8 +3,10 @@
 Toşkent joylari maʼlumotnomasi — ochiq kodli, ochiq maʼlumotli.
 An open-source, open-data local business directory for Tashkent.
 
-Static site, no server, no database. Everything is generated from YAML
-files in this repository and served from GitHub Pages.
+Business records are YAML files in this repository, validated in CI and
+rendered to static pages. Reviews are not: opinions belong in a database,
+facts belong under review in git. The site runs with or without that
+database — see *Deployment*.
 
 ---
 
@@ -45,11 +47,23 @@ Search Console says standard Latin wins, flip it — no data migration.
 ```bash
 npm install
 npm run dev        # http://localhost:3000
-npm test           # alphabet + coordinate tests
+npm test           # alphabet, coordinates, rating maths, database rules
 npm run validate   # check every YAML file
+npm run build      # build for Vercel (server + reviews)
 npm run generate   # build the static site into .output/public
 npm run check:budget  # fail if any page exceeds its weight budget
 npm run check:html    # static HTML and accessibility audit
+```
+
+Nothing above needs a database or an account anywhere. Without
+`DATABASE_URL` the site runs and builds normally and the review section
+reports that it is unavailable, which is the truth. Copy `.env.example`
+to `.env` when you want the write side too.
+
+The database tests are skipped unless you point them at a Postgres:
+
+```bash
+TEST_DATABASE_URL=postgres://... npm test
 ```
 
 ## Adding a business
@@ -95,16 +109,59 @@ broken data cannot reach the site.
 
 ## Contributing data
 
-Three routes in, easiest first:
+Four routes in, easiest first:
 
-1. **[Issue form](.github/ISSUE_TEMPLATE/joy-qoshish.yml)** — no YAML, no
-   git. Paste a maps link, pick a district, done. Linked from `/qoshish`.
-2. **Edit on GitHub** — every business page links to its own YAML file.
-3. **`npm run entry`** — the local form, for entering many at once.
+1. **`/qoshish` — the form on the site.** No account, no GitHub, no
+   technical knowledge. A name and a category are the only required
+   fields; everything else is optional, because a half-filled suggestion
+   about a real shop beats a complete one nobody bothered to send.
+2. **[Issue form](.github/ISSUE_TEMPLATE/joy-qoshish.yml)** — needs a
+   GitHub account, but keeps the discussion in the open.
+3. **Edit on GitHub** — every business page links to its own YAML file.
+4. **`npm run entry`** — the local form, for entering many at once.
 
-All three land as a pull request or an issue, and CI validates before
-anything merges. That is the whole moderation model: no accounts, no
-admin panel, and the review history is public.
+### Where the site form goes
+
+Suggestions land in a `submissions` table, not in the directory. Nothing
+posted there is ever rendered. A maintainer reviews the inbox and turns
+the good ones into YAML drafts:
+
+```bash
+npm run submissions                 # what is waiting
+npm run submissions import <id>     # write a draft, mark imported
+npm run submissions reject <id> [why]
+```
+
+Imported rows become `status: draft`, never `published` — a stranger's
+suggestion is a lead, not a verified listing, and it joins the same queue
+as everything else in `npm run todo`. Anything that does not fit a field
+(opening hours as free text, the submitter's comment, how to reach them)
+is written into the draft's `note`, where whoever verifies it can see it.
+
+The point of the round trip is that business facts stay in git, where
+anyone can see who changed what and revert it, while the person who knows
+which barber is good never has to learn what a pull request is.
+
+### Making the pin easy
+
+Coordinates are the field that kills a form like this, so `/qoshish`
+offers three ways and requires none of them:
+
+- **Paste a Yandex or Google Maps link.** Most people already have the
+  place open on their phone and can share it; `lib/coords.ts` parses
+  both, including Yandex's reversed `ll=LNG,LAT`.
+- **"I'm here"** — geolocation, for someone standing in the doorway. A
+  position outside Tashkent is refused rather than pinned.
+- **Tap the map** — MapLibre, lazy-loaded only if the first two were not
+  used, with a draggable marker so a near-enough pin can be nudged.
+
+### Spam, without an account gate
+
+Requiring a login before someone may suggest a shop would cost more
+listings than it saves. Instead: a per-IP daily cap, a honeypot field,
+and the fact that nothing reaches the site without a human importing it.
+The honeypot is accepted by the schema on purpose and answered with a
+plain `ok` — a 400 would tell a bot the form noticed.
 
 ## Photos
 
@@ -218,7 +275,8 @@ Two details that are easy to get wrong and obvious when they are:
 /kategoriya/<cat>              one category, whole city
 /tuman/<district>              one district, all categories
 /toshkent/<district>/<cat>     the intersection — the pages that rank
-/b/<slug>                      a business
+/b/<slug>                      a business — reviews, ratings, votes
+/kirish                        email login — noindex
 ```
 
 Browsing works on both axes. Without `/kategoriya/<cat>` the home page had
@@ -253,11 +311,75 @@ Drafts never reach the site: they are absent from the pages, the sitemap
 and the search index. Verify one, fill in the details, set
 `status: published`.
 
-The repository ships ~32 such drafts — Tashkent universities and major
-bazaars — seeded from their names alone. **No address, phone or opening
-hours was guessed for any of them.** Categories like barber shops and
-computer shops are deliberately empty: there is no public record to seed
-them from, and inventing entries would be worse than an empty category.
+The repository ships 32 such drafts — Tashkent universities and major
+bazaars. Addresses, phone numbers, websites and (where published) opening
+hours have been researched from public sources; **nothing was guessed.**
+Where sources disagreed, the field is left empty and the disagreement is
+written into the `note` — Farhod bozori's district is given as both
+Chilonzor and Uchtepa, so it says so rather than picking one.
+
+**What every draft is still missing is its coordinates.** That is the one
+field that cannot be researched: every geocoder worth trusting needs an
+API key, and a pin guessed from a street name lands on the wrong
+building. `npm run todo` therefore prints a ready-made Yandex Maps search
+for each row — open it, right-click the pin, copy the coordinates, paste
+them into `npm run entry`, which already parses a Yandex or Google URL.
+
+Three drafts carry a flag worth reading before publishing: AKFA
+University was renamed Central Asian University in 2023, Malika was
+recategorised from a bazaar to a computer market because that is what it
+actually is, and Tashkent State University of Oriental Studies lists two
+different addresses.
+
+Categories like barber shops are deliberately empty: there is no public
+record to seed them from, and inventing entries would be worse than an
+empty category.
+
+## Reviews
+
+Five stars, a written review, and up/down votes on each review. Everything
+a visitor writes lives in Postgres; nothing about it touches the YAML.
+
+**Login is an emailed link, no password.** Phone verification would be the
+right answer for Tashkent and costs money per message, so that waits until
+there is a reason to pay for it. Addresses are used for login only and are
+never shown on the site.
+
+Three rules do the anti-astroturfing work, and all three are database
+constraints rather than checks in a handler — a constraint cannot be
+forgotten by code written later:
+
+| Rule | How |
+|---|---|
+| One review per person per place | `unique (business_slug, user_id)`; a second opinion rewrites the first |
+| One vote per person per review | `primary key (review_id, user_id)` |
+| A login link works once | `used_at is null` inside the claiming `UPDATE`, so a mail scanner that prefetches the link cannot race the visitor for it |
+
+You cannot vote on your own review. Tokens are stored as SHA-256 hashes,
+never raw, so a database dump is not a set of working credentials.
+
+**No average is shown below three reviews.** One five-star rating is not a
+measurement, and a number that looks like one is worse than no number.
+Below the threshold the page shows the reviews and the count.
+
+Sorting and display are deliberately different numbers
+([`lib/rating.ts`](lib/rating.ts)):
+
+- **Display** is the plain average — what people actually gave. Showing
+  4.1 when every reviewer said 5 would be a lie about what they said.
+- **Sorting** is a Bayesian average against the site-wide mean, so one
+  five-star review does not outrank two hundred averaging 4.8.
+- **Reviews within a page** sort by the Wilson lower bound of their votes,
+  not `up − down`. Raw difference calls 41–40 and 1–0 a tie; they are not.
+
+Business pages are rendered on demand and cached for ten minutes, so the
+review text is in the HTML for crawlers, with `aggregateRating` and the
+first ten reviews as JSON-LD. Client-rendered reviews would be content a
+crawler may never see — on a review site, that is the content.
+
+Moderation is `hidden_at` on a review, or `blocked_at` on an account to
+hide everything it wrote at once. Both are reversible; neither deletes
+anything.
 
 ## Layout
 
@@ -323,6 +445,50 @@ near-empty site, and early quality signals are sticky. You want indexing
 to begin at ~50 real listings, not before.
 
 ## Deployment
+
+Two targets, one codebase. Which one you get is decided by `NITRO_PRESET`
+and nothing else.
+
+| | Vercel (default) | GitHub Pages (`NITRO_PRESET=static`) |
+|---|---|---|
+| Business pages | rendered on demand, cached 10 min | prerendered at build |
+| Reviews, ratings, votes | yes | no — there is nowhere to write |
+| Login | yes | no |
+| HTTPS | automatic | needs Pages to issue a certificate |
+| Cost | free tier | free |
+
+The static build is not a crippled version — it is the honest one for a
+host with no server. The review section renders as unavailable rather
+than showing a form that cannot submit.
+
+### Vercel
+
+This is the default because reviews have to POST somewhere and GitHub
+Pages has nowhere.
+
+1. Import the repository at vercel.com. `vercel.json` pins the build
+   command, so the prep steps (`brand`, `index`, `og`) are not skipped by
+   framework auto-detection — without them the site ships with no search
+   index.
+2. Create a Postgres at neon.tech. Pick the **Frankfurt** region:
+   `vercel.json` puts the functions in `fra1`, and a function in Frankfurt
+   talking to a database in Virginia pays that round trip on every query.
+3. Apply the schema once: `psql "$DATABASE_URL" -f db/schema.sql`, or
+   `npm run db:schema`.
+4. Set the environment variables from `.env.example` in the Vercel project.
+   Use Neon's **pooled** connection string — the host contains `-pooler`.
+   Serverless functions open a connection per cold start and the pooler is
+   what absorbs that.
+5. Point the domain at Vercel. It issues its own certificate.
+
+One caveat worth knowing before you rely on it: Vercel's Hobby tier is for
+non-commercial use. A free directory with no ads sits inside that. The day
+yalp.uz sells listings or runs ads it needs the paid tier.
+
+None of this is lock-in. It is Nuxt and Postgres; moving to a VPS is a
+change of `DATABASE_URL` and a different `NITRO_PRESET`.
+
+### GitHub Pages
 
 Push to `main` → GitHub Actions builds and deploys to Pages.
 
@@ -415,10 +581,12 @@ base-URL mismatch. Exits non-zero on any failure, so it can gate a deploy.
       CORS from the Pages origin).
 - [ ] `.uz` DNS — confirm the registrar can set apex `A` records for Pages
       *before* paying for the domain.
-- [ ] **Reviews need a write endpoint**, which static hosting cannot
-      provide. Deferred until the directory has traction. Options are in
-      the project plan; the cheapest real one is a small API on a ~€4/mo
-      VPS with the site staying on Pages.
+- [x] **Reviews, ratings, votes** — built. Postgres behind Vercel
+      functions, email magic-link login, one review per person per place.
+      See *Reviews* below.
+- [ ] **Connect Vercel and Neon.** The code is deployed-ready and tested,
+      but no project or database exists yet — both are the account
+      owner's to create.
 - [ ] Turn on `ANALYTICS` and `SITE_VERIFICATION` when the site goes
       live — the alphabet decision depends on ~8 weeks of query data, and
       that clock only starts once they are set.

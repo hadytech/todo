@@ -1,4 +1,7 @@
-name: Malika Bozori
-category: savdo/bozor
+name: "Malika Bozori"
+category: "savdo/kompyuter"
+district: shayxontohur
+address: "Kiçik Halqa Yoʻli koʻçasi 59, Toşkent"
+description: "Mamlakatdagi eng katta elektronika va kompyuter bozori — 80 ga yaqin doʻkon."
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); kategoriya savdo/bozor dan savdo/kompyuter ga oʻzgartirildi — elektronika bozori, oddiy dehqon bozori emas."

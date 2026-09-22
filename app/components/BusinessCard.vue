@@ -1,10 +1,19 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   business: {
     slug: string; name: string; address?: string
     categoryName: string; districtName: string; price?: number
   }
 }>()
+
+// Arrives after hydration — see useRatings. Absent on a static build,
+// and absent for a place nobody has reviewed yet; both render as no row
+// rather than as an empty one.
+const { get, load } = useRatings()
+const rating = computed(() => get(props.business.slug))
+
+// Deduplicated inside the composable, so twenty cards make one request.
+onMounted(load)
 </script>
 
 <template>
@@ -17,6 +26,18 @@ defineProps<{
            hover:border-accent hover:shadow-sm"
   >
     <div class="font-medium leading-snug">{{ business.name }}</div>
+
+    <!-- Stars only once there are enough reviews to mean anything. Below
+         that the count is shown on its own: "2 ta sharh" invites a reader,
+         a lone five-star average misinforms one. -->
+    <div v-if="rating?.count" class="mt-1 flex items-center gap-1.5 text-sm">
+      <template v-if="rating.average !== null">
+        <StarRating :value="rating.average" size="sm" />
+        <span class="font-medium tabular-nums">{{ rating.average.toFixed(1) }}</span>
+        <span class="text-muted">({{ rating.count }})</span>
+      </template>
+      <span v-else class="text-muted">{{ rating.count }} ta sharh</span>
+    </div>
     <div class="mt-1 text-sm text-muted">
       {{ business.categoryName }} · {{ business.districtName }}
       <span v-if="business.price" class="text-accent">· {{ '$'.repeat(business.price) }}</span>

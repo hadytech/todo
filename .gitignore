@@ -1,5 +1,6 @@
 node_modules/
 .output/
+.vercel/
 .nuxt/
 .data/
 dist
@@ -7,6 +8,8 @@ dist
 .DS_Store
 .env
 .env.*
+# ...but the template is documentation, and belongs in the repo.
+!.env.example
 
 # Generated at build time by `npm run index`.
 public/search-index.json

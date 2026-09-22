@@ -2,58 +2,336 @@
 const config = useRuntimeConfig()
 const repo = config.public.repoUrl as string
 
+const { data: facets } = await useFetch('/api/facets')
+const { enabled, ensure } = useAuth()
+await ensure()
+
+const form = reactive({
+  name: '',
+  top: '',
+  sub: '',
+  district: '',
+  address: '',
+  phone: '',
+  hoursNote: '',
+  website: '',
+  comment: '',
+  contact: '',
+  website2: '', // honeypot — see the endpoint
+})
+
+const location = ref<{ lat: number; lng: number } | null>(null)
+const state = ref<'editing' | 'sending' | 'sent' | 'failed'>('editing')
+const error = ref('')
+
+const subcategories = computed(() =>
+  facets.value?.categories.find((c) => c.slug === form.top)?.children ?? [])
+
+// Changing the top category invalidates whatever was picked under it.
+watch(() => form.top, () => { form.sub = '' })
+
+/** The two things a suggestion cannot be filed without. */
+const ready = computed(() => form.name.trim().length >= 2 && form.top && form.sub)
+
+async function submit() {
+  if (!ready.value) return
+  error.value = ''
+  state.value = 'sending'
+  try {
+    await $fetch('/api/submissions', {
+      method: 'POST',
+      body: {
+        name: form.name,
+        category: `${form.top}/${form.sub}`,
+        district: form.district || undefined,
+        address: form.address || undefined,
+        lat: location.value?.lat,
+        lng: location.value?.lng,
+        phone: form.phone || undefined,
+        website: form.website || undefined,
+        hoursNote: form.hoursNote || undefined,
+        comment: form.comment || undefined,
+        contact: form.contact || undefined,
+        website2: form.website2 || undefined,
+      },
+    })
+    state.value = 'sent'
+  } catch (e: unknown) {
+    state.value = 'failed'
+    error.value = (e as { data?: { statusMessage?: string } })?.data?.statusMessage
+      || 'Yuborib boʻlmadi. Qayta urinib koʻring.'
+  }
+}
+
+function again() {
+  Object.assign(form, {
+    name: '', sub: '', address: '', phone: '', hoursNote: '',
+    website: '', comment: '', website2: '',
+  })
+  location.value = null
+  state.value = 'editing'
+}
+
 useHead({
   title: 'Joy qoʻşiş — yalp.uz',
-  meta: [{ name: 'description', content: 'yalp.uz maʼlumotnomasiga yangi joy qoʻşiş yoki maʼlumotni tuzatiş.' }],
+  meta: [{
+    name: 'description',
+    content: 'yalp.uz maʼlumotnomasiga yangi joy qoʻşiş — hisob kerak emas, bir daqiqada.',
+  }],
 })
 </script>
 
 <template>
-  <div>
-    <h1 class="text-2xl font-bold mb-2">Joy qoʻşiş</h1>
-    <p class="text-muted mb-6">
-      yalp.uz ochiq maʼlumotnoma — hamma maʼlumot ochiq saqlanadi va
-      istagan odam tuzatiş kiritişi mumkin.
-    </p>
+  <div class="mx-auto max-w-xl">
+    <h1 class="text-2xl font-bold">Joy qoʻşiş</h1>
 
-    <section class="mb-8">
-      <h2 class="font-semibold mb-2">Eng oson yoʻl</h2>
-      <p class="text-sm text-muted mb-3">
-        Formani toʻldiring — texnik bilim kerak emas. Biz tekşirib qoʻşamiz.
-      </p>
-      <a
-        :href="`${repo}/issues/new?template=joy-qoshish.yml`"
-        rel="noopener"
-        class="inline-block rounded-soft bg-accent text-accent-ink px-5 py-3 font-medium"
-      >Forma orqali qoʻşiş</a>
-      <p class="text-xs text-muted mt-2">GitHub hisobi kerak boʻladi (bepul).</p>
-    </section>
+    <!-- Sent ------------------------------------------------------- -->
+    <template v-if="state === 'sent'">
+      <div class="mt-6 rounded-soft border border-line bg-surface p-5">
+        <p class="font-medium">Rahmat! Taklifingiz qabul qilindi.</p>
+        <p class="mt-2 text-sm text-muted">
+          Biz maʼlumotni tekşirib, saytga qoʻşamiz. Bu bir neça kun olişi
+          mumkin — har bir joy qoʻlda tekşiriladi, şuning uçun bu yerdagi
+          maʼlumotlarga işonsa boʻladi.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button
+            class="rounded-pill bg-accent px-4 py-2 text-sm font-medium text-accent-ink"
+            @click="again"
+          >Yana bitta qoʻşiş</button>
+          <NuxtLink to="/" class="rounded-pill border border-line px-4 py-2 text-sm">
+            Bosh sahifa
+          </NuxtLink>
+        </div>
+      </div>
+    </template>
 
-    <section class="mb-8">
-      <h2 class="font-semibold mb-2">Oʻzingiz qoʻşmoqçimisiz?</h2>
-      <p class="text-sm text-muted mb-2">
-        Har bir joy — bitta YAML fayl. Pull request yuboring, tekşiruv
-        avtomatik işlaydi.
+    <!-- Form ------------------------------------------------------- -->
+    <template v-else>
+      <p class="mt-2 text-muted">
+        Hisob ham, texnik bilim ham kerak emas. Faqat nomi va turini
+        yozing — qolganini bilsangiz qoʻşing, bilmasangiz boʻş qoldiring.
       </p>
-      <pre class="text-xs bg-raised rounded-soft p-3 overflow-x-auto"><code>name: Çorsu Restorani
+
+      <!-- With no database behind the site there is nothing to POST to.
+           Say so and point at the route that still works, instead of
+           showing a form whose button cannot do anything. -->
+      <div v-if="enabled === false" class="mt-6 rounded-soft border border-line bg-surface p-4">
+        <p class="text-sm">
+          Forma hozirça işlamayapti. Joyni GitHub orqali yuborişingiz mumkin:
+        </p>
+        <a
+          :href="`${repo}/issues/new?template=joy-qoshish.yml`"
+          rel="noopener"
+          class="mt-3 inline-block rounded-pill bg-accent px-4 py-2 text-sm font-medium text-accent-ink"
+        >GitHub formasi</a>
+      </div>
+
+      <form v-else class="mt-6 space-y-5" @submit.prevent="submit">
+        <div>
+          <label for="f-name" class="block text-sm font-medium mb-1">
+            Joy nomi <span class="text-accent">*</span>
+          </label>
+          <input
+            id="f-name"
+            v-model="form.name"
+            required
+            maxlength="120"
+            placeholder="Masalan: Çorsu Sartaroşxonasi"
+            class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+          >
+          <p class="mt-1 text-xs text-muted">
+            Yangi alifboda yozsangiz yaxşi (ö ğ ç ş), lekin odatdagiça
+            yozsangiz ham boʻladi — biz tuzatamiz.
+          </p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label for="f-top" class="block text-sm font-medium mb-1">
+              Turi <span class="text-accent">*</span>
+            </label>
+            <select
+              id="f-top"
+              v-model="form.top"
+              required
+              class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+            >
+              <option value="" disabled>Tanlang…</option>
+              <option v-for="c in facets?.categories" :key="c.slug" :value="c.slug">
+                {{ c.name }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label for="f-sub" class="block text-sm font-medium mb-1">
+              Aniqroq <span class="text-accent">*</span>
+            </label>
+            <select
+              id="f-sub"
+              v-model="form.sub"
+              required
+              :disabled="!form.top"
+              class="w-full rounded-soft border border-line bg-surface px-3 py-2
+                     disabled:opacity-50"
+            >
+              <option value="" disabled>{{ form.top ? 'Tanlang…' : 'Avval turini tanlang' }}</option>
+              <option v-for="ch in subcategories" :key="ch.slug" :value="ch.slug">
+                {{ ch.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <fieldset class="rounded-soft border border-line p-4">
+          <legend class="px-1 text-sm font-medium">Qayerda?</legend>
+          <LocationPicker v-model="location" />
+        </fieldset>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label for="f-district" class="block text-sm text-muted mb-1">Tuman</label>
+            <select
+              id="f-district"
+              v-model="form.district"
+              class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+            >
+              <option value="">Bilmayman</option>
+              <option v-for="d in facets?.districts" :key="d.slug" :value="d.slug">
+                {{ d.name }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label for="f-phone" class="block text-sm text-muted mb-1">Telefon</label>
+            <input
+              id="f-phone"
+              v-model="form.phone"
+              type="tel"
+              inputmode="tel"
+              placeholder="90 123 45 67"
+              class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label for="f-address" class="block text-sm text-muted mb-1">Manzil</label>
+          <input
+            id="f-address"
+            v-model="form.address"
+            maxlength="300"
+            placeholder="Koʻça, uy raqami yoki mashur joy yonida"
+            class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+          >
+        </div>
+
+        <div>
+          <label for="f-hours" class="block text-sm text-muted mb-1">Iş vaqti</label>
+          <!-- Free text on purpose. A seven-row schedule widget is where
+               a form like this loses people. -->
+          <input
+            id="f-hours"
+            v-model="form.hoursNote"
+            maxlength="300"
+            placeholder="Masalan: har kuni 9:00–21:00, yakşanba yopiq"
+            class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+          >
+        </div>
+
+        <details class="rounded-soft border border-line px-4 py-3">
+          <summary class="cursor-pointer text-sm font-medium">
+            Qoʻşimça (ixtiyoriy)
+          </summary>
+          <div class="mt-4 space-y-4">
+            <div>
+              <label for="f-website" class="block text-sm text-muted mb-1">
+                Sayt, Telegram yoki Instagram
+              </label>
+              <input
+                id="f-website"
+                v-model="form.website"
+                maxlength="200"
+                placeholder="instagram.com/… yoki @kanal"
+                class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+              >
+            </div>
+            <div>
+              <label for="f-comment" class="block text-sm text-muted mb-1">
+                Yana nima bilasiz?
+              </label>
+              <textarea
+                id="f-comment"
+                v-model="form.comment"
+                rows="3"
+                maxlength="1000"
+                placeholder="Nimasi bilan yaxşi, qaysi qavatda, qanday topiladi…"
+                class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+              />
+            </div>
+            <div>
+              <label for="f-contact" class="block text-sm text-muted mb-1">
+                Siz bilan qanday boğlanaylik?
+              </label>
+              <input
+                id="f-contact"
+                v-model="form.contact"
+                maxlength="200"
+                placeholder="Telefon yoki Telegram — savol tuğilsa"
+                class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+              >
+              <p class="mt-1 text-xs text-muted">
+                Saytda hech qaçon koʻrsatilmaydi.
+              </p>
+            </div>
+          </div>
+        </details>
+
+        <!-- Honeypot: off-screen, not hidden, so a bot reading styles
+             still finds it. Never shown to a person, never tabbable. -->
+        <div class="absolute left-[-9999px]" aria-hidden="true">
+          <label for="f-website2">Saytingiz</label>
+          <input id="f-website2" v-model="form.website2" tabindex="-1" autocomplete="off">
+        </div>
+
+        <p v-if="error" class="text-sm text-accent">{{ error }}</p>
+
+        <button
+          type="submit"
+          :disabled="!ready || state === 'sending'"
+          class="w-full rounded-pill bg-accent px-4 py-3 font-medium text-accent-ink
+                 disabled:opacity-60"
+        >{{ state === 'sending' ? 'Yuborilyapti…' : 'Yuboriş' }}</button>
+
+        <p class="text-xs text-muted">
+          Har bir taklif qoʻlda tekşiriladi. Nomi va turi yetarli —
+          qolganini biz topamiz.
+        </p>
+      </form>
+    </template>
+
+    <!-- The old routes stay, further down. Some people genuinely prefer
+         them, and the repository is the source of truth either way. -->
+    <details class="mt-10 text-sm">
+      <summary class="cursor-pointer text-muted">Boşqa yoʻllar</summary>
+      <div class="mt-3 space-y-3 text-muted">
+        <p>
+          <a :href="`${repo}/issues/new?template=joy-qoshish.yml`" rel="noopener"
+             class="text-accent">GitHub formasi</a>
+          — hisob kerak, lekin muhokama oçiq qoladi.
+        </p>
+        <p>
+          Har bir joy — bitta YAML fayl. Pull request yuborsangiz, tekşiruv
+          avtomatik işlaydi:
+        </p>
+        <pre class="overflow-x-auto rounded-soft bg-raised p-3 text-xs"><code>name: Çorsu Restorani
 category: ovqatlanish/restoran
 district: shayxontohur
 address: Çorsu bozori yonida, Toşkent
 location: { lat: 41.3264, lng: 69.2347 }
 status: published</code></pre>
-      <p class="text-sm mt-3">
-        <a :href="repo" rel="noopener" class="text-accent">Repozitoriya</a>
-      </p>
-    </section>
-
-    <section>
-      <h2 class="font-semibold mb-2">Alifbo haqida</h2>
-      <p class="text-sm text-muted">
-        Nomlarni yangi alifboda yozing: <b>ö ğ ç ş</b>
-        (<span class="text-muted">oʻ → ö, gʻ → ğ, ch → ç, sh → ş</span>).
-        Bilmasangiz, odatdagiça yozing — biz tuzatamiz. Qidiruv baribir
-        har qanday alifboda işlaydi.
-      </p>
-    </section>
+        <p><a :href="repo" rel="noopener" class="text-accent">Repozitoriya</a></p>
+      </div>
+    </details>
   </div>
 </template>
