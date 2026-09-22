@@ -1,6 +1,17 @@
 <script setup lang="ts">
 const { indexable, repoUrl } = useRuntimeConfig().public
 
+/**
+ * The header's account control.
+ *
+ * Nothing is rendered until `/api/auth/me` answers, because the three
+ * states — signed in, signed out, and no write side at all — look
+ * different and guessing wrong means the header visibly changes under the
+ * reader a moment after they start looking at it.
+ */
+const { user, enabled, loaded, refresh } = useAuth()
+onMounted(refresh)
+
 // robots.txt asks crawlers not to fetch; this tells any that fetched
 // anyway not to index. A page already marked noindex stays noindex.
 if (!indexable) {
@@ -32,6 +43,11 @@ if (!indexable) {
             to="/qoshish"
             class="rounded-pill px-3 py-1.5 text-muted hover:bg-raised hover:text-ink"
           >Joy qoʻşiş</NuxtLink>
+          <NuxtLink
+            v-if="loaded && enabled"
+            to="/kirish"
+            class="rounded-pill px-3 py-1.5 text-muted hover:bg-raised hover:text-ink"
+          >{{ user ? user.name : 'Kiriş' }}</NuxtLink>
           <ThemeToggle />
         </nav>
       </div>
