@@ -1,5 +1,8 @@
-name: Toşkent Davlat Texnika Universiteti
-category: talim/universitet
+name: "Toşkent Davlat Texnika Universiteti"
+category: "talim/universitet"
 district: olmazor
+address: "Universitet koʻçasi 2, Toşkent"
+phones: ["+998 71 207 44 45"]
+website: "https://tdtu.uz"
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring)."

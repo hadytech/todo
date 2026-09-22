@@ -1,4 +1,8 @@
-name: Toşkent Kimyo-Texnologiya Instituti
-category: talim/universitet
+name: "Toşkent Kimyo-Texnologiya Instituti"
+category: "talim/universitet"
+district: shayxontohur
+address: "Alişer Navoiy koʻçasi 32, Toşkent"
+phones: ["+998 71 244 79 20"]
+website: "https://tkti.uz"
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring)."

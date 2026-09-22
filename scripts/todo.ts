@@ -7,6 +7,25 @@
  * nobody remembers the state of.
  */
 import { loadBusinesses, loadCategories } from '../lib/load'
+import { toAscii } from '../lib/alphabet'
+
+/**
+ * A ready-made map search for one draft.
+ *
+ * Coordinates are the one field that cannot be researched from a desk —
+ * every geocoder worth trusting wants an API key, and a pin guessed from
+ * a street name lands on the wrong building. So the next best thing is to
+ * make the manual step as short as possible: open this, right-click the
+ * pin, copy the coordinates, paste them into `npm run entry`, which
+ * already parses a Yandex or Google URL.
+ *
+ * The query is ASCII: Yandex handles the new alphabet poorly, and the
+ * ASCII spelling is the one the map's own data uses.
+ */
+function mapSearch(name: string, address?: string): string {
+  const q = toAscii(`${name} ${address ?? 'Toshkent'}`)
+  return `https://yandex.uz/maps/10335/tashkent/search/${encodeURIComponent(q)}`
+}
 
 const { businesses } = loadBusinesses()
 const drafts = businesses.filter((b) => b.status !== 'published')
@@ -45,6 +64,9 @@ for (const [category, list] of [...byCategory].sort()) {
       .map(([, label]) => label)
     console.log(`   ${b.name}`)
     console.log(`     ${b.slug}.yaml — kerak: ${missing.join(', ') || 'hammasi bor, status: published qiling'}`)
+    // Only where a coordinate is what is missing — printing a map link
+    // next to a row that needs a phone number is noise.
+    if (!b.location) console.log(`     xarita: ${mapSearch(b.name, b.address)}`)
   }
 }
 
@@ -55,4 +77,12 @@ console.log(
     ? `${ready.length} tasi toʻliq — status: published qilsa boʻladi.`
     : 'Hech biri hali toʻliq emas.'),
 )
+const needCoords = drafts.filter((b) => !b.location).length
+if (needCoords) {
+  console.log(
+    `${needCoords} tasida koordinata kerak. `
+    + 'Xarita havolasini oçing → nuqtani oʻng tugma bilan bosing '
+    + '→ koordinatani nusxalang → `npm run entry` ga joylaştiring.',
+  )
+}
 console.log('Toʻldiriş uchun: npm run entry (yoki faylni qoʻlda tahrirlang)')

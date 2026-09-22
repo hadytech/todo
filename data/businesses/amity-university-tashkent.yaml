@@ -1,4 +1,8 @@
-name: Amity University Tashkent
-category: talim/universitet
+name: "Amity University Tashkent"
+category: "talim/universitet"
+district: shayxontohur
+address: "Labzak koʻçasi 70, Toşkent"
+phones: ["+998 71 207 90 06"]
+website: "https://amity.uz"
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring)."

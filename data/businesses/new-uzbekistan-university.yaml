@@ -1,4 +1,16 @@
-name: New Uzbekistan University
-category: talim/universitet
+name: "New Uzbekistan University"
+category: "talim/universitet"
+district: mirzo-ulugbek
+address: "Movarounnahr koʻçasi 1, Toşkent"
+phones: ["+998 71 202 41 11"]
+website: "https://newuu.uz"
+hours:
+  mon: ["09:00", "18:00"]
+  tue: ["09:00", "18:00"]
+  wed: ["09:00", "18:00"]
+  thu: ["09:00", "18:00"]
+  fri: ["09:00", "18:00"]
+  sat: closed
+  sun: closed
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring)."

@@ -1,4 +1,7 @@
-name: Toşkent Davlat Iqtisodiyot Universiteti
-category: talim/universitet
+name: "Toşkent Davlat Iqtisodiyot Universiteti"
+category: "talim/universitet"
+address: "Islom Karimov koʻçasi 49, Toşkent"
+phones: ["+998 71 239 01 49"]
+website: "https://tsue.uz"
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); tuman tasdiqlanmagan."

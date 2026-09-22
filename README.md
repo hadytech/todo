@@ -268,11 +268,29 @@ Drafts never reach the site: they are absent from the pages, the sitemap
 and the search index. Verify one, fill in the details, set
 `status: published`.
 
-The repository ships ~32 such drafts — Tashkent universities and major
-bazaars — seeded from their names alone. **No address, phone or opening
-hours was guessed for any of them.** Categories like barber shops and
-computer shops are deliberately empty: there is no public record to seed
-them from, and inventing entries would be worse than an empty category.
+The repository ships 32 such drafts — Tashkent universities and major
+bazaars. Addresses, phone numbers, websites and (where published) opening
+hours have been researched from public sources; **nothing was guessed.**
+Where sources disagreed, the field is left empty and the disagreement is
+written into the `note` — Farhod bozori's district is given as both
+Chilonzor and Uchtepa, so it says so rather than picking one.
+
+**What every draft is still missing is its coordinates.** That is the one
+field that cannot be researched: every geocoder worth trusting needs an
+API key, and a pin guessed from a street name lands on the wrong
+building. `npm run todo` therefore prints a ready-made Yandex Maps search
+for each row — open it, right-click the pin, copy the coordinates, paste
+them into `npm run entry`, which already parses a Yandex or Google URL.
+
+Three drafts carry a flag worth reading before publishing: AKFA
+University was renamed Central Asian University in 2023, Malika was
+recategorised from a bazaar to a computer market because that is what it
+actually is, and Tashkent State University of Oriental Studies lists two
+different addresses.
+
+Categories like barber shops are deliberately empty: there is no public
+record to seed them from, and inventing entries would be worse than an
+empty category.
 
 ## Reviews
 

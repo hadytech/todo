@@ -1,4 +1,6 @@
-name: Farhod Bozori
-category: savdo/bozor
+name: "Farhod Bozori"
+category: "savdo/bozor"
+address: "Farhod koʻçasi, Toşkent"
+description: "Şaharning janubidagi eng yirik bozorlardan biri, uç qismga boʻlingan; uçinçi qismi ulgurji savdo uçun."
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); tuman manbalarda ziddiyatli — Çilonzor ham, Uçtepa ham koʻrsatiladi."

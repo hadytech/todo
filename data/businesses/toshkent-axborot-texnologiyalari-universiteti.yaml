@@ -1,4 +1,16 @@
-name: Toşkent Axborot Texnologiyalari Universiteti
-category: talim/universitet
+name: "Toşkent Axborot Texnologiyalari Universiteti"
+category: "talim/universitet"
+district: yunusobod
+address: "Amir Temur şoh koʻçasi 108, Toşkent"
+phones: ["+998 71 238 64 15"]
+website: "https://tuit.uz"
+hours:
+  mon: ["08:30", "18:00"]
+  tue: ["08:30", "18:00"]
+  wed: ["08:30", "18:00"]
+  thu: ["08:30", "18:00"]
+  fri: ["08:30", "18:00"]
+  sat: ["08:30", "18:00"]
+  sun: closed
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring)."

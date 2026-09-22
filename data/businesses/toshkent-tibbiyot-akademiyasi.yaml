@@ -1,4 +1,7 @@
-name: Toşkent Tibbiyot Akademiyasi
-category: talim/universitet
+name: "Toşkent Tibbiyot Akademiyasi"
+category: "talim/universitet"
+district: olmazor
+address: "Farobiy koʻçasi 2, Toşkent"
+website: "https://tma.uz"
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); telefon topilmadi — qidiruvda klinikaning raqami çiqadi, akademiyaniki emas."

@@ -1,4 +1,8 @@
-name: Toşkent Arxitektura-Quriliş Universiteti
-category: talim/universitet
+name: "Toşkent Arxitektura-Quriliş Universiteti"
+category: "talim/universitet"
+district: shayxontohur
+address: "Navoiy şoh koʻçasi 13, Toşkent"
+phones: ["+998 71 241 10 84"]
+website: "https://taqu.edu.uz"
 status: draft
-note: "TEKŞIRILSIN — nomi maʼlum, manzil/telefon/iş vaqti kiritilmagan. Toʻldirib, status: published qiling."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring)."
