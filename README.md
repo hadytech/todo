@@ -40,6 +40,32 @@ Two things make this work, and both are easy to break:
 The display alphabet is one config value (`NUXT_PUBLIC_ALPHABET`). If
 Search Console says standard Latin wins, flip it — no data migration.
 
+### Keeping it that way
+
+```bash
+npm run canonicalise           # report anything still in official Latin
+npm run canonicalise -- --fix  # fold it
+```
+
+CI runs the report, so a half-converted spelling cannot merge. It exists
+because the project was half-converted for weeks: `ch`/`sh` became `ç`/`ş`
+while `oʻ`/`gʻ` were left as the official digraphs, producing `koʻçasi` —
+which is neither alphabet, and which `toDisplay` never caught because
+`toDisplay` assumes its input is already canonical.
+
+Only `ö` and `ğ` are folded automatically. `oʻ` and `gʻ` are digraphs that
+exist nowhere but Uzbek orthography, so folding them is unambiguous;
+`ch` and `sh` are not, and auto-folding them would rename Westminster to
+Weştminster. Those stay a human's call, which is what the `validate`
+warnings are for.
+
+One trap worth knowing, because it nearly took the build down: the
+detector must not treat an ASCII apostrophe as an Uzbek one. `from
+'./lib/rating'` ends in g-then-quote, and a transform that folds it
+rewrites the import to `'./lib/ratinğ`. `toCanonical` only accepts the
+typed apostrophes when explicitly asked (`{ typed: true }`), which is
+right for anything a visitor submitted and never right for source.
+
 ---
 
 ## Running it
@@ -255,7 +281,7 @@ for development, or attach it to a GitHub Release and point
 
 The map is strictly opt-in: MapLibre is 264KB gzipped, more than triple
 the rest of a business page, so nothing loads until the visitor taps
-"Xaritani koʻrsatiş". Every failure path falls back to a plain
+"Xaritani körsatiş". Every failure path falls back to a plain
 OpenStreetMap link that works with no JavaScript at all.
 
 ## Identity

@@ -35,7 +35,7 @@ export const SYNONYMS: Record<string, string[]> = {
 
   // Taʼlim
   'talim/universitet': ['университет', 'university', 'oliy taʼlim', 'вуз', 'institut', 'институт'],
-  'talim/oquv-markaz': ['учебный центр', 'курсы', 'kurs', 'training', 'course', 'oʻquv kurs'],
+  'talim/oquv-markaz': ['учебный центр', 'курсы', 'kurs', 'training', 'course', 'öquv kurs'],
   'talim/til-markazi': ['языковой центр', 'английский', 'ingliz tili', 'language', 'ielts'],
   'talim/maktab': ['школа', 'school', 'maktab', 'litsey', 'лицей'],
 

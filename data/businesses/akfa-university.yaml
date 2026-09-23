@@ -1,8 +1,8 @@
 name: "AKFA University"
 category: "talim/universitet"
 district: mirzo-ulugbek
-address: "Milliy Boğ koʻçasi 264, Toşkent"
+address: "Milliy Boğ köçasi 264, Toşkent"
 phones: ["+998 71 200 05 22"]
 website: "https://centralasian.uz"
 status: draft
-note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); 2023-yilda Central Asian University (CAU) deb qayta nomlangan — nomni va slugni qayta koʻrib çiqing."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); 2023-yilda Central Asian University (CAU) deb qayta nomlangan — nomni va slugni qayta körib çiqing."

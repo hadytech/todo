@@ -41,7 +41,7 @@ export async function sendMail(mail: Mail): Promise<void> {
     // can carry account details, and there is nothing they could do with
     // it anyway.
     console.error(`[mail] ${res.status} ${await res.text().catch(() => '')}`)
-    throw createError({ statusCode: 502, statusMessage: 'Xat yuborib boʻlmadi' })
+    throw createError({ statusCode: 502, statusMessage: 'Xat yuborib bölmadi' })
   }
 }
 
@@ -56,7 +56,7 @@ export function loginMail(to: string, link: string, ttlMin: number): Mail {
       link,
       '',
       `Havola ${ttlMin} daqiqa amal qiladi va faqat bir marta işlaydi.`,
-      'Agar siz bu soʻrovni yubormagan boʻlsangiz, bu xatni eʼtiborsiz qoldiring.',
+      'Agar siz bu sörovni yubormagan bölsangiz, bu xatni eʼtiborsiz qoldiring.',
       '',
       'yalp.uz — Toşkent joylari',
     ].join('\n'),

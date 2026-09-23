@@ -1,7 +1,7 @@
 name: "Toşkent Davlat Yuridik Universiteti"
 category: "talim/universitet"
-address: "Sayilgoh koʻçasi 35, Toşkent"
+address: "Sayilgoh köçasi 35, Toşkent"
 phones: ["+998 71 233 66 36"]
 website: "https://tsul.uz"
 status: draft
-note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); tuman tasdiqlanmagan (Sayilgoh 35 — Mirobod boʻlişi mumkin)."
+note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); tuman tasdiqlanmagan (Sayilgoh 35 — Mirobod bölişi mumkin)."

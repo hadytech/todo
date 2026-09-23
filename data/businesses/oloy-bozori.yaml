@@ -1,7 +1,7 @@
 name: "Oloy Bozori"
 category: "savdo/bozor"
 district: yunusobod
-address: "Amir Temur şoh koʻçasi, Oloy bozori, Toşkent"
-description: "Şahar markazidagi eng eski bozorlardan biri. Meva-sabzavot, ziravor va sut mahsulotlari bilan maşhur. Abdulla Qodiriy metro bekatidan bir neça daqiqalik yoʻl."
+address: "Amir Temur şoh köçasi, Oloy bozori, Toşkent"
+description: "Şahar markazidagi eng eski bozorlardan biri. Meva-sabzavot, ziravor va sut mahsulotlari bilan maşhur. Abdulla Qodiriy metro bekatidan bir neça daqiqalik yöl."
 status: draft
 note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); iş vaqti manbalarda har xil — joyida tasdiqlang."

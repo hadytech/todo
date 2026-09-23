@@ -25,7 +25,7 @@ describe('normalisePhone', () => {
     // Too short to be a number, but it may be a real fragment worth a
     // human look — dropping it loses information the submitter gave us.
     expect(normalisePhone('12345')).toBe('12345')
-    expect(normalisePhone('qoʻngʻiroq qiling')).toBe('qoʻngʻiroq qiling')
+    expect(normalisePhone('qönğiroq qiling')).toBe('qönğiroq qiling')
   })
 
   it('does not invent a number from nothing', () => {

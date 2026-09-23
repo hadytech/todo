@@ -67,7 +67,7 @@ export function loadBusinesses(): { businesses: Business[]; issues: Issue[] } {
     try {
       raw = readYaml(join(dir, file))
     } catch (e) {
-      issues.push({ file: rel, message: `YAML oʻqib boʻlmadi: ${(e as Error).message}`, level: 'error' })
+      issues.push({ file: rel, message: `YAML öqib bölmadi: ${(e as Error).message}`, level: 'error' })
       continue
     }
 
@@ -81,7 +81,7 @@ export function loadBusinesses(): { businesses: Business[]; issues: Issue[] } {
     const b = parsed.data
 
     if (slug !== toSlug(slug)) {
-      issues.push({ file: rel, message: `fayl nomi slug boʻlsin: "${toSlug(slug)}.yaml"`, level: 'error' })
+      issues.push({ file: rel, message: `fayl nomi slug bölsin: "${toSlug(slug)}.yaml"`, level: 'error' })
     }
     // A drifted filename silently changes the URL and drops the page's
     // accumulated SEO, so warn loudly but don't block a deliberate rename.
@@ -89,7 +89,7 @@ export function loadBusinesses(): { businesses: Business[]; issues: Issue[] } {
     if (slug !== expected) {
       issues.push({
         file: rel,
-        message: `fayl nomi nomga mos emas ("${expected}.yaml" kutilgandi) — ataylab boʻlsa, eʼtiborsiz qoldiring`,
+        message: `fayl nomi nomga mos emas ("${expected}.yaml" kutilgandi) — ataylab bölsa, eʼtiborsiz qoldiring`,
         level: 'warning',
       })
     }
@@ -108,7 +108,7 @@ export function loadBusinesses(): { businesses: Business[]; issues: Issue[] } {
     if (legacy.length) {
       issues.push({
         file: rel,
-        message: `nom eski alifboda koʻrinadi (${legacy.join(', ')}) — yangi alifboda yozing (ö ğ ç ş); chet soʻz boʻlsa, eʼtiborsiz qoldiring`,
+        message: `nom eski alifboda körinadi (${legacy.join(', ')}) — yangi alifboda yozing (ö ğ ç ş); chet söz bölsa, eʼtiborsiz qoldiring`,
         level: 'warning',
       })
     }
@@ -133,7 +133,7 @@ export function loadBusinesses(): { businesses: Business[]; issues: Issue[] } {
     if (prev) {
       issues.push({
         file: `data/businesses/${b.slug}.yaml`,
-        message: `"${prev}" bilan bir xil koʻrinadi — takror boʻlishi mumkin`,
+        message: `"${prev}" bilan bir xil körinadi — takror bölishi mumkin`,
         level: 'warning',
       })
     }

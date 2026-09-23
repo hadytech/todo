@@ -44,6 +44,13 @@ jobs:
         run: npm test
       - name: Maʼlumotlarni tekşiriş
         run: npm run validate
+      # Everything a person writes — data, interface strings, docs — is
+      # in the new alphabet. This is what keeps it that way: the project
+      # spent weeks half-converted, with `ç` and `ş` applied while `oʻ`
+      # and `gʻ` were left as the official digraphs, producing `koʻçasi`,
+      # which is neither alphabet and which nothing caught.
+      - name: Alifbo imlosi
+        run: npm run canonicalise
       # The server build first: it produces .vercel/output, while the
       # static build below produces .output/public that the budget and
       # HTML checks read. Running them the other way round would have the

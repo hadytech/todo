@@ -25,7 +25,7 @@ const locateError = ref('')
 
 function locate() {
   if (!navigator.geolocation) {
-    locateError.value = 'Brauzeringiz joylaşuvni qoʻllab-quvvatlamaydi.'
+    locateError.value = 'Brauzeringiz joylaşuvni qöllab-quvvatlamaydi.'
     return
   }
   locating.value = true
@@ -37,7 +37,7 @@ function locate() {
       // Sorting a Tashkent directory by distance from another city is
       // just a slow alphabetical shuffle — say so instead.
       if (!inTashkent(p)) {
-        locateError.value = 'Siz Toşkentdan tapqaridasiz — masofa boʻyicha saralaş oʻçirildi.'
+        locateError.value = 'Siz Toşkentdan tapqaridasiz — masofa böyicha saralaş öçirildi.'
         return
       }
       here.value = p
@@ -46,7 +46,7 @@ function locate() {
       locating.value = false
       locateError.value = err.code === err.PERMISSION_DENIED
         ? 'Joylaşuvga ruxsat berilmadi.'
-        : 'Joylaşuvni aniqlab boʻlmadi.'
+        : 'Joylaşuvni aniqlab bölmadi.'
     },
     { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
   )
@@ -126,7 +126,7 @@ useHead({
     <div v-if="results.length" class="flex flex-wrap gap-2 mb-3 text-sm">
       <select
         v-model="category"
-        aria-label="Turi boʻyicha filtr"
+        aria-label="Turi böyicha filtr"
         class="rounded-soft border border-line px-2 py-1 bg-transparent"
       >
         <option value="">Hamma turi</option>
@@ -144,7 +144,7 @@ useHead({
 
       <select
         v-model="district"
-        aria-label="Tuman boʻyicha filtr"
+        aria-label="Tuman böyicha filtr"
         class="rounded-soft border border-line px-2 py-1 bg-transparent"
       >
         <option value="">Hamma tuman</option>
@@ -162,7 +162,7 @@ useHead({
           ? 'border-accent text-accent'
           : 'border-line text-muted'"
         @click="view = v"
-      >{{ v === 'list' ? 'Roʻyxat' : 'Xarita' }}</button>
+      >{{ v === 'list' ? 'Röyxat' : 'Xarita' }}</button>
     </div>
 
     <p v-if="locateError" class="text-sm text-muted mb-3">{{ locateError }}</p>
@@ -171,10 +171,10 @@ useHead({
 
     <p v-else-if="q.trim() && ready && !shown.length" class="text-muted text-sm">
       <template v-if="results.length">
-        Filtrga mos joy yoʻq. Filtrni kengaytirib koʻring.
+        Filtrga mos joy yöq. Filtrni kengaytirib köring.
       </template>
       <template v-else>
-        Hech narsa topilmadi. Boşqaça yozib koʻring — istagan alifbo işlaydi.
+        Hech narsa topilmadi. Boşqaça yozib köring — istagan alifbo işlaydi.
       </template>
     </p>
 

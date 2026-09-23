@@ -168,7 +168,7 @@ async function submit() {
   } catch (e: unknown) {
     state.value = 'failed'
     error.value = (e as { data?: { statusMessage?: string } })?.data?.statusMessage
-      || 'Yuborib boʻlmadi. Qayta urinib koʻring.'
+      || 'Yuborib bölmadi. Qayta urinib köring.'
   }
 }
 
@@ -187,32 +187,32 @@ function again() {
 }
 
 useHead({
-  title: 'Joy qoʻşiş — yalp.uz',
+  title: 'Joy qöşiş — yalp.uz',
   meta: [{
     name: 'description',
-    content: 'yalp.uz maʼlumotnomasiga yangi joy qoʻşiş — hisob kerak emas, bir daqiqada.',
+    content: 'yalp.uz maʼlumotnomasiga yangi joy qöşiş — hisob kerak emas, bir daqiqada.',
   }],
 })
 </script>
 
 <template>
   <div class="mx-auto max-w-xl">
-    <h1 class="text-2xl font-bold">Joy qoʻşiş</h1>
+    <h1 class="text-2xl font-bold">Joy qöşiş</h1>
 
     <!-- Sent ------------------------------------------------------- -->
     <template v-if="state === 'sent'">
       <div class="mt-6 rounded-soft border border-line bg-surface p-5">
         <p class="font-medium">Rahmat! Taklifingiz qabul qilindi.</p>
         <p class="mt-2 text-sm text-muted">
-          Biz maʼlumotni tekşirib, saytga qoʻşamiz. Bu bir neça kun olişi
-          mumkin — har bir joy qoʻlda tekşiriladi, şuning uçun bu yerdagi
-          maʼlumotlarga işonsa boʻladi.
+          Biz maʼlumotni tekşirib, saytga qöşamiz. Bu bir neça kun olişi
+          mumkin — har bir joy qölda tekşiriladi, şuning uçun bu yerdagi
+          maʼlumotlarga işonsa böladi.
         </p>
         <div class="mt-4 flex flex-wrap gap-2">
           <button
             class="rounded-pill bg-accent px-4 py-2 text-sm font-medium text-accent-ink"
             @click="again"
-          >Yana bitta qoʻşiş</button>
+          >Yana bitta qöşiş</button>
           <NuxtLink to="/" class="rounded-pill border border-line px-4 py-2 text-sm">
             Bosh sahifa
           </NuxtLink>
@@ -224,11 +224,11 @@ useHead({
     <template v-else>
       <p class="mt-2 text-muted">
         Hisob ham, texnik bilim ham kerak emas. Faqat nomi va turini
-        yozing — qolganini bilsangiz qoʻşing, bilmasangiz boʻş qoldiring.
+        yozing — qolganini bilsangiz qöşing, bilmasangiz böş qoldiring.
         <span v-if="!enabled" class="block mt-1">
           {{ config.public.telegram
             ? 'Hozir taklif Telegram orqali yuboriladi.'
-            : 'Hozir taklif matn koʻrinişida nusxalanadi.' }}
+            : 'Hozir taklif matn körinişida nusxalanadi.' }}
         </span>
       </p>
 
@@ -237,10 +237,10 @@ useHead({
              maps app and can share it in one tap. -->
         <div class="rounded-soft border border-accent/40 bg-accent-soft/40 p-4">
           <label for="f-link" class="block text-sm font-medium mb-1">
-            Tez yoʻl — xarita havolasini joylaştiring
+            Tez yöl — xarita havolasini joylaştiring
           </label>
           <p class="mb-2 text-xs text-muted">
-            Yandex, Google yoki 2GIS. Nomi va nuqtasi oʻzi toʻladi.
+            Yandex, Google yoki 2GIS. Nomi va nuqtasi özi töladi.
           </p>
           <div class="flex gap-2">
             <input
@@ -259,13 +259,13 @@ useHead({
               class="shrink-0 rounded-soft bg-accent px-4 py-2 text-sm font-medium
                      text-accent-ink disabled:opacity-60"
               @click="useLink"
-            >{{ link.state === 'working' ? '…' : 'Toʻldiriş' }}</button>
+            >{{ link.state === 'working' ? '…' : 'Töldiriş' }}</button>
           </div>
           <p v-if="link.state === 'done'" class="mt-2 text-sm text-accent">
             Havoladan {{ link.filled.join(' va ') }} olindi.
           </p>
           <p v-else-if="link.state === 'failed'" class="mt-2 text-sm text-muted">
-            Havoladan maʼlumot oʻqilmadi — quyida qoʻlda toʻldiring.
+            Havoladan maʼlumot öqilmadi — quyida qölda töldiring.
           </p>
         </div>
 
@@ -283,7 +283,7 @@ useHead({
           >
           <p class="mt-1 text-xs text-muted">
             Yangi alifboda yozsangiz yaxşi (ö ğ ç ş), lekin odatdagiça
-            yozsangiz ham boʻladi — biz tuzatamiz.
+            yozsangiz ham böladi — biz tuzatamiz.
           </p>
         </div>
 
@@ -364,7 +364,7 @@ useHead({
             id="f-address"
             v-model="form.address"
             maxlength="300"
-            placeholder="Koʻça, uy raqami yoki mashur joy yonida"
+            placeholder="Köça, uy raqami yoki mashur joy yonida"
             class="w-full rounded-soft border border-line bg-surface px-3 py-2"
           >
         </div>
@@ -384,7 +384,7 @@ useHead({
 
         <details class="rounded-soft border border-line px-4 py-3">
           <summary class="cursor-pointer text-sm font-medium">
-            Qoʻşimça (ixtiyoriy)
+            Qöşimça (ixtiyoriy)
           </summary>
           <div class="mt-4 space-y-4">
             <div>
@@ -424,7 +424,7 @@ useHead({
                 class="w-full rounded-soft border border-line bg-surface px-3 py-2"
               >
               <p class="mt-1 text-xs text-muted">
-                Saytda hech qaçon koʻrsatilmaydi.
+                Saytda hech qaçon körsatilmaydi.
               </p>
             </div>
           </div>
@@ -480,7 +480,7 @@ useHead({
         </template>
 
         <p class="text-xs text-muted">
-          Har bir taklif qoʻlda tekşiriladi. Nomi va turi yetarli —
+          Har bir taklif qölda tekşiriladi. Nomi va turi yetarli —
           qolganini biz topamiz.
         </p>
       </form>
@@ -489,7 +489,7 @@ useHead({
     <!-- The old routes stay, further down. Some people genuinely prefer
          them, and the repository is the source of truth either way. -->
     <details class="mt-10 text-sm">
-      <summary class="cursor-pointer text-muted">Boşqa yoʻllar</summary>
+      <summary class="cursor-pointer text-muted">Boşqa yöllar</summary>
       <div class="mt-3 space-y-3 text-muted">
         <p>
           <a :href="`${repo}/issues/new?template=joy-qoshish.yml`" rel="noopener"

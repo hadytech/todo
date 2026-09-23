@@ -19,7 +19,7 @@ describe('guessCategory', () => {
 
   it('prefers the more specific keyword', () => {
     // "choyxona" contains no shorter rule that should beat it, and
-    // "kompyuter doʻkoni" must not fall through to a generic "markaz".
+    // "kompyuter dökoni" must not fall through to a generic "markaz".
     expect(guessCategory('Registon Çoyxonasi')).toBe('ovqatlanish/choyxona')
     expect(guessCategory('Malika Kompyuter Bozori')).toBe('savdo/kompyuter')
   })

@@ -6,16 +6,16 @@ import { loadCategories } from './load'
 
 /** A small fixture standing in for the real catalogue. */
 const DOCS: IndexedBusiness[] = [
-  { id: 'oq-dorixona', name: 'Oq Dorixona', address: 'Amir Temur şoh koʻçasi 120',
+  { id: 'oq-dorixona', name: 'Oq Dorixona', address: 'Amir Temur şoh köçasi 120',
     category: 'Soğliq Dorixonalar', district: 'Yunusobod',
     terms: synonymsFor('sogliq/dorixona').join(' '), lat: 41.367, lng: 69.282 },
-  { id: 'shaffof-sartaroshxona', name: 'Şaffof Sartaroşxona', address: 'Qatortol koʻçasi 3',
+  { id: 'shaffof-sartaroshxona', name: 'Şaffof Sartaroşxona', address: 'Qatortol köçasi 3',
     category: 'Gözallik Sartaroşxonalar', district: 'Çilonzor',
     terms: synonymsFor('gozallik/sartaroshxona').join(' '), lat: 41.279, lng: 69.21 },
   { id: 'chorsu-choyxona', name: 'Çorsu Çoyxonasi', address: 'Çorsu bozori',
     category: 'Ovqatlanish Çoyxonalar', district: 'Şayxontohur',
     terms: synonymsFor('ovqatlanish/choyxona').join(' '), lat: 41.326, lng: 69.235 },
-  { id: 'apteka-kafesi', name: 'Apteka Kafesi', address: 'Bobur koʻçasi 1',
+  { id: 'apteka-kafesi', name: 'Apteka Kafesi', address: 'Bobur köçasi 1',
     category: 'Ovqatlanish Kafelar', district: 'Mirobod',
     terms: synonymsFor('ovqatlanish/kafe').join(' '), lat: 41.3, lng: 69.28 },
 ]

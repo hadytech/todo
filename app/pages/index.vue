@@ -67,7 +67,7 @@ useHead({
   title: 'yalp.uz — Toşkentdagi joylar',
   meta: [{
     name: 'description',
-    content: 'Toshkentdagi restoran, kafe, gozallik saloni, universitet va bozorlar maʼlumotnomasi. Chorsu, Yunusobod, Chilonzor va boshqa tumanlar boʻyicha qidiring.',
+    content: 'Toshkentdagi restoran, kafe, gozallik saloni, universitet va bozorlar maʼlumotnomasi. Chorsu, Yunusobod, Chilonzor va boshqa tumanlar böyicha qidiring.',
   }],
   link: [{ rel: 'canonical', href: site }],
   script: structured.map((o) => ({ type: 'application/ld+json', innerHTML: JSON.stringify(o) })),
@@ -139,18 +139,18 @@ useHead({
       rather than new.
     -->
     <section v-if="!data?.items?.length" class="rounded-soft border border-line bg-surface p-6">
-      <h2 class="font-semibold">Maʼlumotnoma toʻldirilmoqda</h2>
+      <h2 class="font-semibold">Maʼlumotnoma töldirilmoqda</h2>
       <p class="mt-1.5 text-muted text-pretty">
-        Hozircha tekşirilgan joy yoʻq.
+        Hozircha tekşirilgan joy yöq.
         <template v-if="data?.pending">
-          {{ data.pending }} ta joy nomi yozib qoʻyilgan — manzil, telefon va iş vaqti
-          tekşirilgaç, şu yerda paydo boʻladi.
+          {{ data.pending }} ta joy nomi yozib qöyilgan — manzil, telefon va iş vaqti
+          tekşirilgaç, şu yerda paydo böladi.
         </template>
       </p>
       <NuxtLink
         to="/qoshish"
         class="mt-4 inline-block rounded-soft bg-accent text-accent-ink px-5 py-2.5 font-medium"
-      >Joy qoʻşiş</NuxtLink>
+      >Joy qöşiş</NuxtLink>
     </section>
 
     <section v-if="data?.items?.length">
@@ -168,7 +168,7 @@ useHead({
         v-if="data.total > data.items.length"
         to="/qidiruv"
         class="inline-block mt-4 text-sm text-accent"
-      >Hammasini koʻriş →</NuxtLink>
+      >Hammasini köriş →</NuxtLink>
     </section>
   </div>
 </template>

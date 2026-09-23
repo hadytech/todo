@@ -133,13 +133,13 @@ function escapeHtml(s: string) {
              text-sm py-6 hover:border-accent hover:text-accent"
       @click="show"
     >
-      Xaritani koʻrsatiş
+      Xaritani körsatiş
     </button>
 
     <p v-if="state === 'loading'" class="text-sm text-muted mt-2">Xarita yuklanmoqda…</p>
 
     <p v-if="state === 'failed'" class="text-sm text-muted">
-      Xaritani yuklab boʻlmadi.
+      Xaritani yuklab bölmadi.
       <a :href="osmLink" rel="noopener" class="text-accent">
         OpenStreetMap'da oçiş
       </a>

@@ -12,13 +12,13 @@ useHead({ title: notFound.value ? 'Sahifa topilmadi — yalp.uz' : 'Xatolik — 
     <p class="text-5xl font-bold opacity-20">{{ error?.statusCode ?? '?' }}</p>
 
     <h1 class="text-xl font-semibold">
-      {{ notFound ? 'Bunday sahifa yoʻq' : 'Nimadir notoʻğri ketdi' }}
+      {{ notFound ? 'Bunday sahifa yöq' : 'Nimadir notöğri ketdi' }}
     </h1>
 
     <p class="text-muted text-sm max-w-sm">
       {{ notFound
-        ? 'Havola eskirgan boʻlişi mumkin, yoki bu joy hali qoʻşilmagan.'
-        : 'Birozdan soʻng qayta urinib koʻring.' }}
+        ? 'Havola eskirgan bölişi mumkin, yoki bu joy hali qöşilmagan.'
+        : 'Birozdan söng qayta urinib köring.' }}
     </p>
 
     <div class="flex gap-3 text-sm">

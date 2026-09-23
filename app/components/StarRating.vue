@@ -64,7 +64,7 @@ const shown = computed(() => hovered.value || Math.round(props.value ?? 0))
   <span
     v-else
     role="img"
-    :aria-label="value === null ? 'Baho yoʻq' : `${value.toFixed(1)} — 5 dan`"
+    :aria-label="value === null ? 'Baho yöq' : `${value.toFixed(1)} — 5 dan`"
     class="relative inline-block leading-none whitespace-nowrap select-none"
     :class="SIZES[size]"
   >

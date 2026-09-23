@@ -52,7 +52,7 @@ useHead({
     innerHTML: JSON.stringify(o),
   })),
   meta: [{ name: 'description', content: () =>
-    `${districtName.value}, Toşkentdagi ${categoryName.value.toLowerCase()} roʻyxati — manzil, telefon va iş vaqti.` }],
+    `${districtName.value}, Toşkentdagi ${categoryName.value.toLowerCase()} röyxati — manzil, telefon va iş vaqti.` }],
   link: [{ rel: 'canonical', href: `${config.public.siteUrl}/toshkent/${district}/${category}` }],
   // Belt and braces: the home page no longer links empty combinations,
   // but a page that ends up empty must not be indexed as thin content.
@@ -78,8 +78,8 @@ useHead({
     </div>
 
     <p v-if="!data?.items.length" class="text-muted text-sm">
-      Bu tumanda hali joy qoʻşilmagan.
-      <NuxtLink to="/qoshish" class="text-accent">Birinchi boʻlib qoʻşing</NuxtLink>.
+      Bu tumanda hali joy qöşilmagan.
+      <NuxtLink to="/qoshish" class="text-accent">Birinchi bölib qöşing</NuxtLink>.
     </p>
   </div>
 </template>

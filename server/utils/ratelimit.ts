@@ -50,7 +50,7 @@ export async function checkLoginRate(email: string, ip: string): Promise<void> {
   if (row.by_email >= PER_EMAIL_HOURLY || row.by_ip >= PER_IP_HOURLY) {
     throw createError({
       statusCode: 429,
-      statusMessage: 'Juda koʻp uriniş. Bir ozdan keyin qayta urinib koʻring.',
+      statusMessage: 'Juda köp uriniş. Bir ozdan keyin qayta urinib köring.',
     })
   }
 }

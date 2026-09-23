@@ -1,7 +1,7 @@
 name: "Çorsu Bozori"
 category: "savdo/bozor"
 district: shayxontohur
-address: "Saqiçmon koʻçasi 1, Toşkent"
-description: "Toşkentning eski şahridagi tarixiy bozor. Koʻk gumbazli bino 1980-yilda qurilgan; 2026-yilda YUNESKO Jahon merosi roʻyxatiga kiritilgan. Çorsu metro bekati yonida."
+address: "Saqiçmon köçasi 1, Toşkent"
+description: "Toşkentning eski şahridagi tarixiy bozor. Kök gumbazli bino 1980-yilda qurilgan; 2026-yilda YUNESKO Jahon merosi röyxatiga kiritilgan. Çorsu metro bekati yonida."
 status: draft
 note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); iş vaqti bitta manbadan olindi — joyida tasdiqlang."

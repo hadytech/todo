@@ -1,6 +1,6 @@
 name: "Yangiobod Bozori"
 category: "savdo/bozor"
-address: "Quyi Talarik koʻçasi 1, Toşkent"
+address: "Quyi Talarik köçasi 1, Toşkent"
 description: "Faqat şanba va yakşanba işlaydigan eski buyumlar bozori (\"Tezikovka\"). Katta ombor majmuasida joylaşgan."
 status: draft
 note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring); tuman aniqlanmagan (manbalarda eski \"Hamza\" nomi uçraydi); iş vaqti — faqat dam oliş kunlari, aniq soatlar topilmadi."

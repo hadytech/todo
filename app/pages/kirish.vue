@@ -15,8 +15,8 @@ await ensure()
  * directly after a failed one.
  */
 const NOTICE: Record<string, string> = {
-  eskirgan: 'Havola eskirgan yoki allaqaçon işlatilgan. Yangisini soʻrang.',
-  xato: 'Havola notoʻğri. Yangisini soʻrang.',
+  eskirgan: 'Havola eskirgan yoki allaqaçon işlatilgan. Yangisini sörang.',
+  xato: 'Havola notöğri. Yangisini sörang.',
 }
 const notice = computed(() => NOTICE[String(route.query.kirish ?? '')] ?? '')
 
@@ -31,7 +31,7 @@ async function submit() {
     sent.value = true
   } catch (e: unknown) {
     error.value = (e as { data?: { statusMessage?: string } })?.data?.statusMessage
-      || 'Yuborib boʻlmadi. Qayta urinib koʻring.'
+      || 'Yuborib bölmadi. Qayta urinib köring.'
   } finally {
     busy.value = false
   }
@@ -79,7 +79,7 @@ useHead({
 
     <template v-else>
       <p class="mt-2 text-sm text-muted">
-        Parol yoʻq. Manzilingizni yozing — kiriş havolasini yuboramiz.
+        Parol yöq. Manzilingizni yozing — kiriş havolasini yuboramiz.
       </p>
 
       <p v-if="notice" class="mt-4 rounded-soft bg-raised px-3 py-2 text-sm">{{ notice }}</p>
@@ -100,7 +100,7 @@ useHead({
         </div>
         <div>
           <label for="login-name" class="block text-sm text-muted mb-1">
-            Ismingiz <span class="text-muted/70">— sharhlarda koʻrinadi</span>
+            Ismingiz <span class="text-muted/70">— sharhlarda körinadi</span>
           </label>
           <input
             id="login-name"
@@ -125,7 +125,7 @@ useHead({
 
       <p class="mt-4 text-xs text-muted">
         Manzilingiz faqat kiriş uçun işlatiladi va saytda hech qaçon
-        koʻrsatilmaydi.
+        körsatilmaydi.
       </p>
     </template>
   </div>

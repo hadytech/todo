@@ -76,9 +76,9 @@ function draftYaml(r: Row, slug: string): string {
   // the note, where it is visible to whoever verifies the listing and
   // never rendered on the site.
   const notes = ['TEKŞIRILSIN: saytdagi forma orqali kelgan taklif']
-  if (!r.lat) notes.push('koordinata yoʻq')
-  if (!r.district) notes.push('tuman koʻrsatilmagan')
-  if (r.hours_note) notes.push(`iş vaqti (taklifçi soʻzi): ${r.hours_note}`)
+  if (!r.lat) notes.push('koordinata yöq')
+  if (!r.district) notes.push('tuman körsatilmagan')
+  if (r.hours_note) notes.push(`iş vaqti (taklifçi sözi): ${r.hours_note}`)
   if (r.phone && !/^\+998 /.test(r.phone)) notes.push(`telefon tekşirilsin: ${r.phone}`)
   if (r.website && !/^https?:\/\//.test(r.website)) notes.push(`havola: ${r.website}`)
   if (r.comment) notes.push(`izoh: ${r.comment}`)
@@ -111,7 +111,7 @@ async function list() {
   order by s.created_at
   `
   if (!rows.length) {
-    console.log('Yangi taklif yoʻq.')
+    console.log('Yangi taklif yöq.')
     return
   }
 
@@ -121,7 +121,7 @@ async function list() {
     console.log(`    id: ${r.id}`)
     console.log(`    ${r.category}${r.district ? ` · ${r.district}` : ''}`)
     if (r.address) console.log(`    ${r.address}`)
-    console.log(`    koordinata: ${r.lat != null ? `${r.lat}, ${r.lng}` : 'yoʻq'}`)
+    console.log(`    koordinata: ${r.lat != null ? `${r.lat}, ${r.lng}` : 'yöq'}`)
     if (r.phone) console.log(`    telefon: ${r.phone}`)
     if (r.hours_note) console.log(`    iş vaqti: ${r.hours_note}`)
     if (r.comment) console.log(`    izoh: ${r.comment}`)
@@ -138,7 +138,7 @@ async function importOne(rowId: string) {
   const [r] = await sql<Row[]>`
     select * from submissions where id = ${rowId} and status = 'pending'
   `
-  if (!r) { console.error('Taklif topilmadi yoki allaqaçon koʻrib çiqilgan.'); process.exit(1) }
+  if (!r) { console.error('Taklif topilmadi yoki allaqaçon körib çiqilgan.'); process.exit(1) }
 
   const slug = freeSlug(r.name)
   const path = `data/businesses/${slug}.yaml`
@@ -150,7 +150,7 @@ async function importOne(rowId: string) {
      where id = ${rowId}
   `
   console.log(`Yaratildi: ${path}`)
-  console.log('Tekşiring, toʻldiring, keyin commit qiling:')
+  console.log('Tekşiring, töldiring, keyin commit qiling:')
   console.log(`  npm run validate && git add ${path} && git commit`)
 }
 
