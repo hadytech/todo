@@ -189,6 +189,28 @@ The point of the round trip is that business facts stay in git, where
 anyone can see who changed what and revert it, while the person who knows
 which barber is good never has to learn what a pull request is.
 
+### Driving it in a browser
+
+```bash
+npm run generate && npm run smoke
+```
+
+Opens the static build in Chromium and walks the add-a-place journey:
+type a name, pick a category, rate, comment, submit. CI runs it.
+
+It exists because two bugs shipped past a green suite, and neither lived
+in a function:
+
+- **The form was invisible until you blurred the field.** It was gated on
+  a value that only updated on `@change`, so on a phone you typed the name
+  and the screen stayed empty — no category, no photo, no submit — until
+  you happened to dismiss the keyboard.
+- **The submit button said "send" and only wrote to the clipboard.** With
+  no `TELEGRAM` configured it opened nothing at all, so you filled in the
+  whole form, pressed send, and nothing happened.
+
+Unit tests cannot see either. A browser can.
+
 ### What the form asks
 
 Name, photo, category — then your rating and your comment. Adding a place
