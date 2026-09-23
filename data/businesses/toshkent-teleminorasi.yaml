@@ -1,0 +1,20 @@
+name: "Toşkent Teleminorasi"
+category: "diqqatga-sazovor/manzara"
+district: yunusobod
+address: "Amir Temur şoh köçasi 109A, Toşkent"
+location:
+  lat: 41.3456
+  lng: 69.2847
+description: "375 metrli teleminora — Markaziy Osiyodagi eng baland inşoot. 1985-yil 15-yanvarda işga tuşirilgan. 97 metr balandlikda kuzatuv maydonçasi bor."
+phones: ["+998 71 202 35 70"]
+website: "http://uztv-tower.uz"
+hours:
+  mon: ["10:00", "20:00"]
+  tue: ["10:00", "20:00"]
+  wed: ["10:00", "20:00"]
+  thu: ["10:00", "20:00"]
+  fri: ["10:00", "20:00"]
+  sat: ["10:00", "20:00"]
+  sun: ["10:00", "20:00"]
+status: published
+note: "Koordinata: Wikipedia (41°20'44\"N 69°17'5\"E). Manzil, telefon va iş vaqti: 2GIS va rasmiy sayt."

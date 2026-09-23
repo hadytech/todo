@@ -67,3 +67,22 @@
       name: Savdo markazlari
     - slug: texnika
       name: Maişiy texnika
+
+# Toşkentning maşhur joylari. Bu kategoriya boşqalaridan farq qiladi:
+# bu yerdagilar biznes emas, şahar belgilaridir — ularning manzili va
+# koordinatasi oçiq manbalarda bor, şuning uçun maʼlumotnoma aynan
+# şulardan boşlandi.
+- slug: diqqatga-sazovor
+  name: Diqqatga sazovor
+  icon: "🕌"
+  children:
+    - slug: tarixiy
+      name: Tarixiy joylar
+    - slug: muzey
+      name: Muzeylar
+    - slug: teatr
+      name: Teatrlar
+    - slug: maydon
+      name: Maydon va boğlar
+    - slug: manzara
+      name: Manzarali joylar

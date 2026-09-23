@@ -44,6 +44,26 @@ export const SYNONYMS: Record<string, string[]> = {
   'savdo/kompyuter': ['компьютер', 'computer', 'noutbuk', 'ноутбук', 'laptop', 'pc'],
   'savdo/savdo-markazi': ['торговый центр', 'mall', 'savdo markaz', 'тц'],
   'savdo/texnika': ['бытовая техника', 'техника', 'electronics', 'maişiy texnika'],
+
+  // Diqqatga sazovor. Tourists search in English and Russian far more
+  // than in Uzbek here, and the transliterations they arrive with are
+  // rarely the official ones — "Khast Imam", "Chorsu", "Kukeldash".
+  'diqqatga-sazovor/tarixiy': [
+    'достопримечательность', 'памятник', 'мечеть', 'медресе',
+    'sight', 'landmark', 'mosque', 'madrasah', 'madrasa',
+    'masjid', 'madrasa', 'tarixiy joy', 'eski şahar', 'old city',
+  ],
+  'diqqatga-sazovor/muzey': ['музей', 'museum', 'muzey', 'exhibition', 'выставка'],
+  'diqqatga-sazovor/teatr': [
+    'театр', 'theatre', 'theater', 'opera', 'опера', 'балет', 'balet', 'teatr',
+  ],
+  'diqqatga-sazovor/maydon': [
+    'площадь', 'парк', 'square', 'park', 'maydon', 'boğ', 'сквер',
+  ],
+  'diqqatga-sazovor/manzara': [
+    'смотровая площадка', 'вид', 'viewpoint', 'observation deck', 'panorama',
+    'manzara', 'teleminora', 'телебашня', 'tv tower',
+  ],
 }
 
 /** Every alternative term for a "top/sub" category path. */
