@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { parseMapLink } from '../../lib/maplink'
 import { guessCategory } from '../../lib/guess'
+import { submissionText } from '../../lib/submission-text'
 
 const config = useRuntimeConfig()
 const repo = config.public.repoUrl as string
@@ -93,8 +94,56 @@ watch(() => form.top, () => { form.sub = '' })
 /** The two things a suggestion cannot be filed without. */
 const ready = computed(() => form.name.trim().length >= 2 && form.top && form.sub)
 
+/**
+ * What the form does when there is no server to post to.
+ *
+ * A static build has no /api/submissions, and the old page answered that
+ * by hiding the form and pointing at GitHub — which is precisely the
+ * barrier the form exists to remove. So the form stays, and the same
+ * facts leave as a message the person sends over Telegram.
+ *
+ * Copy first, open second: the clipboard write has to happen inside the
+ * click to be allowed at all, and Telegram cannot be handed prefilled
+ * text for a specific chat.
+ */
+const copied = ref(false)
+
+function messageText(): string {
+  const cat = facets.value?.categories.find((c) => c.slug === form.top)
+  const sub = cat?.children.find((ch) => ch.slug === form.sub)
+  return submissionText({
+    name: form.name,
+    categoryLabel: sub ? `${cat!.name} — ${sub.name}` : undefined,
+    districtLabel: facets.value?.districts.find((d) => d.slug === form.district)?.name,
+    address: form.address,
+    coords: location.value,
+    phone: form.phone,
+    hoursNote: form.hoursNote,
+    website: form.website,
+    comment: form.comment,
+    contact: form.contact,
+  })
+}
+
+async function sendOffline() {
+  if (!ready.value) return
+  const text = messageText()
+  try {
+    await navigator.clipboard.writeText(text)
+    copied.value = true
+  } catch {
+    // Clipboard can be refused outright — an insecure origin, a locked
+    // down browser. The textarea below still shows the message, so the
+    // person can select it by hand.
+    copied.value = false
+  }
+  const to = config.public.telegram as string
+  if (to) window.open(`https://t.me/${to}`, '_blank', 'noopener')
+}
+
 async function submit() {
   if (!ready.value) return
+  if (!enabled.value) return sendOffline()
   error.value = ''
   state.value = 'sending'
   try {
@@ -129,6 +178,7 @@ function again() {
     website: '', comment: '', website2: '',
   })
   location.value = null
+  copied.value = false
   link.url = ''
   link.state = 'idle'
   link.filled = []
@@ -175,23 +225,14 @@ useHead({
       <p class="mt-2 text-muted">
         Hisob ham, texnik bilim ham kerak emas. Faqat nomi va turini
         yozing — qolganini bilsangiz qoʻşing, bilmasangiz boʻş qoldiring.
+        <span v-if="!enabled" class="block mt-1">
+          {{ config.public.telegram
+            ? 'Hozir taklif Telegram orqali yuboriladi.'
+            : 'Hozir taklif matn koʻrinişida nusxalanadi.' }}
+        </span>
       </p>
 
-      <!-- With no database behind the site there is nothing to POST to.
-           Say so and point at the route that still works, instead of
-           showing a form whose button cannot do anything. -->
-      <div v-if="enabled === false" class="mt-6 rounded-soft border border-line bg-surface p-4">
-        <p class="text-sm">
-          Forma hozirça işlamayapti. Joyni GitHub orqali yuborişingiz mumkin:
-        </p>
-        <a
-          :href="`${repo}/issues/new?template=joy-qoshish.yml`"
-          rel="noopener"
-          class="mt-3 inline-block rounded-pill bg-accent px-4 py-2 text-sm font-medium text-accent-ink"
-        >GitHub formasi</a>
-      </div>
-
-      <form v-else class="mt-6 space-y-5" @submit.prevent="submit">
+      <form class="mt-6 space-y-5" @submit.prevent="submit">
         <!-- The fast path, first: most people have the place open in a
              maps app and can share it in one tap. -->
         <div class="rounded-soft border border-accent/40 bg-accent-soft/40 p-4">
@@ -403,7 +444,40 @@ useHead({
           :disabled="!ready || state === 'sending'"
           class="w-full rounded-pill bg-accent px-4 py-3 font-medium text-accent-ink
                  disabled:opacity-60"
-        >{{ state === 'sending' ? 'Yuborilyapti…' : 'Yuboriş' }}</button>
+        >
+          <!-- Three honest labels, because the button does three
+               different things depending on what is configured. -->
+          {{ state === 'sending'
+            ? 'Yuborilyapti…'
+            : enabled
+              ? 'Yuboriş'
+              : config.public.telegram
+                ? 'Nusxalaş va Telegramda yuboriş'
+                : 'Matnni nusxalaş' }}
+        </button>
+
+        <!-- No server: the same facts, as a message to send by hand. -->
+        <template v-if="!enabled && ready">
+          <p v-if="copied" class="text-sm text-accent">
+            {{ config.public.telegram
+              ? 'Matn nusxalandi — Telegramda joylaştiring (uzun bosib "Paste").'
+              : 'Matn nusxalandi — bizga yuboring.' }}
+          </p>
+          <div>
+            <label for="f-msg" class="block text-sm text-muted mb-1">
+              Yuboriladigan matn
+            </label>
+            <textarea
+              id="f-msg"
+              :value="messageText()"
+              readonly
+              rows="7"
+              class="w-full rounded-soft border border-line bg-raised px-3 py-2
+                     font-mono text-xs"
+              @focus="($event.target as HTMLTextAreaElement).select()"
+            />
+          </div>
+        </template>
 
         <p class="text-xs text-muted">
           Har bir taklif qoʻlda tekşiriladi. Nomi va turi yetarli —

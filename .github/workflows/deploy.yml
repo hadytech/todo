@@ -80,6 +80,10 @@ jobs:
           # Both empty by default — nothing is loaded until they are set.
           NUXT_PUBLIC_ANALYTICS: ${{ vars.ANALYTICS || '' }}
           NUXT_PUBLIC_SITE_VERIFICATION: ${{ vars.SITE_VERIFICATION || '' }}
+          # Where place suggestions go while the site has no server
+          # behind it. Set repository variable TELEGRAM to a username
+          # (no @); without it the form copies the text instead.
+          NUXT_PUBLIC_TELEGRAM: ${{ vars.TELEGRAM || '' }}
       - name: Sahifa byudjeti
         run: npm run check:budget
       - name: HTML tekşiruvi
