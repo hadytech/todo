@@ -44,7 +44,7 @@ useHead({
 </script>
 
 <template>
-  <div class="mx-auto max-w-sm">
+  <div class="mx-auto max-w-sm px-4 py-4">
     <h1 class="text-2xl font-bold">Kiriş</h1>
 
     <template v-if="user">

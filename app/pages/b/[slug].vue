@@ -104,7 +104,7 @@ useSeoMeta({
  * actually lands.
  */
 const trail = computed(() => [
-  { name: 'Bosh sahifa', ascii: 'yalp.uz', to: '/' },
+  { name: 'Boş sahifa', ascii: 'yalp.uz', to: '/' },
   { name: b.value!.districtName, ascii: b.value!.districtAscii, to: `/tuman/${b.value!.district}` },
   {
     name: b.value!.categoryName,
@@ -141,7 +141,7 @@ useHead({
 </script>
 
 <template>
-  <article v-if="b">
+  <article v-if="b" class="px-4 py-4">
     <nav class="text-sm text-muted mb-2 flex flex-wrap gap-x-1">
       <template v-for="(t, i) in trail" :key="t.to">
         <NuxtLink :to="t.to" class="hover:opacity-100 hover:text-accent">{{ t.name }}</NuxtLink>

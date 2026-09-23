@@ -113,7 +113,7 @@ useHead({
 </script>
 
 <template>
-  <div>
+  <div class="px-4 py-4">
     <input
       v-model="q"
       type="search"

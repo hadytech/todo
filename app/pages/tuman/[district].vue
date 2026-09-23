@@ -66,7 +66,7 @@ useHead({
 </script>
 
 <template>
-  <div>
+  <div class="px-4 py-4">
     <nav class="text-sm text-muted mb-2">
       <NuxtLink to="/" class="hover:opacity-100">Bosh sahifa</NuxtLink>
       <span class="mx-1">›</span>
@@ -84,9 +84,9 @@ useHead({
           class="text-sm text-accent"
         >Hammasi ({{ g.items.length }})</NuxtLink>
       </div>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <BusinessCard v-for="b in g.items.slice(0, 5)" :key="b.slug" :business="b" />
-      </div>
+      <div class="-mx-4">
+        <FeedRow v-for="b in g.items.slice(0, 5)" :key="b.slug" :business="b" />
+        </div>
     </section>
 
     <p v-if="!groups.length" class="text-muted text-sm">
