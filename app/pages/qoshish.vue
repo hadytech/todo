@@ -318,25 +318,25 @@ useHead({
       <!-- The one field. A name, or a link that yields one. -->
       <div class="mt-5">
         <label for="f-primary" class="sr-only">Joy nomi yoki xarita havolasi</label>
-        <div class="flex gap-2">
-          <input
-            id="f-primary"
-            v-model="primary"
-            required
-            maxlength="300"
-            placeholder="Çorsu Sartaroşxonasi — yoki yandex.uz/maps/…"
-            class="min-w-0 flex-1 rounded-soft border border-line bg-surface px-3 py-2.5"
-            @change="readPrimary"
-            @paste="nextTick(readPrimary)"
-          >
-          <button
-            type="button"
-            :disabled="busy"
-            class="shrink-0 rounded-soft border border-line px-3 text-sm hover:border-accent
-                   disabled:opacity-60"
-            @click="readPrimary"
-          >Öqiş</button>
-        </div>
+        <!--
+          One field, no button beside it.
+          There used to be an "Öqiş" button here. It only ever did
+          anything for a pasted link, but it sat next to a field people
+          mostly type a name into, so it read as the way to submit the
+          name — and pressing it appeared to do nothing at all. A name
+          updates live through the watcher above, and a link resolves on
+          paste and on blur, so the button was never needed.
+        -->
+        <input
+          id="f-primary"
+          v-model="primary"
+          required
+          maxlength="300"
+          placeholder="Çorsu Sartaroşxonasi — yoki yandex.uz/maps/…"
+          class="w-full rounded-soft border border-line bg-surface px-3 py-2.5"
+          @change="readPrimary"
+          @paste="nextTick(readPrimary)"
+        >
       </div>
 
       <!-- Off-screen rather than hidden, so a bot reading styles still
