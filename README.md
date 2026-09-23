@@ -497,6 +497,36 @@ anything.
 
 ## Layout
 
+Three columns on a wide screen, one on a phone — a timeline rather than a
+page of cards.
+
+```
+lg+   [ rail 248px ][ timeline 600px ][ rail 320px ]
+xl-   [ rail 248px ][ timeline 600px ]
+phone [ slim header / timeline / bottom tabs ]
+```
+
+The centre column is a fixed 600px with a hairline down each side, and
+rows inside it are **full bleed with a separator underneath** rather than
+cards with gaps. That is the whole difference in feel: a feed reads as one
+continuous surface, and the separators do the work that card edges would.
+
+Search is not at the top of the timeline — a search box there pushes the
+first item below the fold. It lives in the right rail on a wide screen and
+is a tab of its own on a phone.
+
+`NavRail` renders both shapes from one list of destinations, because
+keeping a rail and a bottom bar in sync by hand is how a link ends up in
+one and not the other.
+
+Two components appear twice in one document (the mark in the rail and in
+the phone header; search in the rail and in the timeline), so both take
+their internal ids from `useId()`. Duplicate ids are invalid HTML and
+`url(#brandmark)` would have resolved to whichever came first —
+`npm run check:html` caught it.
+
+
+
 ```
 data/          YAML — this is the database
 lib/           alphabet, schema, loader, search config (all unit-tested)

@@ -288,7 +288,7 @@ useHead({
 </script>
 
 <template>
-  <div class="mx-auto max-w-xl">
+  <div class="mx-auto max-w-xl px-4 py-4">
     <h1 class="text-2xl font-bold">Joy qöşiş</h1>
 
     <template v-if="sent">

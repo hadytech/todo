@@ -61,7 +61,7 @@ useHead({
 </script>
 
 <template>
-  <div>
+  <div class="px-4 py-4">
     <nav class="text-sm text-muted mb-2 flex flex-wrap gap-x-1">
       <NuxtLink to="/" class="hover:text-accent">Bosh sahifa</NuxtLink>
       <span>›</span>
@@ -73,9 +73,9 @@ useHead({
     <h1 class="text-xl font-bold mb-1">{{ title }}</h1>
     <p class="text-muted text-sm mb-5">{{ data?.items.length ?? 0 }} ta joy</p>
 
-    <div class="grid gap-3 sm:grid-cols-2">
-      <BusinessCard v-for="b in data?.items" :key="b.slug" :business="b" />
-    </div>
+    <div class="-mx-4">
+      <FeedRow v-for="b in data?.items" :key="b.slug" :business="b" />
+      </div>
 
     <p v-if="!data?.items.length" class="text-muted text-sm">
       Bu tumanda hali joy qöşilmagan.

@@ -20,6 +20,13 @@ const liveCategories = computed(() =>
 const liveDistricts = computed(() =>
   (data.value?.districts ?? []).filter((d) => (counts.value?.districts[d.slug] ?? 0) > 0))
 
+/** Category icon per row, so a listing without a photo still has a mark. */
+const iconFor = (slug: string) =>
+  (data.value?.categories ?? []).find((c) => c.slug === slug)?.icon
+
+const feed = computed(() =>
+  (data.value?.items ?? []).map((b) => ({ ...b, icon: iconFor(b.categoryTop) })))
+
 const site = config.public.siteUrl as string
 
 /**
@@ -76,111 +83,89 @@ useHead({
 
 <template>
   <div>
-    <section class="mb-9">
-      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
-        Toşkentda nima qidiryapsiz?
-      </h1>
-      <p class="mt-2 text-muted text-pretty max-w-2xl">
-        Istagan alifboda yozing — <span class="text-ink">çoyxona</span>,
-        <span class="text-ink">çoyxona</span> yoki
-        <span class="text-ink">чойхона</span> bir xil natija beradi.
-      </p>
+    <!-- The column header. Sticky under the phone bar, at the top on
+         desktop where the rail carries the branding instead. -->
+    <div
+      class="sticky top-14 lg:top-0 z-20 border-b border-line bg-canvas/85 px-4 py-3
+             backdrop-blur"
+    >
+      <h1 class="text-lg font-bold">Lenta</h1>
+    </div>
 
-      <form class="mt-5 flex flex-col sm:flex-row gap-2" @submit.prevent="go">
-        <input
-          v-model="q"
-          type="search"
-          aria-label="Joy qidiriş"
-          placeholder="Nom, tuman yoki turi…"
-          class="flex-1 rounded-soft border border-line bg-surface px-4 py-3.5
-                 placeholder:text-muted"
-        >
-        <button class="rounded-soft bg-accent text-accent-ink px-6 py-3.5 font-medium">
-          Qidiruv
-        </button>
-      </form>
-    </section>
-
-    <section v-if="liveCategories.length" class="mb-9">
-      <div class="tiles grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <NuxtLink
-          v-for="c in liveCategories"
-          :key="c.slug"
-          :to="`/kategoriya/${c.slug}`"
-          class="card rounded-soft border border-line bg-surface p-4
-                 hover:border-accent hover:shadow-sm"
-        >
-          <span class="block text-2xl leading-none">{{ c.icon }}</span>
-          <span class="mt-2 block font-medium leading-tight">{{ c.name }}</span>
-          <span class="mt-0.5 block text-sm text-muted tabular-nums">
-            {{ counts?.categories[c.slug] }} ta joy
-          </span>
-        </NuxtLink>
-      </div>
-    </section>
-
-    <section v-if="liveDistricts.length" class="mb-9">
-      <h2 class="text-sm font-semibold text-muted mb-2.5">Tumanlar</h2>
-      <div class="flex flex-wrap gap-2">
-        <NuxtLink
-          v-for="d in liveDistricts"
-          :key="d.slug"
-          :to="`/tuman/${d.slug}`"
-          class="rounded-pill border border-line bg-surface px-3.5 py-1.5 text-sm
-                 hover:border-accent"
-        >{{ d.name }}<span class="ml-1.5 text-muted tabular-nums">{{ counts?.districts[d.slug] }}</span></NuxtLink>
-      </div>
-    </section>
+    <!-- The composer. A timeline opens with an invitation to add to it. -->
+    <NuxtLink
+      to="/qoshish"
+      class="flex items-center gap-3 border-b border-line px-4 py-3 hover:bg-raised/40"
+    >
+      <span
+        class="grid h-11 w-11 shrink-0 place-items-center rounded-pill bg-accent-soft
+               text-xl text-accent"
+        aria-hidden="true"
+      >+</span>
+      <span class="text-muted">Bir joyni qöşasizmi?</span>
+      <span
+        class="ml-auto shrink-0 rounded-pill bg-accent px-4 py-1.5 text-sm font-bold
+               text-accent-ink"
+      >Qöşiş</span>
+    </NuxtLink>
 
     <!--
-      Nothing published yet. An empty directory is the truth right now, so
-      the page says so and offers the one useful action, rather than
-      rendering a bare search box over nothing — which reads as broken
-      rather than new.
+      Nothing published yet. An empty timeline is the truth right now, so
+      it says so in the shape of a row rather than leaving a blank
+      column, which reads as broken rather than new.
     -->
-    <section v-if="!data?.items?.length" class="rounded-soft border border-line bg-surface p-6">
+    <div v-if="!feed.length" class="border-b border-line px-4 py-8">
       <h2 class="font-semibold">Maʼlumotnoma töldirilmoqda</h2>
       <p class="mt-1.5 text-muted text-pretty">
-        Hozircha tekşirilgan joy yöq.
+        Hozirça tekşirilgan joy yöq.
         <template v-if="data?.pending">
           {{ data.pending }} ta joy nomi yozib qöyilgan — manzil, telefon va iş vaqti
           tekşirilgaç, şu yerda paydo böladi.
         </template>
       </p>
-      <NuxtLink
-        to="/qoshish"
-        class="mt-4 inline-block rounded-soft bg-accent text-accent-ink px-5 py-2.5 font-medium"
-      >Joy qöşiş</NuxtLink>
+    </div>
+
+    <FeedRow v-for="b in feed" :key="b.slug" :business="b" />
+
+    <NuxtLink
+      v-if="data?.total && data.total > feed.length"
+      to="/qidiruv"
+      class="block border-b border-line px-4 py-4 text-accent hover:bg-raised/40"
+    >Hammasini köriş ({{ data.total }} ta)</NuxtLink>
+
+    <!-- Browsing, below the fold. On a phone this is the only place the
+         categories and districts appear at all. -->
+    <section v-if="liveCategories.length" class="border-b border-line px-4 py-4">
+      <h2 class="mb-3 text-sm font-semibold text-muted">Turlari böyiça</h2>
+      <div class="flex flex-wrap gap-2">
+        <NuxtLink
+          v-for="c in liveCategories"
+          :key="c.slug"
+          :to="`/kategoriya/${c.slug}`"
+          class="rounded-pill border border-line px-3.5 py-1.5 text-sm hover:border-accent"
+        >
+          <span aria-hidden="true">{{ c.icon }}</span>
+          {{ c.name }}
+          <span class="ml-1 text-muted tabular-nums">{{ counts?.categories[c.slug] }}</span>
+        </NuxtLink>
+      </div>
     </section>
 
-    <section v-if="data?.items?.length">
-      <div class="flex items-baseline justify-between mb-2.5">
-        <h2 class="text-sm font-semibold text-muted">Joylar</h2>
-        <span class="text-sm text-muted tabular-nums">{{ data.total }} ta</span>
+    <section v-if="liveDistricts.length" class="border-b border-line px-4 py-4">
+      <h2 class="mb-3 text-sm font-semibold text-muted">Tumanlar</h2>
+      <div class="flex flex-wrap gap-2">
+        <NuxtLink
+          v-for="d in liveDistricts"
+          :key="d.slug"
+          :to="`/tuman/${d.slug}`"
+          class="rounded-pill border border-line px-3.5 py-1.5 text-sm hover:border-accent"
+        >{{ d.name }}<span class="ml-1.5 text-muted tabular-nums">{{ counts?.districts[d.slug] }}</span></NuxtLink>
       </div>
-
-      <!-- One column on a phone, two once there is room. -->
-      <div class="grid gap-3 sm:grid-cols-2">
-        <BusinessCard v-for="b in data.items" :key="b.slug" :business="b" />
-      </div>
-
-      <NuxtLink
-        v-if="data.total > data.items.length"
-        to="/qidiruv"
-        class="inline-block mt-4 text-sm text-accent"
-      >Hammasini köriş →</NuxtLink>
     </section>
+
+    <!-- The phone has no right rail, so search lives here too. -->
+    <div class="xl:hidden border-b border-line px-4 py-4">
+      <SideSearch />
+    </div>
   </div>
 </template>
-
-<style scoped>
-/**
- * With an odd number of categories the last tile would sit alone in a
- * half-empty row, which reads as a layout bug rather than a choice. At
- * two columns it stretches to fill the row instead; at three columns the
- * browser handles it, so the rule is scoped to the narrow layout.
- */
-@media (max-width: 639px) {
-  .tiles > :last-child:nth-child(odd) { grid-column: span 2; }
-}
-</style>
