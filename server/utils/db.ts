@@ -19,7 +19,7 @@ export function db(): postgres.Sql {
   if (!url) {
     throw createError({
       statusCode: 503,
-      statusMessage: 'Sharhlar vaqtincha ishlamayapti',
+      statusMessage: 'Şarhlar vaqtincha ishlamayapti',
     })
   }
   handle ??= postgres(url, {

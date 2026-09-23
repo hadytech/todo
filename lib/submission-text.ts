@@ -15,6 +15,7 @@ export interface Draft {
   districtLabel?: string
   address?: string
   coords?: { lat: number; lng: number } | null
+  rating?: number
   phone?: string
   hoursNote?: string
   website?: string
@@ -22,8 +23,9 @@ export interface Draft {
   contact?: string
 }
 
-const LABELS: [keyof Draft | 'coords', string][] = [
+const LABELS: [keyof Draft | 'coords' | 'rating', string][] = [
   ['categoryLabel', 'Turi'],
+  ['rating', 'Baho'],
   ['districtLabel', 'Tuman'],
   ['address', 'Manzil'],
   ['coords', 'Nuqta'],
@@ -38,6 +40,12 @@ export function submissionText(d: Draft): string {
   const lines = [`yalp.uz — yangi joy: ${d.name.trim()}`, '']
 
   for (const [key, label] of LABELS) {
+    if (key === 'rating') {
+      // Stars rather than a bare number: a maintainer reading these in
+      // a Telegram thread should see the rating without decoding it.
+      if (d.rating) lines.push(`${label}: ${'★'.repeat(d.rating)}${'☆'.repeat(5 - d.rating)} (${d.rating}/5)`)
+      continue
+    }
     if (key === 'coords') {
       // Written as a bare "lat, lng" pair on purpose: that is a form
       // both `npm run entry` and every maps app accept when pasted.

@@ -28,7 +28,7 @@ onMounted(load)
     <div class="font-medium leading-snug">{{ business.name }}</div>
 
     <!-- Stars only once there are enough reviews to mean anything. Below
-         that the count is shown on its own: "2 ta sharh" invites a reader,
+         that the count is shown on its own: "2 ta şarh" invites a reader,
          a lone five-star average misinforms one. -->
     <div v-if="rating?.count" class="mt-1 flex items-center gap-1.5 text-sm">
       <template v-if="rating.average !== null">
@@ -36,7 +36,7 @@ onMounted(load)
         <span class="font-medium tabular-nums">{{ rating.average.toFixed(1) }}</span>
         <span class="text-muted">({{ rating.count }})</span>
       </template>
-      <span v-else class="text-muted">{{ rating.count }} ta sharh</span>
+      <span v-else class="text-muted">{{ rating.count }} ta şarh</span>
     </div>
     <div class="mt-1 text-sm text-muted">
       {{ business.categoryName }} · {{ business.districtName }}

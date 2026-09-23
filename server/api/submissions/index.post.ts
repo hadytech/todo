@@ -4,6 +4,7 @@ import { currentUser } from '../../utils/auth'
 import { checkSubmissionRate, clientIp } from '../../utils/ratelimit'
 import { catalog } from '../../utils/catalog'
 import { normalisePhone } from '../../../lib/phone'
+import { MAX_ENCODED } from '../../../lib/photo'
 
 /**
  * Accept a place suggested from the site.
@@ -40,6 +41,25 @@ const Body = z.object({
   telegram: optional(z.string().trim().max(40)),
   instagram: optional(z.string().trim().max(40)),
   hoursNote: optional(z.string().trim().max(300)),
+
+  /**
+   * The submitter's own rating, because adding a place and having an
+   * opinion about it are the same act.
+   */
+  rating: z.number().int().min(1).max(5).optional(),
+
+  /**
+   * A JPEG data URL, already resized in the browser.
+   *
+   * The size ceiling is enforced here as well as on the device: a limit
+   * that only exists in the client is not a limit, and an unbounded
+   * string field is a cheap way to fill a free database.
+   */
+  photo: optional(
+    z.string()
+      .max(MAX_ENCODED, 'rasm juda katta')
+      .regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/, 'rasm formati notöğri'),
+  ),
   comment: optional(z.string().trim().max(1000)),
   contact: optional(z.string().trim().max(200)),
 
@@ -71,8 +91,10 @@ export default defineEventHandler(async (event) => {
       statusMessage: field === 'name'
         ? 'Joy nomini yozing'
         : field === 'lat' || field === 'lng'
-          ? 'Nuqta Toşkent ichida bölsin'
-          : 'Formani tekşirib qayta yuboring',
+          ? 'Nuqta Toşkent içida bölsin'
+          : field === 'photo'
+            ? 'Rasmni yuborib bölmadi — boşqa rasm tanlang'
+            : 'Formani tekşirib qayta yuboring',
     })
   }
   const b = parsed.data
@@ -96,13 +118,14 @@ export default defineEventHandler(async (event) => {
     insert into submissions (
       name, category, district, address, lat, lng,
       phone, website, telegram, instagram,
-      hours_note, comment, contact, user_id, submitted_ip
+      hours_note, comment, contact, rating, photo, user_id, submitted_ip
     ) values (
       ${b.name}, ${b.category}, ${b.district ?? null}, ${b.address ?? null},
       ${b.lat ?? null}, ${b.lng ?? null},
       ${normalisePhone(b.phone) ?? null}, ${b.website ?? null},
       ${b.telegram ?? null}, ${b.instagram ?? null},
       ${b.hoursNote ?? null}, ${b.comment ?? null}, ${b.contact ?? null},
+      ${b.rating ?? null}, ${b.photo ?? null},
       ${user?.id ?? null}, ${ip}
     )
     returning id

@@ -37,7 +37,7 @@ function locate() {
       // Sorting a Tashkent directory by distance from another city is
       // just a slow alphabetical shuffle — say so instead.
       if (!inTashkent(p)) {
-        locateError.value = 'Siz Toşkentdan tapqaridasiz — masofa böyicha saralaş öçirildi.'
+        locateError.value = 'Siz Toşkentdan tapqaridasiz — masofa böyiça saralaş öçirildi.'
         return
       }
       here.value = p
@@ -126,7 +126,7 @@ useHead({
     <div v-if="results.length" class="flex flex-wrap gap-2 mb-3 text-sm">
       <select
         v-model="category"
-        aria-label="Turi böyicha filtr"
+        aria-label="Turi böyiça filtr"
         class="rounded-soft border border-line px-2 py-1 bg-transparent"
       >
         <option value="">Hamma turi</option>
@@ -144,7 +144,7 @@ useHead({
 
       <select
         v-model="district"
-        aria-label="Tuman böyicha filtr"
+        aria-label="Tuman böyiça filtr"
         class="rounded-soft border border-line px-2 py-1 bg-transparent"
       >
         <option value="">Hamma tuman</option>
