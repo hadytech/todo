@@ -120,6 +120,27 @@ Four routes in, easiest first:
 3. **Edit on GitHub** — every business page links to its own YAML file.
 4. **`npm run entry`** — the local form, for entering many at once.
 
+### When there is no server
+
+On a static build — GitHub Pages, or a local checkout with no `.env` —
+there is no `/api/submissions` to post to. The form does **not** hide
+itself and point at GitHub: requiring a GitHub account is the exact
+barrier `/qoshish` exists to remove, and a page that falls back to it has
+fallen back to nothing.
+
+Instead the form stays, collects the same fields, and hands the visitor
+the same facts as a plain-text message — copied to the clipboard, with
+Telegram opened alongside it. Telegram because in Tashkent that is the
+channel people actually have.
+
+Set repository variable **`TELEGRAM`** to the username that should
+receive them, without the `@`. Without it the button copies the text and
+says so, rather than opening a chat that does not exist.
+
+The message shape is pinned by tests in
+[`lib/submission-text.ts`](lib/submission-text.ts), because it is what a
+maintainer reads every day.
+
 ### Where the site form goes
 
 Suggestions land in a `submissions` table, not in the directory. Nothing

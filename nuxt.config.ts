@@ -194,6 +194,19 @@ export default defineNuxtConfig({
       /** Source repository. Update here if the repo is renamed. */
       repoUrl: process.env.NUXT_PUBLIC_REPO_URL || 'https://github.com/hadytech/todo',
       /**
+       * Telegram account or channel that accepts place suggestions,
+       * without the @.
+       *
+       * This is what makes /qoshish usable on a build with no server:
+       * the form still collects everything and hands the visitor a
+       * ready-made message. Telegram rather than email because in
+       * Tashkent it is the channel people actually have — the whole
+       * point of the form is that requiring a GitHub account loses the
+       * person who knows which barber is good, and requiring anything
+       * else they do not use loses them just as surely.
+       */
+      telegram: process.env.NUXT_PUBLIC_TELEGRAM || '',
+      /**
        * Swap this to flip the whole site between alphabets. Everything is
        * derived from one canonical form, so this is the only line that
        * changes if the data says standard Latin wins.
