@@ -16,11 +16,11 @@ const TIME = /^([01]\d|2[0-4]):([0-5]\d)$/
 
 const timeRange = z
   .tuple([
-    z.string().regex(TIME, 'vaqt HH:MM formatida boʻlsin'),
-    z.string().regex(TIME, 'vaqt HH:MM formatida boʻlsin'),
+    z.string().regex(TIME, 'vaqt HH:MM formatida bölsin'),
+    z.string().regex(TIME, 'vaqt HH:MM formatida bölsin'),
   ])
   .refine(([open, close]) => open < close, {
-    message: 'ochilish vaqti yopilish vaqtidan oldin boʻlsin (kechasi yopiladigan joy uchun 24:00 ishlating)',
+    message: 'ochilish vaqti yopilish vaqtidan oldin bölsin (kechasi yopiladigan joy uchun 24:00 ishlating)',
   })
 
 /**
@@ -33,7 +33,7 @@ const timeRanges = z
   .max(3)
   .refine(
     (rs) => rs.every((r, i) => i === 0 || rs[i - 1]![1] <= r[0]!),
-    { message: 'vaqt oraliqlari tartib boʻyicha va bir-birining ustiga tuşmasin' },
+    { message: 'vaqt oraliqlari tartib böyicha va bir-birining ustiga tuşmasin' },
   )
 
 /**
@@ -46,8 +46,8 @@ const timeRanges = z
 const day = z.union([z.literal('closed'), timeRange, timeRanges], {
   errorMap: () => ({
     message:
-      'kun "closed", ["HH:MM", "HH:MM"], yoki tanaffusli boʻlsa '
-      + '[["09:00","15:00"], ["18:00","23:00"]] koʻrinişida boʻlsin',
+      'kun "closed", ["HH:MM", "HH:MM"], yoki tanaffusli bölsa '
+      + '[["09:00","15:00"], ["18:00","23:00"]] körinişida bölsin',
   }),
 })
 
@@ -68,7 +68,7 @@ const photo = z.object({
 export const businessSchema = z.object({
   name: z.string().min(2).max(120),
   /** "top/sub", matching data/categories.yaml. */
-  category: z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+$/, 'kategoriya "asosiy/ichki" koʻrinishida boʻlsin'),
+  category: z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+$/, 'kategoriya "asosiy/ichki" körinishida bölsin'),
   /** Slug from data/districts.yaml. Optional on a draft. */
   district: z.string().regex(/^[a-z0-9-]+$/).optional(),
   address: z.string().min(4).max(300).optional(),
@@ -80,7 +80,7 @@ export const businessSchema = z.object({
   }).optional(),
   description: z.string().max(1200).optional(),
   phones: z.array(
-    z.string().regex(/^\+998 \d{2} \d{3} \d{2} \d{2}$/, 'telefon "+998 XX XXX XX XX" formatida boʻlsin'),
+    z.string().regex(/^\+998 \d{2} \d{3} \d{2} \d{2}$/, 'telefon "+998 XX XXX XX XX" formatida bölsin'),
   ).max(3).default([]),
   telegram: z.string().regex(/^@[A-Za-z0-9_]{4,32}$/).optional(),
   instagram: z.string().regex(/^[A-Za-z0-9_.]{1,30}$/).optional(),
@@ -109,7 +109,7 @@ export const businessSchema = z.object({
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: [field],
-        message: `"published" joy uchun ${field} majburiy (tekşirilmagan boʻlsa: status: draft)`,
+        message: `"published" joy uchun ${field} majburiy (tekşirilmagan bölsa: status: draft)`,
       })
     }
   }

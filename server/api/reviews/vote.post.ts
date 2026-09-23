@@ -11,7 +11,7 @@ const Body = z.object({
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event)
   const parsed = Body.safeParse(await readBody(event))
-  if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Notoʻğri ovoz' })
+  if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Notöğri ovoz' })
 
   const { reviewId, value } = parsed.data
   const sql = db()
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
      where id = ${reviewId} and hidden_at is null
   `
   if (!own) throw createError({ statusCode: 404, statusMessage: 'Sharh topilmadi' })
-  if (own.mine) throw createError({ statusCode: 403, statusMessage: 'Oʻz sharhingizga ovoz bera olmaysiz' })
+  if (own.mine) throw createError({ statusCode: 403, statusMessage: 'Öz sharhingizga ovoz bera olmaysiz' })
 
   if (value === 0) {
     await sql`delete from votes where review_id = ${reviewId} and user_id = ${user.id}`

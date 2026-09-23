@@ -48,14 +48,14 @@ async function submit() {
     await reload()
   } catch (e: unknown) {
     form.error = (e as { data?: { statusMessage?: string } })?.data?.statusMessage
-      || 'Saqlanmadi. Qayta urinib koʻring.'
+      || 'Saqlanmadi. Qayta urinib köring.'
   } finally {
     form.busy = false
   }
 }
 
 async function remove() {
-  if (!confirm('Sharhingiz oʻçirilsinmi?')) return
+  if (!confirm('Sharhingiz öçirilsinmi?')) return
   await $fetch('/api/reviews', { method: 'DELETE', query: { slug: props.slug } }).catch(() => {})
   await reload()
 }
@@ -182,7 +182,7 @@ useHead(() => {
       </div>
 
       <p v-if="data.count && data.average === null" class="mt-2 text-sm text-muted">
-        Oʻrtaça baho {{ MIN_REVIEWS_FOR_AVERAGE }} ta sharhdan keyin koʻrsatiladi.
+        Örtaça baho {{ MIN_REVIEWS_FOR_AVERAGE }} ta sharhdan keyin körsatiladi.
       </p>
 
       <!-- Write / edit -->
@@ -224,7 +224,7 @@ useHead(() => {
               v-model="form.body"
               rows="4"
               maxlength="4000"
-              placeholder="Nima yaxşi edi, nima yoʻq? Boşqalarga foydali boʻlsin."
+              placeholder="Nima yaxşi edi, nima yöq? Boşqalarga foydali bölsin."
               class="w-full rounded-soft border border-line bg-canvas px-3 py-2"
             />
             <p class="mt-1 text-xs text-muted">
@@ -251,7 +251,7 @@ useHead(() => {
               type="button"
               class="rounded-pill px-4 py-2 text-sm text-muted hover:text-accent ml-auto"
               @click="remove"
-            >Oʻçiriş</button>
+            >Öçiriş</button>
           </div>
         </form>
       </div>
@@ -312,7 +312,7 @@ useHead(() => {
       </ol>
 
       <p v-else-if="!pending" class="mt-6 text-sm text-muted">
-        Hali sharh yoʻq. Birinçi boʻling.
+        Hali sharh yöq. Birinçi böling.
       </p>
     </template>
   </section>

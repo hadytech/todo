@@ -90,8 +90,8 @@ useHead({
     </section>
 
     <p v-if="!groups.length" class="text-muted text-sm">
-      Bu tumanda hali joy qoʻşilmagan.
-      <NuxtLink to="/qoshish" class="text-accent">Birinchi boʻlib qoʻşing</NuxtLink>.
+      Bu tumanda hali joy qöşilmagan.
+      <NuxtLink to="/qoshish" class="text-accent">Birinchi bölib qöşing</NuxtLink>.
     </p>
   </div>
 </template>

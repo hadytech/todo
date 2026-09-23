@@ -130,6 +130,69 @@ export function toDisplay(input: string): string {
   return input.normalize('NFC')
 }
 
+/**
+ * Rules for folding official Latin INTO the new alphabet.
+ *
+ * Only ö and ğ. That is the whole point of the restriction: `oʻ` and
+ * `gʻ` are digraphs that exist nowhere but Uzbek orthography, so folding
+ * them is unambiguous. `ch` and `sh` are not — "Westminster",
+ * "Washington" and "MDIS Tashkent" would become "Weştminster",
+ * "Waşington" and "Taşkent", and a directory that renames the
+ * institutions it lists is worse than one with inconsistent spelling.
+ * Those two stay a human's judgement.
+ */
+/**
+ * The apostrophes that only ever mean "this is Uzbek orthography".
+ *
+ * The ASCII apostrophe and the backtick are deliberately absent. They
+ * are code punctuation: `from './lib/rating'` ends in g-then-quote, and
+ * a transform that treats that as an Uzbek digraph rewrites the import
+ * to `'./lib/ratinğ` and takes the build down. Anything that runs over
+ * source has to use this set.
+ */
+const UZBEK_QUOTES = ['\u02BB', '\u2018', '\u2019', '\u02BC']
+/** Plus the ones a person types when the okina is not on their keyboard. */
+const TYPED_QUOTES = [...UZBEK_QUOTES, "'", '`']
+
+const canonicalRules = (quotes: string[]): Rule[] => LETTERS
+  .filter((l) => l.canonical === 'ö' || l.canonical === 'ğ')
+  .flatMap((l) => quotes.map((q) => [l.standard[0] + q, l.canonical] as Rule))
+
+const TO_CANONICAL = canonicalRules(UZBEK_QUOTES)
+const TO_CANONICAL_TYPED = canonicalRules(TYPED_QUOTES)
+
+/**
+ * Normalise authored text into the new alphabet.
+ *
+ * `toDisplay` assumes its input is already canonical, because the
+ * contract is that `data/` is authored that way. This is what enforces
+ * that contract — run over anything written by hand, it turns the
+ * official spelling into the canonical one, so "koʻchasi" stops being
+ * half-converted to "koʻçasi" and becomes "köçasi".
+ */
+export function toCanonical(input: string, opts: { typed?: boolean } = {}): string {
+  // `typed` widens the rule set to the apostrophes people reach for when
+  // the okina is not on their keyboard. Safe on prose and on anything a
+  // visitor submitted; never safe on source code.
+  return transliterate(input, opts.typed ? TO_CANONICAL_TYPED : TO_CANONICAL)
+}
+
+/**
+ * Official-Latin digraphs left in text that should be canonical.
+ *
+ * Used by the validator and the HTML audit. An empty result is the
+ * passing case.
+ */
+export function findOfficialSpellings(input: string): string[] {
+  const out = new Set<string>()
+  // Same restriction as TO_CANONICAL, and for the same reason: run over
+  // a .ts file, an ASCII apostrophe would report every import as a
+  // spelling error.
+  const re = new RegExp(`[A-Za-z]*[oOgG][${UZBEK_QUOTES.join('')}][A-Za-z]*`, 'g')
+  for (const m of input.normalize('NFC').matchAll(re)) out.add(m[0])
+  return [...out]
+}
+
 /** Official Uzbek Latin orthography, for `alternateName` and copy-paste. */
 export function toStandardLatin(input: string): string {
   return transliterate(input, TO_STANDARD)

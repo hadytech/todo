@@ -1,12 +1,12 @@
-name: Yangi joy qoʻşiş
-description: Toşkentdagi joyni maʼlumotnomaga qoʻşiş
+name: Yangi joy qöşiş
+description: Toşkentdagi joyni maʼlumotnomaga qöşiş
 title: "Yangi joy: "
 labels: ["yangi-joy"]
 body:
   - type: markdown
     attributes:
       value: |
-        Rahmat! Quyidagi maydonlarni toʻldiring — qolganini biz qilamiz.
+        Rahmat! Quyidagi maydonlarni töldiring — qolganini biz qilamiz.
 
         Nomlarni **yangi alifboda** yozing: `ö ğ ç ş`.
         Bilmasangiz, odatdagiça yozing — biz tuzatamiz.
@@ -61,7 +61,7 @@ body:
     id: address
     attributes:
       label: Manzil
-      placeholder: Bunyodkor şoh koʻçasi 12
+      placeholder: Bunyodkor şoh köçasi 12
     validations: { required: true }
 
   - type: input
@@ -69,7 +69,7 @@ body:
     attributes:
       label: Xaritadagi joyi
       description: >
-        Google yoki Yandex Maps'da joyni toping va havolani şu yerga qoʻying.
+        Google yoki Yandex Maps'da joyni toping va havolani şu yerga qöying.
         Yoki koordinatani yozing: 41.3264, 69.2347
       placeholder: https://yandex.uz/maps/?ll=69.2347%2C41.3264
     validations: { required: true }
@@ -92,5 +92,5 @@ body:
   - type: textarea
     id: extra
     attributes:
-      label: Qoʻşimça
+      label: Qöşimça
       description: Tavsif, Telegram, Instagram, sayt — bilganingizça.

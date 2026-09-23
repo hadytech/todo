@@ -44,9 +44,9 @@ async function checkPages() {
     add('joy sahifasida JSON-LD bor', biz.body.includes('"@type":"LocalBusiness"'))
     const canonical = biz.body.match(/rel="canonical" href="([^"]+)"/)?.[1] ?? ''
     add(
-      'canonical şu domenni koʻrsatadi',
+      'canonical şu domenni körsatadi',
       canonical.startsWith(base),
-      canonical || 'canonical yoʻq',
+      canonical || 'canonical yöq',
     )
   }
   return home
@@ -75,7 +75,7 @@ async function checkRobots(expectIndexable: boolean) {
 
   const disallowed = /Disallow:\s*\/\s*$/m.test(res.body)
   add(
-    expectIndexable ? 'robots.txt indekslaşga ruxsat beradi' : 'robots.txt indekslaşni toʻsadi',
+    expectIndexable ? 'robots.txt indekslaşga ruxsat beradi' : 'robots.txt indekslaşni tösadi',
     expectIndexable ? !disallowed : disallowed,
     res.body.trim().split('\n').join(' | '),
   )
@@ -89,9 +89,9 @@ async function checkSitemap() {
   const locs = [...res.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]!)
   add('sitemapda havolalar bor', locs.length > 0, `${locs.length} ta`)
   add(
-    'sitemap şu domenni koʻrsatadi',
+    'sitemap şu domenni körsatadi',
     locs.every((l) => l.startsWith(base)),
-    locs.find((l) => !l.startsWith(base)) ?? 'hammasi toʻğri',
+    locs.find((l) => !l.startsWith(base)) ?? 'hammasi töğri',
   )
 }
 
@@ -101,9 +101,9 @@ async function checkSearchIndex() {
   if (res.status === 200) {
     try {
       const parsed = JSON.parse(res.body)
-      add('qidiruv indeksi oʻqildi', typeof parsed === 'object' && parsed !== null)
+      add('qidiruv indeksi öqildi', typeof parsed === 'object' && parsed !== null)
     } catch {
-      add('qidiruv indeksi oʻqildi', false, 'JSON buzuq')
+      add('qidiruv indeksi öqildi', false, 'JSON buzuq')
     }
   }
 }
@@ -133,12 +133,12 @@ async function checkHttps() {
   try {
     const plain = await fetch(insecure, { redirect: 'follow' })
     add(
-      'http https ga yoʻnaltiradi',
+      'http https ga yönaltiradi',
       plain.url.startsWith('https://'),
-      plain.url.startsWith('https://') ? 'yoʻnaltirildi' : `http'da qoldi: ${plain.url}`,
+      plain.url.startsWith('https://') ? 'yönaltirildi' : `http'da qoldi: ${plain.url}`,
     )
   } catch (e) {
-    add('http https ga yoʻnaltiradi', false, (e as Error).message)
+    add('http https ga yönaltiradi', false, (e as Error).message)
   }
 }
 
@@ -157,5 +157,5 @@ for (const c of checks) {
 }
 
 const failed = checks.filter((c) => !c.ok)
-console.log(failed.length ? `\n${failed.length} ta tekşiruv oʻtmadi.` : '\nSayt işlayapti.')
+console.log(failed.length ? `\n${failed.length} ta tekşiruv ötmadi.` : '\nSayt işlayapti.')
 process.exit(failed.length ? 1 : 0)

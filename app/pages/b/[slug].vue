@@ -229,7 +229,7 @@ useHead({
     <ReviewSection :slug="b.slug" :business-name="b.name" />
 
     <p class="mt-8 text-sm text-muted">
-      Maʼlumot notoʻğrimi?
+      Maʼlumot notöğrimi?
       <a :href="`${config.public.repoUrl}/edit/main/data/businesses/${b.slug}.yaml`"
          rel="noopener" class="text-accent">Tuzatiş yuboring</a>
       <span class="text-muted">&nbsp;yoki&nbsp;</span>

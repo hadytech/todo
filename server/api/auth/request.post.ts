@@ -17,7 +17,7 @@ const Body = z.object({
 export default defineEventHandler(async (event) => {
   const parsed = Body.safeParse(await readBody(event))
   if (!parsed.success) {
-    throw createError({ statusCode: 400, statusMessage: 'Elektron pocta manzili notoʻğri' })
+    throw createError({ statusCode: 400, statusMessage: 'Elektron pocta manzili notöğri' })
   }
   const { email, name } = parsed.data
 

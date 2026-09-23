@@ -71,7 +71,7 @@ export default defineEventHandler(async (event) => {
       statusMessage: field === 'name'
         ? 'Joy nomini yozing'
         : field === 'lat' || field === 'lng'
-          ? 'Nuqta Toşkent ichida boʻlsin'
+          ? 'Nuqta Toşkent ichida bölsin'
           : 'Formani tekşirib qayta yuboring',
     })
   }
@@ -85,7 +85,7 @@ export default defineEventHandler(async (event) => {
   // fixes, not a reason to reject the whole submission.
   const known = catalog.categories.some((c) =>
     c.children.some((ch) => `${c.slug}/${ch.slug}` === b.category))
-  if (!known) throw createError({ statusCode: 400, statusMessage: 'Kategoriya notoʻğri' })
+  if (!known) throw createError({ statusCode: 400, statusMessage: 'Kategoriya notöğri' })
 
   const ip = clientIp(event)
   await checkSubmissionRate(ip)

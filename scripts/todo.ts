@@ -31,7 +31,7 @@ const { businesses } = loadBusinesses()
 const drafts = businesses.filter((b) => b.status !== 'published')
 
 if (!drafts.length) {
-  console.log('Tekşirişni kutayotgan joy yoʻq.')
+  console.log('Tekşirişni kutayotgan joy yöq.')
   process.exit(0)
 }
 
@@ -74,15 +74,15 @@ const ready = drafts.filter((b) => b.district && b.address && b.location)
 console.log(
   `\n${drafts.length} ta qoralama. `
   + (ready.length
-    ? `${ready.length} tasi toʻliq — status: published qilsa boʻladi.`
-    : 'Hech biri hali toʻliq emas.'),
+    ? `${ready.length} tasi töliq — status: published qilsa böladi.`
+    : 'Hech biri hali töliq emas.'),
 )
 const needCoords = drafts.filter((b) => !b.location).length
 if (needCoords) {
   console.log(
     `${needCoords} tasida koordinata kerak. `
-    + 'Xarita havolasini oçing → nuqtani oʻng tugma bilan bosing '
+    + 'Xarita havolasini oçing → nuqtani öng tugma bilan bosing '
     + '→ koordinatani nusxalang → `npm run entry` ga joylaştiring.',
   )
 }
-console.log('Toʻldiriş uchun: npm run entry (yoki faylni qoʻlda tahrirlang)')
+console.log('Töldiriş uchun: npm run entry (yoki faylni qölda tahrirlang)')

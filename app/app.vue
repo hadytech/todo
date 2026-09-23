@@ -25,7 +25,7 @@ if (!indexable) {
       href="#asosiy"
       class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-soft
              focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-ink"
-    >Asosiy qismga oʻtiş</a>
+    >Asosiy qismga ötiş</a>
 
     <header class="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur">
       <div class="mx-auto max-w-4xl px-4 h-14 flex items-center gap-3">
@@ -42,7 +42,7 @@ if (!indexable) {
           <NuxtLink
             to="/qoshish"
             class="rounded-pill px-3 py-1.5 text-muted hover:bg-raised hover:text-ink"
-          >Joy qoʻşiş</NuxtLink>
+          >Joy qöşiş</NuxtLink>
           <NuxtLink
             v-if="loaded && enabled"
             to="/kirish"
@@ -63,7 +63,7 @@ if (!indexable) {
           Toşkent joylari maʼlumotnomasi — oçiq kodli, oçiq maʼlumotli.
         </p>
         <nav class="flex flex-wrap gap-x-5 gap-y-1">
-          <NuxtLink to="/qoshish" class="text-muted hover:text-ink">Joy qoʻşiş</NuxtLink>
+          <NuxtLink to="/qoshish" class="text-muted hover:text-ink">Joy qöşiş</NuxtLink>
           <NuxtLink to="/qidiruv" class="text-muted hover:text-ink">Qidiruv</NuxtLink>
           <a :href="repoUrl" rel="noopener" class="text-muted hover:text-ink">Manba kodi</a>
         </nav>

@@ -36,13 +36,13 @@ async function encode(input: string): Promise<Buffer> {
 
 async function main() {
   if (!existsSync(SRC)) {
-    console.log(`photos-src/ topilmadi.\nRasmlarni photos-src/<slug>/ ichiga qoʻying, soʻng qayta işga tuşiring.`)
+    console.log(`photos-src/ topilmadi.\nRasmlarni photos-src/<slug>/ ichiga qöying, söng qayta işga tuşiring.`)
     return
   }
   mkdirSync(OUT, { recursive: true })
 
   const slugs = readdirSync(SRC).filter((d) => statSync(join(SRC, d)).isDirectory())
-  if (!slugs.length) { console.log('photos-src/ boʻş.'); return }
+  if (!slugs.length) { console.log('photos-src/ böş.'); return }
 
   let totalBytes = 0
   let count = 0
@@ -50,7 +50,7 @@ async function main() {
   for (const slug of slugs) {
     const yamlPath = join(DATA_DIR, 'businesses', `${slug}.yaml`)
     if (!existsSync(yamlPath)) {
-      console.warn(`  oʻtkazib yuborildi: ${slug} — data/businesses/${slug}.yaml yoʻq`)
+      console.warn(`  ötkazib yuborildi: ${slug} — data/businesses/${slug}.yaml yöq`)
       continue
     }
 
@@ -114,9 +114,9 @@ async function main() {
   const capacity = Math.floor((600 * 1024) / avgKb)
   console.log(
     `Jami: ${(totalBytes / 1024 / 1024).toFixed(1)} MB, ${count} ta rasm, ` +
-    `oʻrtaça ${avgKb.toFixed(0)} KB.`,
+    `örtaça ${avgKb.toFixed(0)} KB.`,
   )
-  console.log(`Şu oʻlçamda ~${capacity.toLocaleString('en-US')} ta rasm sigʻadi (600MB byudjet).`)
+  console.log(`Şu ölçamda ~${capacity.toLocaleString('en-US')} ta rasm siğadi (600MB byudjet).`)
 }
 
 main().catch((e) => { console.error(e); process.exit(1) })

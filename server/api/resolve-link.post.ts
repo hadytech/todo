@@ -21,7 +21,7 @@ const TIMEOUT_MS = 6000
 export default defineEventHandler(async (event) => {
   const parsed = Body.safeParse(await readBody(event))
   if (!parsed.success) {
-    throw createError({ statusCode: 400, statusMessage: 'Havola notoʻğri' })
+    throw createError({ statusCode: 400, statusMessage: 'Havola notöğri' })
   }
 
   let url = parsed.data.url

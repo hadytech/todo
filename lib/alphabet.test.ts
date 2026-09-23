@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   toDisplay, toStandardLatin, toAscii, toSlug, toSearchKey, findLegacySpellings,
+  toCanonical, findOfficialSpellings,
 } from './alphabet'
 
 /**
@@ -128,5 +129,86 @@ describe('findLegacySpellings', () => {
 
   it('stays quiet on correctly authored data', () => {
     expect(findLegacySpellings('Çorsu Restorani')).toEqual([])
+  })
+})
+
+describe('toCanonical', () => {
+  it('folds the official digraphs into the new letters', () => {
+    expect(toCanonical('koʻchasi')).toBe('köchasi')
+    expect(toCanonical('yongʻoq')).toBe('yonğoq')
+    expect(toCanonical('Oʻzbekiston')).toBe('Özbekiston')
+  })
+
+  it('fixes the half-converted spelling this project kept producing', () => {
+    // ç and ş were applied while oʻ was left alone, which is neither
+    // alphabet. This is the exact string that shipped in the data.
+    expect(toCanonical('koʻçasi')).toBe('köçasi')
+    expect(toCanonical('notoʻğri')).toBe('notöğri')
+  })
+
+  it('accepts whichever apostrophe someone actually typed, when asked', () => {
+    for (const q of ['ʻ', '‘', '’', 'ʼ', '`', "'"]) {
+      expect(toCanonical(`qo${q}shish`, { typed: true })).toBe('qöshish')
+    }
+  })
+
+  it('leaves code punctuation alone by default', () => {
+    // The trap this restriction exists for: `from './lib/rating'` ends
+    // in g-then-quote. Folding that would rewrite the import to
+    // `'./lib/ratingğ` and take the build down.
+    expect(toCanonical("import { bayesian } from './lib/rating'"))
+      .toBe("import { bayesian } from './lib/rating'")
+    expect(toCanonical('const catalog = `x`')).toBe('const catalog = `x`')
+  })
+
+  it('preserves case, including on the capital form', () => {
+    expect(toCanonical('OʻZBEKISTON')).toBe('ÖZBEKISTON')
+    expect(toCanonical('Toʻldirish')).toBe('Töldirish')
+  })
+
+  it('leaves ch and sh alone, on purpose', () => {
+    // These are ambiguous with foreign words, and a directory that
+    // renames the institutions it lists is worse than one with
+    // inconsistent spelling. They stay a human's judgement.
+    expect(toCanonical('Westminster')).toBe('Westminster')
+    expect(toCanonical('MDIS Tashkent')).toBe('MDIS Tashkent')
+    expect(toCanonical('chorsu')).toBe('chorsu')
+  })
+
+  it('does not touch Cyrillic or bare vowels', () => {
+    // Those are search-fold variants, not spellings anyone authored.
+    // Folding "о" here would quietly rewrite Russian text.
+    expect(toCanonical('Чорсу')).toBe('Чорсу')
+    expect(toCanonical('Toshkent')).toBe('Toshkent')
+  })
+
+  it('is idempotent', () => {
+    const once = toCanonical('koʻçasi, toʻğri')
+    expect(toCanonical(once)).toBe(once)
+  })
+})
+
+describe('findOfficialSpellings', () => {
+  it('finds text that should have been canonical', () => {
+    expect(findOfficialSpellings('koʻçasi')).not.toHaveLength(0)
+    expect(findOfficialSpellings('yongʻoq')).not.toHaveLength(0)
+  })
+
+  it('passes clean new-alphabet text', () => {
+    expect(findOfficialSpellings('Çorsu köçasi, Toşkent')).toEqual([])
+    expect(findOfficialSpellings('Yönalişlar va baholar')).toEqual([])
+  })
+
+  it('catches the Uzbek apostrophes', () => {
+    for (const q of ['ʻ', '‘', '’', 'ʼ']) {
+      expect(findOfficialSpellings(`qo${q}shish`)).not.toHaveLength(0)
+    }
+  })
+
+  it('does not report source code as a spelling error', () => {
+    // Run over a .ts file, an ASCII apostrophe would report every
+    // import as a spelling error and every --fix would break the build.
+    expect(findOfficialSpellings("from './lib/rating'")).toEqual([])
+    expect(findOfficialSpellings('const catalog = `x`')).toEqual([])
   })
 })

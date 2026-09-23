@@ -18,7 +18,7 @@ const { toggle } = useTheme()
            hover:bg-raised hover:text-ink"
     @click="toggle"
   >
-    <span class="sr-only">Kunduzgi va tungi koʻriniş</span>
+    <span class="sr-only">Kunduzgi va tungi köriniş</span>
 
     <svg class="icon-moon size-[18px]" viewBox="0 0 24 24" fill="none" aria-hidden="true"
          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

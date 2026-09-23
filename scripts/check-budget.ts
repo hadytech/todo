@@ -87,7 +87,7 @@ for (const page of pages) {
     `${mark} ${route.padEnd(42)} JS ${jsKb.toFixed(1).padStart(6)} KB   ` +
     `HTML ${htmlKb.toFixed(1).padStart(5)} KB`,
   )
-  for (const m of missing) console.error(`       yoʻq fayl: ${m}`)
+  for (const m of missing) console.error(`       yöq fayl: ${m}`)
 }
 
 // Report the deliberately-lazy chunks so a regression that makes one of
@@ -100,7 +100,7 @@ const lazy = walk(join(ROOT, '_nuxt'))
   .sort((a, b) => b.kb - a.kb)
 
 if (lazy.length) {
-  console.log('\nKerak boʻlganda yuklanadigan boʻlaklar (sahifa byudjetiga kirmaydi):')
+  console.log('\nKerak bölganda yuklanadigan bölaklar (sahifa byudjetiga kirmaydi):')
   for (const c of lazy.slice(0, 4)) console.log(`       ${c.kb.toFixed(1).padStart(6)} KB  ${c.name}`)
 }
 

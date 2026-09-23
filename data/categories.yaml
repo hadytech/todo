@@ -1,6 +1,6 @@
-# Uchta asosiy kategoriya bilan boshlaymiz. Bitta sohada chuqur boʻlish
-# hamma sohada yuza boʻlishdan yaxşi — yangi kategoriya qoʻshish oson,
-# boʻş kategoriyani toʻldirish esa qiyin.
+# Uchta asosiy kategoriya bilan boshlaymiz. Bitta sohada chuqur bölish
+# hamma sohada yuza bölishdan yaxşi — yangi kategoriya qöshish oson,
+# böş kategoriyani töldirish esa qiyin.
 - slug: ovqatlanish
   name: Ovqatlanish
   icon: "🍽"
@@ -49,7 +49,7 @@
     - slug: universitet
       name: Universitetlar
     - slug: oquv-markaz
-      name: Oʻquv markazlari
+      name: Öquv markazlari
     - slug: til-markazi
       name: Til markazlari
     - slug: maktab
@@ -62,7 +62,7 @@
     - slug: bozor
       name: Bozorlar
     - slug: kompyuter
-      name: Kompyuter doʻkonlari
+      name: Kompyuter dökonlari
     - slug: savdo-markazi
       name: Savdo markazlari
     - slug: texnika

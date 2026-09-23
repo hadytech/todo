@@ -1,7 +1,7 @@
 name: "Özbekiston Milliy Universiteti"
 category: "talim/universitet"
 district: olmazor
-address: "Universitet koʻçasi 4, Toşkent"
+address: "Universitet köçasi 4, Toşkent"
 website: "https://nuu.uz"
 status: draft
 note: "TEKŞIRILSIN: koordinata kerak (xaritadan olib `npm run entry` ga joylaştiring)."

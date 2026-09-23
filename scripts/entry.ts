@@ -43,7 +43,7 @@ function page(): string {
     </tr>`).join('')
 
   return `<!doctype html>
-<html lang="uz"><head><meta charset="utf-8"><title>yalp.uz — joy qoʻşiş</title>
+<html lang="uz"><head><meta charset="utf-8"><title>yalp.uz — joy qöşiş</title>
 <style>
   :root { color-scheme: light dark; --line:#8883; }
   body { font:16px/1.5 system-ui,sans-serif; max-width:42rem; margin:2rem auto; padding:0 1rem; }
@@ -60,7 +60,7 @@ function page(): string {
   .row { display:flex; gap:.75rem; } .row > * { flex:1; }
   kbd { font:inherit; background:#8882; padding:0 .3rem; border-radius:3px; }
 </style></head><body>
-<h1>Joy qoʻşiş</h1>
+<h1>Joy qöşiş</h1>
 <p style="opacity:.75;font-size:.9rem">Nomlarni <b>yangi alifboda</b> yozing: ö ğ ç ş.
 Saqlash — <kbd>Ctrl</kbd>+<kbd>Enter</kbd>.</p>
 <form id="f">
@@ -72,7 +72,7 @@ Saqlash — <kbd>Ctrl</kbd>+<kbd>Enter</kbd>.</p>
     </div>
     <label class="f">Manzil<input name="address" required></label>
     <label class="f">Koordinata
-      <span>"41.3264, 69.2347" yoki Google/Yandex Maps havolasini qoʻying</span>
+      <span>"41.3264, 69.2347" yoki Google/Yandex Maps havolasini qöying</span>
       <input name="coords" required placeholder="41.3264, 69.2347"></label>
     <label class="f">Tavsif<textarea name="description" rows="3"></textarea></label>
   </fieldset>
@@ -93,7 +93,7 @@ Saqlash — <kbd>Ctrl</kbd>+<kbd>Enter</kbd>.</p>
         <th colspan="2" class="brk">tanaffus</th><th></th></tr></thead>
       <tbody>${dayRows}</tbody>
     </table>
-    <p class="hint">Tanaffus — kun oʻrtasida yopiladigan vaqt. Boʻş qoldirsangiz, kun yaxlit boʻladi.</p>
+    <p class="hint">Tanaffus — kun örtasida yopiladigan vaqt. Böş qoldirsangiz, kun yaxlit böladi.</p>
   </fieldset>
   <button type="submit">Saqlash</button>
 </form>
@@ -129,7 +129,7 @@ f.addEventListener('submit', async e => {
 
 function buildRecord(body: Record<string, string>) {
   const coords = parseCoords(body.coords ?? '')
-  if (!coords) return { errors: ['Koordinatani oʻqib boʻlmadi. "41.3264, 69.2347" koʻrinişida yozing.'] }
+  if (!coords) return { errors: ['Koordinatani öqib bölmadi. "41.3264, 69.2347" körinişida yozing.'] }
 
   // Only emit a day we actually have data for. Emitting [undefined,
   // undefined] for a blank field buries the real error under seven
@@ -238,7 +238,7 @@ const server = createServer((req, res) => {
 
         const legacy = findLegacySpellings(built.record!.name)
         const header = legacy.length
-          ? `# Diqqat: nom eski alifboda koʻrinadi (${legacy.join(', ')}). Yangi alifboda yozing: ö ğ ç ş.\n`
+          ? `# Diqqat: nom eski alifboda körinadi (${legacy.join(', ')}). Yangi alifboda yozing: ö ğ ç ş.\n`
           : ''
         writeFileSync(file, header + toYaml(built.record), 'utf8')
         reply(200, { ok: true, file: `data/businesses/${slug}.yaml` })
@@ -253,6 +253,6 @@ const server = createServer((req, res) => {
 })
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Joy qoʻşiş formasi: http://localhost:${PORT}`)
-  console.log('Toʻxtatiş uchun Ctrl+C.')
+  console.log(`Joy qöşiş formasi: http://localhost:${PORT}`)
+  console.log('Töxtatiş uchun Ctrl+C.')
 })

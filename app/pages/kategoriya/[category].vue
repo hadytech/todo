@@ -58,7 +58,7 @@ useHead({
   title: () => `${title.value} | yalp.uz`,
   meta: [{
     name: 'description',
-    content: () => `Toshkentdagi ${categoryName.value.toLowerCase()} — manzil, telefon va iş vaqti, tuman boʻyicha.`,
+    content: () => `Toshkentdagi ${categoryName.value.toLowerCase()} — manzil, telefon va iş vaqti, tuman böyicha.`,
   }],
   link: [{ rel: 'canonical', href: pageUrl }],
   script: () => structured.value.map((o) => ({
@@ -93,8 +93,8 @@ useHead({
     </section>
 
     <p v-if="!groups.length" class="text-muted text-sm">
-      Bu turdagi joy hali qoʻşilmagan.
-      <NuxtLink to="/qoshish" class="text-accent">Birinchi boʻlib qoʻşing</NuxtLink>.
+      Bu turdagi joy hali qöşilmagan.
+      <NuxtLink to="/qoshish" class="text-accent">Birinchi bölib qöşing</NuxtLink>.
     </p>
   </div>
 </template>

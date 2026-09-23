@@ -161,13 +161,13 @@ async function showMap() {
         style="height: 18rem"
       />
       <p class="mt-1 text-xs text-muted">
-        Xaritani bosing yoki nuqtani sudrab joyiga qoʻying.
+        Xaritani bosing yoki nuqtani sudrab joyiga qöying.
       </p>
     </div>
 
     <p v-if="mapState === 'loading'" class="text-sm text-muted">Xarita yuklanmoqda…</p>
     <p v-if="mapState === 'failed'" class="text-sm text-muted">
-      Xarita yuklanmadi — havola joylaştiring yoki boʻş qoldiring, biz topamiz.
+      Xarita yuklanmadi — havola joylaştiring yoki böş qoldiring, biz topamiz.
     </p>
 
     <p

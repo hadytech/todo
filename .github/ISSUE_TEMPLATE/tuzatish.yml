@@ -1,5 +1,5 @@
 name: Maʼlumotni tuzatiş
-description: Nomi, manzili, telefoni yoki iş vaqti notoʻğri
+description: Nomi, manzili, telefoni yoki iş vaqti notöğri
 title: "Tuzatiş: "
 labels: ["tuzatiş"]
 body:
@@ -14,6 +14,6 @@ body:
   - type: textarea
     id: problem
     attributes:
-      label: Nimasi notoʻğri
-      placeholder: Telefon raqami oʻzgargan, yangisi +998 …
+      label: Nimasi notöğri
+      placeholder: Telefon raqami özgargan, yangisi +998 …
     validations: { required: true }

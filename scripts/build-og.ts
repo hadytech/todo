@@ -85,8 +85,8 @@ async function assertFontRenders() {
   for (let i = 0; i < data.length; i++) if (data[i]! > 128) lit++
   if (lit < 200) {
     throw new Error(
-      'Şrift topilmadi — kartalar boʻş çiqadi.\n'
-      + 'CI da oʻrnating: sudo apt-get install -y fonts-dejavu-core',
+      'Şrift topilmadi — kartalar böş çiqadi.\n'
+      + 'CI da örnating: sudo apt-get install -y fonts-dejavu-core',
     )
   }
 }
@@ -122,7 +122,7 @@ async function main() {
       ? `Havola kartalari: ${needCards.length} ta, ${(bytes / 1024).toFixed(0)} KB jami.`
       : published
         ? 'Havola kartalari kerak emas — hamma joyda rasm bor.'
-        : 'Naşr qilingan joy yoʻq — havola kartalari kerak emas.',
+        : 'Naşr qilingan joy yöq — havola kartalari kerak emas.',
   )
 }
 

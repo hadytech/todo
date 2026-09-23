@@ -8,7 +8,7 @@ const Body = z.object({
   slug: z.string().min(1).max(120),
   rating: z.number().int().min(1).max(5),
   /**
-   * A floor of 20 characters. "Zoʻr!" is a rating, not a review, and the
+   * A floor of 20 characters. "Zör!" is a rating, not a review, and the
    * star already carries it — the text is there to say something the
    * number cannot.
    */
@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 400,
       statusMessage: issue?.path[0] === 'body'
-        ? 'Sharh kamida 20 ta belgidan iborat boʻlsin'
+        ? 'Sharh kamida 20 ta belgidan iborat bölsin'
         : 'Sharhni tekşirib qayta yuboring',
     })
   }
