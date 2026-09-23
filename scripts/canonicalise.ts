@@ -4,8 +4,12 @@
  * The project's contract is that everything a person writes — data,
  * interface strings, documentation — is in the new alphabet. That was
  * only half true: `ch`/`sh` were converted to `ç`/`ş` while `oʻ`/`gʻ`
- * were left as the official digraphs, producing "koʻçasi", which is
+ * were left as the official digraphs, producing `koʻçasi`, which is
  * neither alphabet.
+ *
+ * This file is not exempt from its own rule, which is why that example
+ * is in backticks: the check found it the moment the file was committed
+ * and `git ls-files` started reporting it.
  *
  * Kept in the repository rather than run and thrown away, because the
  * same drift can happen again the moment someone pastes an address from
