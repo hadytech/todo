@@ -142,18 +142,41 @@ The point of the round trip is that business facts stay in git, where
 anyone can see who changed what and revert it, while the person who knows
 which barber is good never has to learn what a pull request is.
 
-### Making the pin easy
+### One paste fills the form
 
-Coordinates are the field that kills a form like this, so `/qoshish`
-offers three ways and requires none of them:
+The fast path is first on the page, because it is what most people can
+actually produce: the place is already open in a maps app and the share
+button is one tap. A pasted link fills the **name** and the **pin**, and
+the name preselects the **category** — which leaves nothing required.
 
-- **Paste a Yandex or Google Maps link.** Most people already have the
-  place open on their phone and can share it; `lib/coords.ts` parses
-  both, including Yandex's reversed `ll=LNG,LAT`.
+Share buttons produce *short* links (`maps.app.goo.gl/…`,
+`yandex.ru/maps/-/…`) that carry an id and nothing else. The browser
+cannot follow them — cross-origin, no CORS — so `/api/resolve-link`
+does, server-side, and returns the name and pin it lands on. A long URL
+already says everything it is going to say and is parsed without any
+outbound request.
+
+That endpoint fetches a URL chosen by an anonymous caller, which is a
+server-side request forgery primitive unless it is constrained.
+`MAP_HOSTS` in [`lib/maplink.ts`](lib/maplink.ts) is the allowlist, and
+**every redirect hop is re-checked** — a redirect to `169.254.169.254`
+would otherwise walk straight out of the allowlist into the cloud
+metadata service. There is a hop cap and a timeout too.
+
+Two more ways to set the pin, neither required:
+
 - **"I'm here"** — geolocation, for someone standing in the doorway. A
   position outside Tashkent is refused rather than pinned.
-- **Tap the map** — MapLibre, lazy-loaded only if the first two were not
-  used, with a draggable marker so a near-enough pin can be nudged.
+- **Tap the map** — MapLibre, lazy-loaded only if the link did not
+  already answer, with a draggable marker so a near-enough pin can be
+  nudged.
+
+The category guess ([`lib/guess.ts`](lib/guess.ts)) matches on the ASCII
+fold, so the new alphabet, the official one and Cyrillic all hit the same
+keywords, and it takes the **longest** matching keyword rather than the
+first — "sartaroshxonasi" contains "oshxona", so a first-match scan hands
+a barber to the restaurants. It answers null rather than guessing
+plausibly, because someone skimming a filled form tends to trust it.
 
 ### Spam, without an account gate
 

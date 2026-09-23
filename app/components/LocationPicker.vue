@@ -1,23 +1,16 @@
 <script setup lang="ts">
-import { parseCoords } from '../../lib/coords'
-
 /**
- * Three ways to say where a place is, because people arrive with
- * different things in hand.
+ * Two ways to say where a place is: "here", or by tapping a map.
  *
- * Most people already have the place open in Yandex Maps on their phone
- * and can share a link — that path is first and needs no map to load at
- * all. Someone standing in the doorway wants "here". Someone at a desk
- * wants to tap a map. Asking any of them to type decimal degrees is how
- * a form gets abandoned.
+ * The third and most common way — pasting a shared map link — lives on
+ * the page above, because a link now fills the name as well as the pin
+ * and this component has no business setting a name.
  */
 const model = defineModel<{ lat: number; lng: number } | null>({ default: null })
 
 const config = useRuntimeConfig().public
 const asset = useAssetUrl()
 
-const link = ref('')
-const linkError = ref('')
 const mapEl = ref<HTMLElement | null>(null)
 const mapState = ref<'idle' | 'loading' | 'ready' | 'failed'>('idle')
 const geoState = ref<'idle' | 'asking' | 'denied' | 'far'>('idle')
@@ -31,23 +24,20 @@ let map: { flyTo: (o: object) => void } | null = null
 
 function set(c: { lat: number; lng: number }) {
   model.value = c
-  marker?.setLngLat([c.lng, c.lat])
-  map?.flyTo({ center: [c.lng, c.lat], zoom: 16 })
 }
 
-function fromLink() {
-  linkError.value = ''
-  const c = parseCoords(link.value)
-  if (!c) {
-    linkError.value = 'Havoladan nuqta topilmadi. Xaritadan belgilang.'
-    return
-  }
-  if (!IN_TASHKENT(c)) {
-    linkError.value = 'Bu nuqta Toşkentdan taşqarida.'
-    return
-  }
-  set(c)
-}
+/**
+ * Keep the map in step with the pin, wherever the pin came from.
+ *
+ * The page above can set it from a pasted link while this map is
+ * already open, and a marker left at the old spot would quietly
+ * contradict the coordinates printed underneath it.
+ */
+watch(model, (c) => {
+  if (!c) return
+  marker?.setLngLat([c.lng, c.lat])
+  map?.flyTo({ center: [c.lng, c.lat], zoom: 16 })
+})
 
 function fromGps() {
   if (!navigator.geolocation) return
@@ -138,33 +128,7 @@ async function showMap() {
 
 <template>
   <div class="space-y-3">
-    <!-- 1. The path most people are already on: the place is open in a
-         maps app and they can share it. -->
-    <div>
-      <label for="loc-link" class="block text-sm text-muted mb-1">
-        Yandex yoki Google Maps havolasini joylaştiring
-      </label>
-      <div class="flex gap-2">
-        <input
-          id="loc-link"
-          v-model="link"
-          type="url"
-          inputmode="url"
-          placeholder="https://yandex.uz/maps/..."
-          class="min-w-0 flex-1 rounded-soft border border-line bg-surface px-3 py-2"
-          @paste="nextTick(fromLink)"
-          @keydown.enter.prevent="fromLink"
-        >
-        <button
-          type="button"
-          class="shrink-0 rounded-soft border border-line px-3 py-2 text-sm hover:border-accent"
-          @click="fromLink"
-        >Olish</button>
-      </div>
-      <p v-if="linkError" class="mt-1 text-sm text-accent">{{ linkError }}</p>
-    </div>
-
-    <!-- 2. Standing in the doorway. -->
+    <!-- Standing in the doorway. -->
     <div class="flex flex-wrap items-center gap-2 text-sm">
       <button
         type="button"
@@ -189,7 +153,7 @@ async function showMap() {
       </span>
     </div>
 
-    <!-- 3. Tap it. -->
+    <!-- Tap it. -->
     <div v-show="mapState === 'loading' || mapState === 'ready'">
       <div
         ref="mapEl"
