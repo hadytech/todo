@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { parseMapLink } from '../../lib/maplink'
+import { guessCategory } from '../../lib/guess'
+
 const config = useRuntimeConfig()
 const repo = config.public.repoUrl as string
 
@@ -23,6 +26,63 @@ const form = reactive({
 const location = ref<{ lat: number; lng: number } | null>(null)
 const state = ref<'editing' | 'sending' | 'sent' | 'failed'>('editing')
 const error = ref('')
+
+/**
+ * The fast path: one pasted link fills the name and the pin.
+ *
+ * This is first on the page because it is what most people can actually
+ * produce — the place is already open in Yandex Maps and the share
+ * button is one tap. A short link (which is what that button gives you)
+ * carries nothing but an id, so the server follows it; a long one is
+ * read here without a round trip.
+ */
+const link = reactive({ url: '', state: 'idle' as 'idle' | 'working' | 'done' | 'failed', filled: [] as string[] })
+
+async function useLink() {
+  const raw = link.url.trim()
+  if (!raw) return
+  link.state = 'working'
+  link.filled = []
+
+  let parsed = parseMapLink(raw)
+  if (parsed.needsResolving) {
+    try {
+      const r = await $fetch<{ ok: boolean; url: string; coords: typeof location.value; name: string | null }>(
+        '/api/resolve-link', { method: 'POST', body: { url: raw } })
+      if (r.ok) parsed = { coords: r.coords, name: r.name, address: null, needsResolving: false }
+    } catch {
+      // Falls through to the "could not read it" branch below. The form
+      // still works; only this shortcut failed.
+    }
+  }
+
+  // Never overwrite something the person already typed — a link is a
+  // suggestion, and they know the name of the shop better than a URL slug.
+  if (parsed.name && !form.name.trim()) {
+    form.name = parsed.name
+    link.filled.push('nomi')
+  }
+  if (parsed.coords) {
+    location.value = parsed.coords
+    link.filled.push('nuqtasi')
+  }
+  link.state = link.filled.length ? 'done' : 'failed'
+}
+
+/**
+ * Preselect a category from the name, and only while the person has not
+ * chosen one themselves. A guess that overrides a real choice is worse
+ * than no guess at all.
+ */
+const categoryTouched = ref(false)
+watch(() => form.name, (name) => {
+  if (categoryTouched.value || !name) return
+  const guess = guessCategory(name)
+  if (!guess) return
+  const [top, sub] = guess.split('/')
+  form.top = top!
+  nextTick(() => { form.sub = sub! })
+})
 
 const subcategories = computed(() =>
   facets.value?.categories.find((c) => c.slug === form.top)?.children ?? [])
@@ -69,6 +129,10 @@ function again() {
     website: '', comment: '', website2: '',
   })
   location.value = null
+  link.url = ''
+  link.state = 'idle'
+  link.filled = []
+  categoryTouched.value = false
   state.value = 'editing'
 }
 
@@ -128,6 +192,42 @@ useHead({
       </div>
 
       <form v-else class="mt-6 space-y-5" @submit.prevent="submit">
+        <!-- The fast path, first: most people have the place open in a
+             maps app and can share it in one tap. -->
+        <div class="rounded-soft border border-accent/40 bg-accent-soft/40 p-4">
+          <label for="f-link" class="block text-sm font-medium mb-1">
+            Tez yoʻl — xarita havolasini joylaştiring
+          </label>
+          <p class="mb-2 text-xs text-muted">
+            Yandex, Google yoki 2GIS. Nomi va nuqtasi oʻzi toʻladi.
+          </p>
+          <div class="flex gap-2">
+            <input
+              id="f-link"
+              v-model="link.url"
+              type="url"
+              inputmode="url"
+              placeholder="https://yandex.uz/maps/..."
+              class="min-w-0 flex-1 rounded-soft border border-line bg-surface px-3 py-2"
+              @paste="nextTick(useLink)"
+              @keydown.enter.prevent="useLink"
+            >
+            <button
+              type="button"
+              :disabled="link.state === 'working'"
+              class="shrink-0 rounded-soft bg-accent px-4 py-2 text-sm font-medium
+                     text-accent-ink disabled:opacity-60"
+              @click="useLink"
+            >{{ link.state === 'working' ? '…' : 'Toʻldiriş' }}</button>
+          </div>
+          <p v-if="link.state === 'done'" class="mt-2 text-sm text-accent">
+            Havoladan {{ link.filled.join(' va ') }} olindi.
+          </p>
+          <p v-else-if="link.state === 'failed'" class="mt-2 text-sm text-muted">
+            Havoladan maʼlumot oʻqilmadi — quyida qoʻlda toʻldiring.
+          </p>
+        </div>
+
         <div>
           <label for="f-name" class="block text-sm font-medium mb-1">
             Joy nomi <span class="text-accent">*</span>
@@ -156,6 +256,7 @@ useHead({
               v-model="form.top"
               required
               class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+              @change="categoryTouched = true"
             >
               <option value="" disabled>Tanlang…</option>
               <option v-for="c in facets?.categories" :key="c.slug" :value="c.slug">
@@ -172,6 +273,7 @@ useHead({
               v-model="form.sub"
               required
               :disabled="!form.top"
+              @change="categoryTouched = true"
               class="w-full rounded-soft border border-line bg-surface px-3 py-2
                      disabled:opacity-50"
             >
