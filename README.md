@@ -409,6 +409,30 @@ Pages with nothing on them are never generated and never linked. An empty
 landing page is thin content that drags on the pages that do rank, and a
 dead end for anyone who taps it.
 
+## What is published
+
+Six places, all famous, all verified:
+
+| | District | Coordinate source |
+|---|---|---|
+| Çorsu Bozori | Şayxontohur | Wikidata |
+| Kökaldoş Madrasasi | Şayxontohur | Wikidata, agreeing with a second GPS source |
+| Hazrati Imom Majmuasi | Olmazor | Wikipedia |
+| Toşkent Teleminorasi | Yunusobod | Wikipedia |
+| Alişer Navoiy Katta Teatr | Şayxontohur | published coordinate; address and district from Yandex |
+| Mustaqillik Maydoni | Şayxontohur | Wikidata; district from Yandex |
+
+Landmarks first, deliberately. Their coordinates, addresses and districts
+are matters of public record, which is exactly what the verification
+queue is short of — a shop's pin is only knowable by standing in front
+of it, a UNESCO-listed bazaar's is not.
+
+Every one carries its source in `note`. Several near-misses were left as
+drafts rather than published: the Amir Temur Museum has a coordinate but
+no district I could confirm, and the Minor Mosque returned two
+coordinates half a city apart. Where sources disagreed, nothing was
+published.
+
 ## The verification queue
 
 ```bash
