@@ -158,3 +158,28 @@ create table if not exists submissions (
 
 create index if not exists submissions_status_idx on submissions (status, created_at);
 create index if not exists submissions_ip_idx     on submissions (submitted_ip, created_at desc);
+
+-- ------------------------------------- submissions: photo and first rating
+--
+-- Adding a place and having an opinion about it are the same act, so the
+-- form asks for both. These are additive, so an existing database takes
+-- them without a migration step.
+
+alter table submissions add column if not exists rating smallint
+  check (rating is null or rating between 1 and 5);
+
+/*
+ * The photo, as a base64 data URL, compressed in the browser before it
+ * is sent.
+ *
+ * Deliberately in the row rather than a blob store: a blob store is
+ * another account, another key and another bill, and this is a queue
+ * rather than a library — `npm run submissions import` writes the file
+ * into photos-src/ and nulls this column, so a row only carries an
+ * image for as long as nobody has looked at it yet. That keeps the
+ * table small enough for a free Postgres tier, which holding every
+ * photo forever would not.
+ */
+alter table submissions add column if not exists photo text;
+
+alter table submissions add column if not exists photo_imported_at timestamptz;

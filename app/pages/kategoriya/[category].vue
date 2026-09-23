@@ -58,7 +58,7 @@ useHead({
   title: () => `${title.value} | yalp.uz`,
   meta: [{
     name: 'description',
-    content: () => `Toshkentdagi ${categoryName.value.toLowerCase()} — manzil, telefon va iş vaqti, tuman böyicha.`,
+    content: () => `Toshkentdagi ${categoryName.value.toLowerCase()} — manzil, telefon va iş vaqti, tuman böyiça.`,
   }],
   link: [{ rel: 'canonical', href: pageUrl }],
   script: () => structured.value.map((o) => ({

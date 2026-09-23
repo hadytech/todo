@@ -82,7 +82,7 @@ useHead({
       </h1>
       <p class="mt-2 text-muted text-pretty max-w-2xl">
         Istagan alifboda yozing — <span class="text-ink">çoyxona</span>,
-        <span class="text-ink">choyxona</span> yoki
+        <span class="text-ink">çoyxona</span> yoki
         <span class="text-ink">чойхона</span> bir xil natija beradi.
       </p>
 

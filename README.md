@@ -189,6 +189,28 @@ The point of the round trip is that business facts stay in git, where
 anyone can see who changed what and revert it, while the person who knows
 which barber is good never has to learn what a pull request is.
 
+### What the form asks
+
+Name, photo, category — then your rating and your comment. Adding a place
+and having an opinion about it are the same act, so the form asks for both
+rather than sending someone back to the listing afterwards. Everything else
+(location, address, phone, hours, links) is folded away behind one
+disclosure.
+
+Only the name and the category are required. A photo cannot be required
+without losing every contributor who does not have one to hand.
+
+**The photo is resized on the device.** A phone camera produces 3–8MB;
+what gets sent is a JPEG under 400KB, capped in
+[`lib/photo.ts`](lib/photo.ts) and again on the server, because a limit
+that only exists in the browser is not a limit. It travels as a base64
+data URL in the submission row rather than to a blob store — a blob store
+is another account, another key and another bill, and this is a queue
+rather than a library. `npm run submissions import` writes the file into
+`photos-src/`, where `npm run photos` already looks, and **nulls the
+column**: a row carries an image only until someone has looked at it,
+which is what keeps the table inside a free Postgres tier.
+
 ### One paste fills the form
 
 The fast path is first on the page, because it is what most people can

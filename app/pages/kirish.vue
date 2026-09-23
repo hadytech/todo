@@ -53,7 +53,7 @@ useHead({
       </p>
       <div class="mt-4 flex gap-3">
         <NuxtLink to="/" class="rounded-pill bg-accent px-4 py-2 text-sm font-medium text-accent-ink">
-          Bosh sahifa
+          Boş sahifa
         </NuxtLink>
         <button
           class="rounded-pill border border-line px-4 py-2 text-sm"
@@ -63,7 +63,7 @@ useHead({
     </template>
 
     <p v-else-if="enabled === false" class="mt-4 text-muted">
-      Sharhlar hozirça oçiq emas. Sayt maʼlumotlari işlayapti, lekin baho va
+      Şarhlar hozirça oçiq emas. Sayt maʼlumotlari işlayapti, lekin baho va
       izohlar uçun maʼlumotlar bazasi hali ulanmagan.
     </p>
 
@@ -100,7 +100,7 @@ useHead({
         </div>
         <div>
           <label for="login-name" class="block text-sm text-muted mb-1">
-            Ismingiz <span class="text-muted/70">— sharhlarda körinadi</span>
+            Ismingiz <span class="text-muted/70">— şarhlarda körinadi</span>
           </label>
           <input
             id="login-name"

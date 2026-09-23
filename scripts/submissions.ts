@@ -16,7 +16,7 @@
  * suggestion is a lead, not a verified listing. It joins the same queue
  * as everything else in `npm run todo`.
  */
-import { writeFileSync, existsSync } from 'node:fs'
+import { writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import postgres from 'postgres'
 import { toSlug, toDisplay } from '../lib/alphabet'
 import { loadBusinesses } from '../lib/load'
@@ -44,6 +44,8 @@ interface Row {
   hours_note: string | null
   comment: string | null
   contact: string | null
+  rating: number | null
+  photo: string | null
   created_at: Date
 }
 
@@ -81,6 +83,7 @@ function draftYaml(r: Row, slug: string): string {
   if (r.hours_note) notes.push(`iş vaqti (taklifçi sözi): ${r.hours_note}`)
   if (r.phone && !/^\+998 /.test(r.phone)) notes.push(`telefon tekşirilsin: ${r.phone}`)
   if (r.website && !/^https?:\/\//.test(r.website)) notes.push(`havola: ${r.website}`)
+  if (r.rating) notes.push(`taklifçi bahosi: ${r.rating}/5`)
   if (r.comment) notes.push(`izoh: ${r.comment}`)
   if (r.contact) notes.push(`taklifçi aloqasi: ${r.contact}`)
   out.push(`note: ${q(notes.join('; '))}`)
@@ -102,7 +105,12 @@ function freeSlug(name: string): string {
 
 async function list() {
   const rows = await sql<(Row & { dup: number })[]>`
-    select s.*,
+    select s.id, s.name, s.category, s.district, s.address, s.lat, s.lng,
+           s.phone, s.website, s.telegram, s.instagram,
+           s.hours_note, s.comment, s.contact, s.rating, s.created_at,
+           -- The image itself would be megabytes across a listing of
+           -- twenty; its size is all this view needs.
+           s.photo,
            (select count(*) from submissions o
              where o.status = 'pending' and lower(o.name) = lower(s.name)
                and o.id <> s.id)::int as dup
@@ -122,6 +130,8 @@ async function list() {
     console.log(`    ${r.category}${r.district ? ` · ${r.district}` : ''}`)
     if (r.address) console.log(`    ${r.address}`)
     console.log(`    koordinata: ${r.lat != null ? `${r.lat}, ${r.lng}` : 'yöq'}`)
+    if (r.rating) console.log(`    baho: ${'\u2605'.repeat(r.rating)}${'\u2606'.repeat(5 - r.rating)}`)
+    if (r.photo) console.log(`    rasm: bor (${Math.round(r.photo.length / 1024)} KB)`)
     if (r.phone) console.log(`    telefon: ${r.phone}`)
     if (r.hours_note) console.log(`    iş vaqti: ${r.hours_note}`)
     if (r.comment) console.log(`    izoh: ${r.comment}`)
@@ -144,12 +154,30 @@ async function importOne(rowId: string) {
   const path = `data/businesses/${slug}.yaml`
   writeFileSync(path, draftYaml(r, slug), 'utf8')
 
+  /**
+   * The photo lands in photos-src/, which is gitignored and is exactly
+   * where `npm run photos` looks — so the submitted JPEG goes through
+   * the same compression as every other image rather than being
+   * committed raw.
+   */
+  let photoPath: string | null = null
+  if (r.photo) {
+    const dir = `photos-src/${slug}`
+    mkdirSync(dir, { recursive: true })
+    photoPath = `${dir}/submitted.jpg`
+    writeFileSync(photoPath, Buffer.from(r.photo.split(',')[1]!, 'base64'))
+  }
+
   await sql`
     update submissions
-       set status = 'imported', reviewed_at = now(), review_note = ${slug}
+       set status = 'imported', reviewed_at = now(), review_note = ${slug},
+           -- The image is on disk now. Keeping a second copy in a free
+           -- Postgres tier is how a queue turns into a bill.
+           photo = null, photo_imported_at = ${r.photo ? sql`now()` : null}
      where id = ${rowId}
   `
   console.log(`Yaratildi: ${path}`)
+  if (photoPath) console.log(`Rasm: ${photoPath} — keyin: npm run photos`)
   console.log('Tekşiring, töldiring, keyin commit qiling:')
   console.log(`  npm run validate && git add ${path} && git commit`)
 }

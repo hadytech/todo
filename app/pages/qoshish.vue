@@ -2,6 +2,7 @@
 import { parseMapLink } from '../../lib/maplink'
 import { guessCategory } from '../../lib/guess'
 import { submissionText } from '../../lib/submission-text'
+import { compressImage, MAX_ENCODED } from '../../lib/photo'
 
 const config = useRuntimeConfig()
 const repo = config.public.repoUrl as string
@@ -19,6 +20,21 @@ const form = reactive({
 const location = ref<{ lat: number; lng: number } | null>(null)
 
 /**
+ * The photo, compressed on the device.
+ *
+ * A phone camera produces several megabytes; what gets sent is a
+ * resized JPEG well under half a megabyte. Doing that here rather than
+ * server-side means the big version never leaves the phone, which on a
+ * Tashkent mobile connection is the difference between a submission and
+ * an abandoned one.
+ */
+const photo = ref<string | null>(null)
+const photoBusy = ref(false)
+
+/** The submitter's own rating. Adding a place and rating it are one act. */
+const rating = ref(0)
+
+/**
  * One status channel for the whole page.
  *
  * This form used to run four independent state machines — the link
@@ -33,6 +49,27 @@ const busy = ref(false)
 const sent = ref(false)
 
 const say = (tone: Tone, text: string) => { status.value = { tone, text } }
+
+async function onPhoto(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  photoBusy.value = true
+  try {
+    const dataUrl = await compressImage(file)
+    if (dataUrl.length > MAX_ENCODED) {
+      say('error', 'Rasm juda katta — boşqa rasm tanlang.')
+      return
+    }
+    photo.value = dataUrl
+    status.value = null
+  } catch {
+    say('error', 'Rasmni öqib bölmadi.')
+  } finally {
+    photoBusy.value = false
+    // Let the same file be chosen again after a removal.
+    ;(event.target as HTMLInputElement).value = ''
+  }
+}
 
 /** The one field: a name, or a map link that yields one. */
 const primary = ref('')
@@ -104,6 +141,8 @@ function payload() {
     hoursNote: form.hoursNote || undefined,
     comment: form.comment || undefined,
     contact: form.contact || undefined,
+    rating: rating.value || undefined,
+    photo: photo.value || undefined,
     website2: form.website2 || undefined,
   }
 }
@@ -118,6 +157,7 @@ function messageText(): string {
     districtLabel: facets.value?.districts.find((d) => d.slug === form.district)?.name,
     address: form.address,
     coords: location.value,
+    rating: rating.value || undefined,
     phone: form.phone,
     hoursNote: form.hoursNote,
     website: form.website,
@@ -164,6 +204,8 @@ function again() {
   })
   primary.value = ''
   location.value = null
+  photo.value = null
+  rating.value = 0
   status.value = null
   categoryTouched.value = false
   sent.value = false
@@ -201,7 +243,7 @@ useHead({
             @click="again"
           >Yana bitta</button>
           <NuxtLink to="/" class="rounded-pill border border-line px-4 py-2 text-sm">
-            Bosh sahifa
+            Boş sahifa
           </NuxtLink>
         </div>
       </div>
@@ -209,8 +251,7 @@ useHead({
 
     <form v-else class="mt-2" @submit.prevent="submit">
       <p class="text-muted">
-        Nomini yozing yoki xarita havolasini joylaştiring. Qolgani
-        ixtiyoriy.
+        Nomi, rasmi va turi — şu yetarli. Qolgani ixtiyoriy.
       </p>
 
       <!-- The one field. A name, or a link that yields one. -->
@@ -251,6 +292,38 @@ useHead({
 
       <!-- Everything below appears once there is something to describe. -->
       <template v-if="form.name.trim().length >= 2">
+        <!-- Photo second, because it is the thing only someone standing
+             there can supply, and the thing a listing is worst without. -->
+        <div class="mt-5">
+          <p class="text-sm text-muted mb-2">Rasm</p>
+          <div v-if="photo" class="flex items-start gap-3">
+            <img :src="photo" alt="Tanlangan rasm"
+                 class="h-28 w-28 rounded-soft object-cover border border-line">
+            <button
+              type="button"
+              class="rounded-pill px-3 py-1.5 text-sm text-muted hover:text-accent"
+              @click="photo = null"
+            >Öçiriş</button>
+          </div>
+          <label
+            v-else
+            class="flex h-28 cursor-pointer items-center justify-center rounded-soft
+                   border border-dashed border-line text-sm text-muted
+                   hover:border-accent hover:text-accent"
+          >
+            <!-- `capture` makes a phone offer the camera first, which is
+                 where the useful photo actually is. -->
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              class="sr-only"
+              @change="onPhoto"
+            >
+            {{ photoBusy ? 'Tayyorlanyapti…' : 'Rasm qöşiş' }}
+          </label>
+        </div>
+
         <div class="mt-5 grid gap-3 sm:grid-cols-2">
           <div>
             <label for="f-top" class="block text-sm text-muted mb-1">Turi</label>
@@ -288,16 +361,41 @@ useHead({
           </div>
         </div>
 
+        <!-- Adding a place and having an opinion about it are the same
+             act, so the form asks for both rather than sending someone
+             back to the listing afterwards. -->
         <div class="mt-5">
-          <p class="text-sm text-muted mb-2">Qayerda?</p>
-          <LocationPicker v-model="location" @status="say" />
+          <p class="text-sm text-muted mb-2">Bahoyingiz</p>
+          <StarRating
+            :value="rating"
+            editable
+            size="lg"
+            name="new-place"
+            @update:value="rating = $event"
+          />
+        </div>
+
+        <div class="mt-4">
+          <label for="f-comment" class="block text-sm text-muted mb-1">Izohingiz</label>
+          <textarea
+            id="f-comment"
+            v-model="form.comment"
+            rows="3"
+            maxlength="1000"
+            placeholder="Nimasi bilan yaxşi? Boşqalarga foydali bölsin."
+            class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+          />
         </div>
 
         <details class="mt-5 rounded-soft border border-line px-4 py-3">
           <summary class="cursor-pointer text-sm text-muted">
-            Manzil, telefon, iş vaqti va boşqalar
+            Qayerda, telefon, iş vaqti va boşqalar
           </summary>
           <div class="mt-4 space-y-4">
+            <div>
+              <p class="text-sm text-muted mb-2">Qayerda?</p>
+              <LocationPicker v-model="location" @status="say" />
+            </div>
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
                 <label for="f-district" class="block text-sm text-muted mb-1">Tuman</label>
@@ -345,15 +443,6 @@ useHead({
                 id="f-website" v-model="form.website" maxlength="200"
                 class="w-full rounded-soft border border-line bg-surface px-3 py-2"
               >
-            </div>
-            <div>
-              <label for="f-comment" class="block text-sm text-muted mb-1">
-                Yana nima bilasiz?
-              </label>
-              <textarea
-                id="f-comment" v-model="form.comment" rows="3" maxlength="1000"
-                class="w-full rounded-soft border border-line bg-surface px-3 py-2"
-              />
             </div>
             <div>
               <label for="f-contact" class="block text-sm text-muted mb-1">

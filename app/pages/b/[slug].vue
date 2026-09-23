@@ -165,7 +165,7 @@ useHead({
         :class="openNow
           ? 'bg-accent-soft text-accent'
           : 'bg-raised text-muted'"
-      >{{ openNow ? 'Hozir ochiq' : 'Hozir yopiq' }}</span>
+      >{{ openNow ? 'Hozir oçiq' : 'Hozir yopiq' }}</span>
     </div>
 
     <div v-if="b.photos?.length" class="mt-4 flex gap-2 overflow-x-auto -mx-4 px-4 snap-x">

@@ -51,5 +51,5 @@ console.log(`Indeks tayyor: ${docs.length} ta joy, ${kb} KB (gzip ~3x kiçik).`)
 // The index is downloaded by real users on real mobile networks. Catch
 // the growth here rather than in a bug report.
 if (json.length > 2_000_000) {
-  console.warn(`\n  Ogohlantirish: indeks ${kb} KB — kategoriya böyicha bölişni öylang.`)
+  console.warn(`\n  Ogohlantirish: indeks ${kb} KB — kategoriya böyiça bölişni öylang.`)
 }

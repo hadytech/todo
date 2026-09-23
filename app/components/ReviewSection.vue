@@ -55,7 +55,7 @@ async function submit() {
 }
 
 async function remove() {
-  if (!confirm('Sharhingiz öçirilsinmi?')) return
+  if (!confirm('Şarhingiz öçirilsinmi?')) return
   await $fetch('/api/reviews', { method: 'DELETE', query: { slug: props.slug } }).catch(() => {})
   await reload()
 }
@@ -144,12 +144,12 @@ useHead(() => {
 
 <template>
   <section class="mt-8">
-    <h2 class="font-semibold text-lg">Sharhlar</h2>
+    <h2 class="font-semibold text-lg">Şarhlar</h2>
 
     <!-- No database behind the site: say so once, plainly, and offer
          nothing that cannot work. -->
     <p v-if="data.enabled === false && !pending" class="mt-2 text-sm text-muted">
-      Sharhlar hozirça oçiq emas.
+      Şarhlar hozirça oçiq emas.
     </p>
 
     <template v-else>
@@ -161,7 +161,7 @@ useHead(() => {
           </span>
           <div>
             <StarRating :value="data.average" size="sm" />
-            <div class="text-sm text-muted">{{ data.count }} ta sharh</div>
+            <div class="text-sm text-muted">{{ data.count }} ta şarh</div>
           </div>
         </div>
 
@@ -182,7 +182,7 @@ useHead(() => {
       </div>
 
       <p v-if="data.count && data.average === null" class="mt-2 text-sm text-muted">
-        Örtaça baho {{ MIN_REVIEWS_FOR_AVERAGE }} ta sharhdan keyin körsatiladi.
+        Örtaça baho {{ MIN_REVIEWS_FOR_AVERAGE }} ta şarhdan keyin körsatiladi.
       </p>
 
       <!-- Write / edit -->
@@ -192,14 +192,14 @@ useHead(() => {
           <NuxtLink
             to="/kirish"
             class="mt-2 inline-block rounded-pill bg-accent px-4 py-2 text-sm font-medium text-accent-ink"
-          >Kiriş va sharh yoziş</NuxtLink>
+          >Kiriş va şarh yoziş</NuxtLink>
         </div>
 
         <button
           v-else-if="user && !form.open"
           class="rounded-pill border border-line px-4 py-2 text-sm hover:border-accent"
           @click="startEdit"
-        >{{ mine ? 'Sharhimni tahrirlaş' : 'Sharh yoziş' }}</button>
+        >{{ mine ? 'Şarhimni tahrirlaş' : 'Şarh yoziş' }}</button>
 
         <form
           v-else-if="user"
@@ -218,7 +218,7 @@ useHead(() => {
           </div>
 
           <div>
-            <label :for="`body-${slug}`" class="sr-only">Sharh matni</label>
+            <label :for="`body-${slug}`" class="sr-only">Şarh matni</label>
             <textarea
               :id="`body-${slug}`"
               v-model="form.body"
@@ -312,7 +312,7 @@ useHead(() => {
       </ol>
 
       <p v-else-if="!pending" class="mt-6 text-sm text-muted">
-        Hali sharh yöq. Birinçi böling.
+        Hali şarh yöq. Birinçi böling.
       </p>
     </template>
   </section>
