@@ -50,6 +50,26 @@ const sent = ref(false)
 
 const say = (tone: Tone, text: string) => { status.value = { tone, text } }
 
+/** True once the message has been copied and a destination opened. */
+const handedOff = ref(false)
+
+/**
+ * Where a submission goes when there is no server.
+ *
+ * Telegram when a handle is configured, because that is the channel
+ * people in Tashkent actually have. Otherwise a GitHub issue with every
+ * field already filled in — not account-free, but it is a real inbox
+ * that always exists, and one that cannot silently swallow the
+ * submission the way a bare clipboard write did.
+ */
+const offlineTarget = computed(() => {
+  if (telegram) return `https://t.me/${telegram}`
+  const url = new URL(`${repo}/issues/new`)
+  url.searchParams.set('title', `Yangi joy: ${form.name.trim()}`)
+  url.searchParams.set('body', messageText())
+  return url.toString()
+})
+
 async function onPhoto(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (!file) return
@@ -74,6 +94,21 @@ async function onPhoto(event: Event) {
 /** The one field: a name, or a map link that yields one. */
 const primary = ref('')
 
+const looksLikeUrl = (v: string) => /^https?:\/\//i.test(v.trim())
+
+/**
+ * Track the name as it is typed, not when the field is left.
+ *
+ * This was gated on a `@change` handler, which fires on blur. On a
+ * phone that means you type the name, look at the screen, and nothing
+ * is there — no category, no photo, no submit — until you happen to
+ * dismiss the keyboard. The rest of the form is gated on this value,
+ * so the gate has to move as the person types.
+ */
+watch(primary, (v) => {
+  if (!looksLikeUrl(v)) form.name = v.trim()
+})
+
 /**
  * Work out what was just typed or pasted.
  *
@@ -85,7 +120,7 @@ async function readPrimary() {
   const raw = primary.value.trim()
   if (!raw) return
 
-  if (!/^https?:\/\//i.test(raw)) {
+  if (!looksLikeUrl(raw)) {
     form.name = raw
     return
   }
@@ -109,8 +144,24 @@ async function readPrimary() {
   if (parsed.name) { form.name = parsed.name; primary.value = parsed.name; got.push('nomi') }
   if (parsed.coords) { location.value = parsed.coords; got.push('nuqtasi') }
 
-  if (got.length) say('ok', `Havoladan ${got.join(' va ')} olindi.`)
-  else say('error', 'Havoladan maʼlumot öqilmadi — nomini yozing.')
+  if (got.length) {
+    say('ok', `Havoladan ${got.join(' va ')} olindi.`)
+    return
+  }
+
+  /**
+   * The link told us nothing — a short share link with no server to
+   * follow it, or a URL we cannot read.
+   *
+   * This used to leave a dead end: the field still held the URL, so no
+   * name was set, so the rest of the form never appeared and there was
+   * nothing to do but start again. Keep the link where it is useful,
+   * empty the field, and ask for the one thing we actually need.
+   */
+  if (!form.website) form.website = raw
+  primary.value = ''
+  form.name = ''
+  say('info', 'Havoladan nom çiqmadi — joy nomini yozing. Havolani saqlab qöydik.')
 }
 
 // A name usually says what the place is; making someone restate it in a
@@ -170,18 +221,27 @@ async function submit() {
   if (!ready.value || busy.value) return
   status.value = null
 
-  // No database behind the site: the same facts leave as a message.
-  // Copy first — the clipboard write is only permitted inside the click.
+  /**
+   * No server to post to. The same facts leave as a message.
+   *
+   * The button used to say "send" and then only write to the
+   * clipboard, so on a site with no Telegram handle configured you
+   * filled in the whole form, pressed send, and nothing whatsoever
+   * happened. Whatever else is true, this branch now always opens a
+   * real destination.
+   *
+   * Copy happens first because the clipboard write is only permitted
+   * inside the click that triggered it.
+   */
   if (!enabled.value) {
     try {
       await navigator.clipboard.writeText(messageText())
-      say('ok', telegram
-        ? 'Matn nusxalandi — Telegramda joylaştiring.'
-        : 'Matn nusxalandi — bizga yuboring.')
     } catch {
-      say('info', 'Quyidagi matnni nusxalab yuboring.')
+      // Refused on an insecure origin or a locked-down browser. The
+      // message is on screen below either way.
     }
-    if (telegram) window.open(`https://t.me/${telegram}`, '_blank', 'noopener')
+    window.open(offlineTarget.value, '_blank', 'noopener')
+    handedOff.value = true
     return
   }
 
@@ -207,6 +267,7 @@ function again() {
   photo.value = null
   rating.value = 0
   status.value = null
+  handedOff.value = false
   categoryTouched.value = false
   sent.value = false
 }
@@ -464,8 +525,29 @@ useHead({
           class="mt-5 w-full rounded-pill bg-accent px-4 py-3 font-medium text-accent-ink
                  disabled:opacity-60"
         >
-          {{ busy ? 'Yuborilyapti…' : enabled ? 'Yuboriş' : 'Nusxalaş va yuboriş' }}
+          {{ busy
+            ? 'Yuborilyapti…'
+            : enabled
+              ? 'Yuboriş'
+              : telegram ? 'Telegramda yuboriş' : 'Yuboriş (GitHub)' }}
         </button>
+
+        <!-- What just happened, said plainly. A one-line status was too
+             quiet for an action that leaves the site. -->
+        <div
+          v-if="handedOff"
+          class="mt-3 rounded-soft border border-accent/40 bg-accent-soft/40 p-4 text-sm"
+        >
+          <p class="font-medium text-accent">Matn nusxalandi va oyna oçildi.</p>
+          <p class="mt-1 text-muted">
+            {{ telegram
+              ? 'Telegramda joylaştiring (uzun bosib "Paste") va yuboring.'
+              : 'Oçilgan sahifada matn tayyor — "Submit" tugmasini bosing.' }}
+            Oyna oçilmagan bölsa, quyidagi matnni özingiz yuboring.
+          </p>
+          <a :href="offlineTarget" target="_blank" rel="noopener"
+             class="mt-2 inline-block text-accent underline">Qayta oçiş</a>
+        </div>
 
         <!-- Only when there is no server, and only once it would be sent. -->
         <div v-if="!enabled && ready" class="mt-3">

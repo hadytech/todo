@@ -59,6 +59,14 @@ jobs:
         run: npm run build
       - name: Sayt qurilişini sinash
         run: npm run generate
+      # The form being on screen when you have typed a name, and the
+      # submit button reaching anywhere, are not things a unit test can
+      # see. Both shipped broken past a green suite; this is what would
+      # have caught them.
+      - name: Brauzer sinovi
+        run: |
+          npx playwright install --with-deps chromium
+          npm run smoke
       - name: Sahifa byudjeti
         run: npm run check:budget
       - name: HTML tekşiruvi
