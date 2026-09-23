@@ -61,6 +61,11 @@ await page.waitForTimeout(500)
 
 check('the one field is there', await page.locator('#f-primary').isVisible())
 
+// There must be nothing beside it that looks like a submit. The removed
+// "Öqiş" button read as the way to send the name and did nothing.
+check('nothing beside the field pretends to submit it',
+  await page.locator('#f-primary ~ button, #f-primary + button').count() === 0)
+
 /**
  * The regression this exists for.
  *

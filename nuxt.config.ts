@@ -129,6 +129,28 @@ export default defineNuxtConfig({
          * cached (see routeRules) instead of prerendered.
          */
         ...(staticBuild ? published.map((b) => `/b/${b.slug}`) : []),
+        /**
+         * The API routes, written out as files.
+         *
+         * A prerendered page normally gets its data from
+         * `_payload.json`, which is keyed by build id. When that misses
+         * — a tab open across a deploy, a CDN still serving the
+         * previous index.html — `useFetch` falls through to the real
+         * route, and on a static host there was nothing there. The
+         * business page then threw its own 404, so a listing that
+         * existed reported itself missing.
+         *
+         * Prerendering these means the fallback resolves: stale data
+         * for a moment instead of a dead page.
+         */
+        ...(staticBuild
+          // A static host ignores the query string, so only the bare
+          // routes are worth writing: /api/list?category=x would be
+          // served the same file as /api/list. The filtered browse
+          // pages fall back to the unfiltered list rather than to a
+          // dead page, which is the trade.
+          ? ['/api/facets', '/api/list', ...published.map((b) => `/api/business/${b.slug}`)]
+          : []),
         ...landingRoutes,
         ...districtRoutes,
         ...categoryRoutes,
