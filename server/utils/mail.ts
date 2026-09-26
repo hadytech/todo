@@ -18,7 +18,16 @@ export interface Mail {
 
 export async function sendMail(mail: Mail): Promise<void> {
   const key = process.env.RESEND_API_KEY
-  const from = process.env.MAIL_FROM || 'yalp.uz <kiriş@yalp.uz>'
+  /**
+   * ASCII only in the address itself.
+   *
+   * The default used to be `kiriş@yalp.uz`. An email local part has to be
+   * ASCII unless every hop speaks SMTPUTF8, which no provider promises —
+   * so that address was rejected by anyone who tried to send from it, and
+   * the site's own alphabet rule had quietly produced an invalid one.
+   * The display name beside it may be anything.
+   */
+  const from = process.env.MAIL_FROM || 'yalp.uz <kirish@yalp.uz>'
 
   if (!key) {
     // Development. Printing beats failing: the flow stays walkable
@@ -40,8 +49,20 @@ export async function sendMail(mail: Mail): Promise<void> {
     // The provider's message is for the log, never for the visitor: it
     // can carry account details, and there is nothing they could do with
     // it anyway.
-    console.error(`[mail] ${res.status} ${await res.text().catch(() => '')}`)
-    throw createError({ statusCode: 502, statusMessage: 'Xat yuborib bölmadi' })
+    const detail = await res.text().catch(() => '')
+    console.error(`[mail] ${res.status} from=${from} ${detail}`)
+    /**
+     * A 403 from Resend means the sending domain is not verified — the
+     * one failure here that is a setup step rather than a fault, and the
+     * one worth naming, because "could not send" sends somebody looking
+     * in the code for something that is in a dashboard.
+     */
+    throw createError({
+      statusCode: 502,
+      statusMessage: res.status === 403
+        ? 'Poçta xizmati domenni tasdiqlamagan — MAIL_FROM sozlamasini tekşiring'
+        : 'Xat yuborib bölmadi',
+    })
   }
 }
 

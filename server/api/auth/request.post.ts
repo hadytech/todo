@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { db } from '../../utils/db'
 import { ensureSchema } from '../../utils/migrate'
+import { siteOrigin } from '../../utils/origin'
 import { hashToken, newToken, LOGIN_TOKEN_TTL_MIN } from '../../utils/auth'
 import { loginMail, sendMail } from '../../utils/mail'
 import { checkLoginRate } from '../../utils/ratelimit'
@@ -48,8 +49,7 @@ export default defineEventHandler(async (event) => {
   // The name travels in the link, not in the database, because the
   // account does not exist yet and an unverified address must not be
   // able to create one.
-  const base = useRuntimeConfig(event).public.siteUrl
-  const url = new URL('/api/auth/verify', base)
+  const url = new URL('/api/auth/verify', siteOrigin(event))
   url.searchParams.set('token', token)
   if (name) url.searchParams.set('name', name)
 
