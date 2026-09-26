@@ -122,13 +122,18 @@ export default defineNuxtConfig({
          */
         ...(staticBuild ? ['/qoshish', '/kirish'] : []),
         /**
-         * Business pages carry reviews, and reviews are the content
-         * people actually search for. Freezing them at build time would
-         * mean a crawler only ever sees the reviews that existed when CI
-         * last ran, so under Vercel they are rendered on demand and
-         * cached (see routeRules) instead of prerendered.
+         * Prerendered on every preset.
+         *
+         * These were rendered on demand under Vercel so that review text
+         * would be in the HTML rather than frozen at build time. That is
+         * the right shape once reviews exist — but there is no database
+         * connected yet, so on-demand rendering buys nothing today and
+         * costs a whole class of failure: a page that depends on a
+         * function being routed correctly can 404, and a file cannot.
+         *
+         * Put the `isr` rule back alongside DATABASE_URL.
          */
-        ...(staticBuild ? published.map((b) => `/b/${b.slug}`) : []),
+        ...published.map((b) => `/b/${b.slug}`),
         /**
          * The API routes, written out as files.
          *
@@ -172,7 +177,6 @@ export default defineNuxtConfig({
      * page per window rather than once per visit. That is what keeps a
      * free Postgres tier comfortably inside its compute allowance.
      */
-    '/b/**': { isr: 600 },
     // Rendered per request: a form must not be served from a cache that
     // predates the database it posts to.
     '/qoshish': { isr: false },

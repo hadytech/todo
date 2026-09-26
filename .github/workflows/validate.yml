@@ -1,11 +1,13 @@
 name: Validate
 
-# Runs on every pull request. This is what makes "anyone can send a PR"
-# safe: malformed data cannot reach the site.
+# Runs on every pull request and every push, `main` included. The pull
+# request run is what makes "anyone can send a PR" safe: malformed data
+# cannot reach the site. The `main` run is what keeps the branch Vercel
+# deploys from under the same gates — Vercel builds and ships whatever
+# lands there without consulting this workflow, so nothing else would.
 on:
   pull_request:
   push:
-    branches-ignore: [main]
 
 jobs:
   check:
