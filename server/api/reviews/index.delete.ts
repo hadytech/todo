@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   requireSameOrigin(event)
 
   const parsed = Query.safeParse(getQuery(event))
-  if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Slug kerak' })
+  if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Joy manzili kerak' })
 
   const me = await readerIdentity(event)
   if (!me) throw createError({ statusCode: 404, statusMessage: 'Şarh topilmadi' })

@@ -27,10 +27,10 @@ export function requireSameOrigin(event: Parameters<typeof getRequestHeader>[0])
   try {
     from = new URL(stated).host
   } catch {
-    throw createError({ statusCode: 403, statusMessage: 'Söro rad etildi' })
+    throw createError({ statusCode: 403, statusMessage: 'Sörov rad etildi' })
   }
 
   if (from !== host) {
-    throw createError({ statusCode: 403, statusMessage: 'Söro rad etildi' })
+    throw createError({ statusCode: 403, statusMessage: 'Sörov rad etildi' })
   }
 }

@@ -17,7 +17,7 @@ const { user, enabled, loaded } = useAuth()
  * into an address bar.
  */
 const LINKS = [
-  { to: '/', label: 'Lenta', icon: 'M3 11.5 12 4l9 7.5M5.5 9.8V20h13V9.8' },
+  { to: '/', label: 'Oqim', icon: 'M3 11.5 12 4l9 7.5M5.5 9.8V20h13V9.8' },
   { to: '/qidiruv', label: 'Qidiruv', icon: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14ZM20 20l-4.2-4.2' },
   { to: '/qoshish', label: 'Qöşiş', icon: 'M12 5v14M5 12h14' },
 ]

@@ -390,7 +390,7 @@ await page.waitForTimeout(1500)
 check('it says it worked', await page.getByRole('status').count() > 0,
   (await page.getByRole('status').first().innerText().catch(() => '')).slice(0, 60))
 check('it offers to show you your post',
-  await page.getByRole('link', { name: /körish/i }).count() > 0)
+  await page.getByRole('link', { name: /köriş/i }).count() > 0)
 
 // Found by its text, not by position: an earlier section of this script
 // left a review on the same place, and the list is ordered by usefulness

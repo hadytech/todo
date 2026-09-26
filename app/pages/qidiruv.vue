@@ -126,10 +126,10 @@ useHead({
     <div v-if="results.length" class="flex flex-wrap gap-2 mb-3 text-sm">
       <select
         v-model="category"
-        aria-label="Turi böyiça filtr"
+        aria-label="Turi böyiça tanlaş"
         class="rounded-soft border border-line px-2 py-1 bg-transparent"
       >
-        <option value="">Hamma turi</option>
+        <option value="">Hamma turlar</option>
         <option v-for="c in facets?.categories" :key="c.slug" :value="c.slug">{{ c.name }}</option>
       </select>
       <button
@@ -144,10 +144,10 @@ useHead({
 
       <select
         v-model="district"
-        aria-label="Tuman böyiça filtr"
+        aria-label="Tuman böyiça tanlaş"
         class="rounded-soft border border-line px-2 py-1 bg-transparent"
       >
-        <option value="">Hamma tuman</option>
+        <option value="">Hamma tumanlar</option>
         <option v-for="d in facets?.districts" :key="d.slug" :value="d.slug">{{ d.name }}</option>
       </select>
     </div>
@@ -171,10 +171,10 @@ useHead({
 
     <p v-else-if="q.trim() && ready && !shown.length" class="text-muted text-sm">
       <template v-if="results.length">
-        Filtrga mos joy yöq. Filtrni kengaytirib köring.
+        Tanlovga mos joy yöq. Şartlarni kengaytirib köring.
       </template>
       <template v-else>
-        Hech narsa topilmadi. Boşqaça yozib köring — istagan alifbo işlaydi.
+        Heç narsa topilmadi. Boşqaça yozib köring — istagan alifbo işlaydi.
       </template>
     </p>
 

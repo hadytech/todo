@@ -64,7 +64,7 @@ useSeoMeta({
   ogSiteName: 'yalp.uz',
   ogLocale: 'uz_UZ',
   ogTitle: 'yalp.uz — Toşkentdagi joylar',
-  ogDescription: 'Toshkentdagi restoran, kafe, gozallik saloni, universitet va bozorlar maʼlumotnomasi.',
+  ogDescription: 'Toşkentdagi restoran, kafe, gözallik saloni, universitet va bozorlar maʼlumotnomasi.',
   ogUrl: site,
   ogImage: `${site}/og.png`,
   twitterCard: 'summary_large_image',
@@ -74,7 +74,7 @@ useHead({
   title: 'yalp.uz — Toşkentdagi joylar',
   meta: [{
     name: 'description',
-    content: 'Toshkentdagi restoran, kafe, gozallik saloni, universitet va bozorlar maʼlumotnomasi. Chorsu, Yunusobod, Chilonzor va boshqa tumanlar böyicha qidiring.',
+    content: 'Toşkentdagi restoran, kafe, gözallik saloni, universitet va bozorlar maʼlumotnomasi. Çorsu, Yunusobod, Çilonzor va boşqa tumanlar böyiça qidiring.',
   }],
   link: [{ rel: 'canonical', href: site }],
   script: structured.map((o) => ({ type: 'application/ld+json', innerHTML: JSON.stringify(o) })),
@@ -89,7 +89,7 @@ useHead({
       class="sticky top-14 lg:top-0 z-20 border-b border-line bg-canvas/85 px-4 py-3
              backdrop-blur"
     >
-      <h1 class="text-lg font-bold">Lenta</h1>
+      <h1 class="text-lg font-bold">Oqim</h1>
     </div>
 
     <!-- The composer, at the top of the timeline where a composer goes.

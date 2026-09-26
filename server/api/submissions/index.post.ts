@@ -103,7 +103,7 @@ export default defineEventHandler(async (event) => {
   if (!dbConfigured()) {
     throw createError({
       statusCode: 503,
-      statusMessage: 'Forma vaqtincha işlamayapti — GitHub orqali yuboring',
+      statusMessage: 'Yuboriş vaqtinça işlamayapti — GitHub orqali yuboring',
     })
   }
   await ensureSchema()
@@ -141,7 +141,7 @@ export default defineEventHandler(async (event) => {
   if (b.category) {
     const known = catalog.categories.some((c) =>
       c.children.some((ch) => `${c.slug}/${ch.slug}` === b.category))
-    if (!known) throw createError({ statusCode: 400, statusMessage: 'Kategoriya notöğri' })
+    if (!known) throw createError({ statusCode: 400, statusMessage: 'Turi notöğri' })
     category = b.category
   } else {
     // Longest match wins inside guessCategory — "sartaroşxonasi" contains

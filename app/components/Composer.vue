@@ -260,14 +260,14 @@ const boxId = useId()
       role="status"
     >
       {{ status.text }}
-      <NuxtLink v-if="status.to" :to="status.to" class="underline">Körish</NuxtLink>
+      <NuxtLink v-if="status.to" :to="status.to" class="underline">Köriş</NuxtLink>
     </p>
 
     <p v-if="open" class="mt-2 text-xs text-muted">
       Hisob kerak emas. Manzilingiz saqlanmaydi.
       <NuxtLink to="/maxfiylik" class="underline hover:text-accent">Maxfiylik</NuxtLink>
       ·
-      <NuxtLink to="/qoshish" class="underline hover:text-accent">Batafsil forma</NuxtLink>
+      <NuxtLink to="/qoshish" class="underline hover:text-accent">Batafsil qöşiş</NuxtLink>
     </p>
   </section>
 

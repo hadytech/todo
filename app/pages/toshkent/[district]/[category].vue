@@ -63,7 +63,7 @@ useHead({
 <template>
   <div class="px-4 py-4">
     <nav class="text-sm text-muted mb-2 flex flex-wrap gap-x-1">
-      <NuxtLink to="/" class="hover:text-accent">Bosh sahifa</NuxtLink>
+      <NuxtLink to="/" class="hover:text-accent">Boş sahifa</NuxtLink>
       <span>›</span>
       <NuxtLink :to="`/tuman/${district}`" class="hover:text-accent">{{ districtName }}</NuxtLink>
       <span>›</span>
@@ -79,7 +79,7 @@ useHead({
 
     <p v-if="!data?.items.length" class="text-muted text-sm">
       Bu tumanda hali joy qöşilmagan.
-      <NuxtLink to="/qoshish" class="text-accent">Birinchi bölib qöşing</NuxtLink>.
+      <NuxtLink to="/qoshish" class="text-accent">Birinçi bölib qöşing</NuxtLink>.
     </p>
   </div>
 </template>

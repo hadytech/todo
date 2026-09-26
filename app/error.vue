@@ -22,7 +22,7 @@ useHead({ title: notFound.value ? 'Sahifa topilmadi — yalp.uz' : 'Xatolik — 
     </p>
 
     <div class="flex gap-3 text-sm">
-      <NuxtLink to="/" class="rounded-soft bg-accent text-accent-ink px-4 py-2">Bosh sahifa</NuxtLink>
+      <NuxtLink to="/" class="rounded-soft bg-accent text-accent-ink px-4 py-2">Boş sahifa</NuxtLink>
       <NuxtLink to="/qidiruv" class="rounded-soft border border-line px-4 py-2">
         Qidiruv
       </NuxtLink>

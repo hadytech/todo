@@ -581,10 +581,10 @@ useHead({
       <div class="mt-3 space-y-3 text-muted">
         <p>
           <a :href="`${repo}/issues/new?template=joy-qoshish.yml`" rel="noopener"
-             class="text-accent">GitHub formasi</a>
+             class="text-accent">GitHub orqali</a>
           — hisob kerak, lekin muhokama oçiq qoladi.
         </p>
-        <p><a :href="repo" rel="noopener" class="text-accent">Repozitoriya</a></p>
+        <p><a :href="repo" rel="noopener" class="text-accent">Manba kodi</a></p>
       </div>
     </details>
   </div>

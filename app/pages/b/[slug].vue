@@ -153,7 +153,7 @@ useHead({
 
     <!-- Visible, indexed, and genuinely useful: the spelling people know. -->
     <p v-if="b.nameAscii !== b.name" class="text-sm text-muted mt-1">
-      Boşqa nomi: {{ b.nameAscii }}
+      Boşqaça yozilişi: {{ b.nameAscii }}
     </p>
 
     <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-sm text-muted">
