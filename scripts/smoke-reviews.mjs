@@ -169,9 +169,9 @@ await openForm.first().click()
 await page.waitForTimeout(300)
 
 // Five stars: the control is a radio group, so pick the last one.
-const stars = page.locator('form input[type=radio]')
+const stars = page.locator(`#r-${SLUG}-1, #r-${SLUG}-2, #r-${SLUG}-3, #r-${SLUG}-4, #r-${SLUG}-5`)
 check('the rating control is there', await stars.count() === 5, `${await stars.count()} yulduz`)
-await stars.nth(4).check({ force: true })
+await page.locator(`#r-${SLUG}-5`).check({ force: true })
 
 await page.locator('form textarea').fill(body)
 await page.locator('form input[type=text], form input:not([type])').first().fill('Dilnoza')
@@ -343,6 +343,96 @@ const crossSubmit = await fetch(`${ORIGIN}/api/submissions`, {
 })
 check('a submission from another origin is refused',
   crossSubmit.status === 403, `status ${crossSubmit.status}`)
+
+// ====================================================== the composer, one box
+//
+// The whole point of it: type a sentence, tap the place, tap a star, post.
+// Counted in taps below, because "easy" is a claim about tap count and
+// nothing else, and a form can pass every other test while still asking
+// for eight things.
+console.log('\nLentadagi bitta oyna:\n')
+
+await page.goto(`${ORIGIN}/`, { waitUntil: 'networkidle' })
+await page.waitForTimeout(600)
+
+const box = page.locator('section textarea').first()
+check('the composer is on the feed, not a link to a form', await box.count() > 0)
+check('nothing is asked before you start typing',
+  await page.locator('section select').count() === 0,
+  `${await page.locator('section select').count()} dropdown`)
+
+// 1. Type.
+// Deliberately unlike the review text used earlier in this script: two
+// bodies sharing a phrase made the matcher below pick the wrong row.
+const COMPOSED = 'Çorsu bozorida qassoblar rastasi juda toza saqlanadi.'
+await box.fill(COMPOSED)
+await page.waitForTimeout(900)
+
+// 2. Tap the place it matched.
+const suggestion = page.locator('section ul button').first()
+check('typing offers matching places', await suggestion.count() > 0)
+const suggested = (await suggestion.innerText()).trim()
+check('the match is the place that was named', /çorsu|chorsu/i.test(suggested), suggested)
+await suggestion.click()
+await page.waitForTimeout(200)
+check('the chosen place shows as a chip',
+  await page.getByRole('button', { name: /boşqa joy/i }).count() > 0)
+
+// 3. Tap a star. 4. Post.
+// By id, not position: StarRating gives each radio `<name>-<n>`, and a
+// positional index silently picked a different group's star.
+await page.locator('#compose-5').check({ force: true })
+const postBtn = page.getByRole('button', { name: /^Joylaş$/ })
+check('four taps and it can post', await postBtn.isEnabled())
+await postBtn.click()
+await page.waitForTimeout(1500)
+
+check('it says it worked', await page.getByRole('status').count() > 0,
+  (await page.getByRole('status').first().innerText().catch(() => '')).slice(0, 60))
+check('it offers to show you your post',
+  await page.getByRole('link', { name: /körish/i }).count() > 0)
+
+// Found by its text, not by position: an earlier section of this script
+// left a review on the same place, and the list is ordered by usefulness
+// rather than by recency.
+const composed = (await asPage(page, 'GET', `/api/reviews/${SLUG}`)).json
+const mine = composed.reviews?.find((r) => r.body === COMPOSED)
+check('the review really is stored', Boolean(mine), `${composed.count} ta şarh`)
+check('with the text that was typed', mine?.body === COMPOSED)
+check('and the rating that was tapped', mine?.rating === 5, String(mine?.rating))
+
+// The box empties, the way a composer does.
+check('the box is empty again', (await box.inputValue()) === '')
+
+// A place the directory does not have: same box, no category asked.
+const fresh = await browser.newContext()
+const freshPage = await fresh.newPage()
+await freshPage.goto(`${ORIGIN}/`, { waitUntil: 'networkidle' })
+await freshPage.waitForTimeout(600)
+const box2 = freshPage.locator('section textarea').first()
+await box2.fill('Registon qahvaxonasi, ertalabki non hali issiq böladi.')
+await freshPage.waitForTimeout(900)
+
+const nameField = freshPage.locator('section input[type=text], section input:not([type])').first()
+check('a new place has its name proposed', await nameField.count() > 0)
+check('the proposal is the first clause, not the whole sentence',
+  (await nameField.inputValue()) === 'Registon qahvaxonasi',
+  await nameField.inputValue())
+check('no category is asked for',
+  await freshPage.locator('section select').count() === 0)
+
+await freshPage.locator('#compose-4').check({ force: true })
+await freshPage.getByRole('button', { name: /^Joylaş$/ }).click()
+await freshPage.waitForTimeout(1500)
+
+const row = execFileSync('psql', ['-t', '-A', url, '-c',
+  "select name || '|' || coalesce(category,'(yöq)') || '|' || coalesce(rating::text,'') "
+  + 'from submissions order by created_at desc limit 1',
+], { encoding: 'utf8' }).trim().split('|')
+check('the new place was filed', row[0] === 'Registon qahvaxonasi', row[0])
+check('its category was guessed from the name', row[1] === 'ovqatlanish/qahvaxona', row[1])
+check('its first rating came with it', row[2] === '4', row[2])
+await fresh.close()
 
 // --------------------------------------------------------- nothing was broken
 check('no page errors', pageErrors.length === 0, pageErrors.join('; '))
