@@ -1,4 +1,11 @@
--- yalp.uz — the write side.
+/* eslint-disable */
+/**
+ * GENERATED FILE — do not edit.
+ *
+ * Produced from db/schema.sql by scripts/build-schema.ts (`npm run schema`).
+ * Edit the SQL there; server/utils/schema.test.ts fails if this drifts.
+ */
+export const SCHEMA_SQL = `-- yalp.uz — the write side.
 --
 -- Everything a visitor creates lives here. Business records stay in
 -- data/businesses/*.yaml, under review in git, because a directory's
@@ -14,7 +21,7 @@
 -- Safe to re-run, and tested as such: on a blank database, on one created
 -- before these tables existed, and twice in a row (server/db.test.ts).
 --
--- Editing this file means running `npm run schema` to regenerate the copy
+-- Editing this file means running \`npm run schema\` to regenerate the copy
 -- the server bundles. server/utils/schema.test.ts fails if you forget.
 
 create extension if not exists pgcrypto;
@@ -52,7 +59,7 @@ create table if not exists login_tokens (
 
 create index if not exists login_tokens_email_idx on login_tokens (email, created_at desc);
 -- The index on request_key is created further down, with the alter that
--- adds the column: `create table if not exists` skips an existing table,
+-- adds the column: \`create table if not exists\` skips an existing table,
 -- so on an upgrade the column does not exist yet at this point.
 
 create table if not exists sessions (
@@ -129,7 +136,7 @@ group by business_slug;
 -- directory's facts should be auditable and revertable by anyone. This
 -- table is the inbox in front of that: anyone can post to it, a
 -- maintainer turns the good ones into YAML drafts with
--- `npm run submissions`, and the repository stays the source of truth.
+-- \`npm run submissions\`, and the repository stays the source of truth.
 --
 -- Nothing here is ever rendered on the site. A row is a suggestion, not
 -- a listing.
@@ -154,7 +161,7 @@ create table if not exists submissions (
 
   -- Free text on purpose. Asking someone who is doing you a favour to
   -- fill in a seven-day opening schedule is how a form gets abandoned
-  -- halfway. A maintainer normalises this into the real `hours` shape.
+  -- halfway. A maintainer normalises this into the real \`hours\` shape.
   hours_note   text,
   comment      text,
   -- How to reach the submitter, if they want to be reachable. Never
@@ -194,7 +201,7 @@ alter table submissions add column if not exists rating smallint
  *
  * Deliberately in the row rather than a blob store: a blob store is
  * another account, another key and another bill, and this is a queue
- * rather than a library — `npm run submissions import` writes the file
+ * rather than a library — \`npm run submissions import\` writes the file
  * into photos-src/ and nulls this column, so a row only carries an
  * image for as long as nobody has looked at it yet. That keeps the
  * table small enough for a free Postgres tier, which holding every
@@ -305,3 +312,7 @@ alter table reviews add column if not exists writer_key text;
 
 create index if not exists reviews_author_idx on reviews (author_key, created_at desc);
 create index if not exists reviews_writer_idx on reviews (writer_key, created_at desc);
+`
+
+/** SHA-256 of the SQL above, used to skip a migration that already ran. */
+export const SCHEMA_DIGEST = '13c21b4a0acb8f059e3fba81b4c7b13838e6a4e540bd4cb54fa6e771834110c2'

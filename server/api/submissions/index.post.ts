@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { db, dbConfigured } from '../../utils/db'
+import { ensureSchema } from '../../utils/migrate'
 import { currentUser } from '../../utils/auth'
 import { checkSubmissionRate } from '../../utils/ratelimit'
 import { ipKey } from '../../utils/privacy'
@@ -95,6 +96,7 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Forma vaqtincha işlamayapti — GitHub orqali yuboring',
     })
   }
+  await ensureSchema()
 
   requireSameOrigin(event)
 

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { db, dbConfigured } from '../../utils/db'
+import { ensureSchema } from '../../utils/migrate'
 import { writerIdentity, cleanAuthorName } from '../../utils/identity'
 import { requireSameOrigin } from '../../utils/sameorigin'
 import { checkReviewRate } from '../../utils/ratelimit'
@@ -40,6 +41,9 @@ export default defineEventHandler(async (event) => {
   if (!dbConfigured()) {
     throw createError({ statusCode: 503, statusMessage: 'Şarhlar hozirça oçiq emas' })
   }
+  // Connecting a database is the whole setup; the schema applies itself.
+  // Memoised per instance, so this is free after the first call.
+  await ensureSchema()
   requireSameOrigin(event)
 
   const parsed = Body.safeParse(await readBody(event))

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { db, dbConfigured } from '../../utils/db'
+import { ensureSchema } from '../../utils/migrate'
 import { writerIdentity } from '../../utils/identity'
 import { requireSameOrigin } from '../../utils/sameorigin'
 
@@ -19,6 +20,7 @@ export default defineEventHandler(async (event) => {
   if (!dbConfigured()) {
     throw createError({ statusCode: 503, statusMessage: 'Şarhlar hozirça oçiq emas' })
   }
+  await ensureSchema()
   requireSameOrigin(event)
 
   const parsed = Body.safeParse(await readBody(event))

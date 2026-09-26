@@ -1,4 +1,5 @@
 import postgres from 'postgres'
+import { databaseUrl } from '../../lib/dburl'
 
 /**
  * One Postgres handle per warm serverless instance.
@@ -15,7 +16,7 @@ import postgres from 'postgres'
 let handle: postgres.Sql | null = null
 
 export function db(): postgres.Sql {
-  const url = process.env.DATABASE_URL
+  const url = databaseUrl()
   if (!url) {
     throw createError({
       statusCode: 503,
@@ -42,5 +43,5 @@ export function db(): postgres.Sql {
  * connection error at the visitor.
  */
 export function dbConfigured(): boolean {
-  return Boolean(process.env.DATABASE_URL)
+  return Boolean(databaseUrl())
 }
