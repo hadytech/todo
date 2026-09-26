@@ -138,7 +138,12 @@ create table if not exists submissions (
   id           uuid primary key default gen_random_uuid(),
 
   name         text not null check (length(btrim(name)) between 2 and 120),
-  category     text not null,
+  -- Nullable, because the composer does not ask for one. A category is
+  -- guessed from the name where the name says what the place is, and left
+  -- null where it does not — a maintainer assigns it during import. This
+  -- is an inbox, not a listing: refusing a shop somebody bothered to tell
+  -- us about because a dropdown was not touched is the wrong trade.
+  category     text,
   district     text,
   address      text,
   lat          double precision,
@@ -263,6 +268,11 @@ do $$ begin
     alter table votes add primary key (review_id, voter);
   end if;
 end $$;
+
+-- An existing database created before the composer has `not null` on
+-- submissions.category. Dropping it is additive in the direction that
+-- matters: every row that satisfied the old rule still satisfies this one.
+alter table submissions alter column category drop not null;
 
 -- ============================================================= pseudonyms
 --

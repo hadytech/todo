@@ -92,22 +92,10 @@ useHead({
       <h1 class="text-lg font-bold">Lenta</h1>
     </div>
 
-    <!-- The composer. A timeline opens with an invitation to add to it. -->
-    <NuxtLink
-      to="/qoshish"
-      class="flex items-center gap-3 border-b border-line px-4 py-3 hover:bg-raised/40"
-    >
-      <span
-        class="grid h-11 w-11 shrink-0 place-items-center rounded-pill bg-accent-soft
-               text-xl text-accent"
-        aria-hidden="true"
-      >+</span>
-      <span class="text-muted">Bir joyni qöşasizmi?</span>
-      <span
-        class="ml-auto shrink-0 rounded-pill bg-accent px-4 py-1.5 text-sm font-bold
-               text-accent-ink"
-      >Qöşiş</span>
-    </NuxtLink>
+    <!-- The composer, at the top of the timeline where a composer goes.
+         This used to be a link to the form, which is a sign pointing at a
+         door rather than a door. -->
+    <Composer />
 
     <!--
       Nothing published yet. An empty timeline is the truth right now, so

@@ -7,6 +7,7 @@ import { ipKey } from '../../utils/privacy'
 import { requireSameOrigin } from '../../utils/sameorigin'
 import { catalog } from '../../utils/catalog'
 import { normalisePhone } from '../../../lib/phone'
+import { guessCategory } from '../../../lib/guess'
 import { MAX_ENCODED } from '../../../lib/photo'
 import { sanitisePhoto } from '../../../lib/imagemeta'
 
@@ -28,7 +29,16 @@ const optional = (s: z.ZodString) =>
 
 const Body = z.object({
   name: z.string().trim().min(2).max(120),
-  category: z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+$/),
+  /**
+   * Optional, because the composer never asks.
+   *
+   * A name usually says what a place is — "sartaroşxona", "qahvaxona" —
+   * so it is guessed below. Where it does not, the row is filed without
+   * one and a maintainer assigns it during import. Refusing a shop
+   * somebody bothered to tell us about because a dropdown went untouched
+   * is the wrong trade, and this table is an inbox rather than a listing.
+   */
+  category: optional(z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+$/)),
   district: optional(z.string().regex(/^[a-z0-9-]+$/)),
   address: optional(z.string().trim().max(300)),
 
@@ -119,12 +129,25 @@ export default defineEventHandler(async (event) => {
   // Silently accepted, never stored. A bot that gets "ok" stops trying.
   if (b.website2) return { ok: true }
 
-  // The category has to exist, or the suggestion cannot be filed. The
-  // district is checked too, but a wrong one is a typo a maintainer
-  // fixes, not a reason to reject the whole submission.
-  const known = catalog.categories.some((c) =>
-    c.children.some((ch) => `${c.slug}/${ch.slug}` === b.category))
-  if (!known) throw createError({ statusCode: 400, statusMessage: 'Kategoriya notöğri' })
+  /**
+   * A stated category has to exist; an absent one is guessed, and a guess
+   * that fails is simply absent.
+   *
+   * The check still matters for a stated one: an arbitrary string here
+   * would be a value no browse page can ever show, so it is a typo worth
+   * refusing rather than storing.
+   */
+  let category: string | null = null
+  if (b.category) {
+    const known = catalog.categories.some((c) =>
+      c.children.some((ch) => `${c.slug}/${ch.slug}` === b.category))
+    if (!known) throw createError({ statusCode: 400, statusMessage: 'Kategoriya notöğri' })
+    category = b.category
+  } else {
+    // Longest match wins inside guessCategory — "sartaroşxonasi" contains
+    // "oşxona", and taking the first hit put barbers in restaurants.
+    category = guessCategory(b.name)
+  }
 
   /**
    * The photo, with its metadata taken off.
@@ -165,7 +188,7 @@ export default defineEventHandler(async (event) => {
       phone, website, telegram, instagram,
       hours_note, comment, contact, rating, photo, user_id, submitter_key
     ) values (
-      ${b.name}, ${b.category}, ${b.district ?? null}, ${b.address ?? null},
+      ${b.name}, ${category}, ${b.district ?? null}, ${b.address ?? null},
       ${b.lat ?? null}, ${b.lng ?? null},
       ${normalisePhone(b.phone) ?? null}, ${b.website ?? null},
       ${b.telegram ?? null}, ${b.instagram ?? null},
