@@ -1,9 +1,10 @@
 import {
   catalog, categoryLabel, cityLabel, DEFAULT_CITY, districtLabel, pendingCount,
 } from '../utils/catalog'
+import { publishedFromQueue } from '../utils/published'
 
 /** Lightweight list for the home page and the browse pages. */
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const { category, district, limit, city } = getQuery(event) as {
     category?: string; district?: string; limit?: string; city?: string
   }
@@ -28,7 +29,16 @@ export default defineEventHandler((event) => {
     ? catalog.districts.find((d) => d.slug === district)?.city
     : undefined
   const inCity = city || districtCity || DEFAULT_CITY.slug
-  const cityRows = catalog.businesses.filter((b) => b.city === inCity)
+
+  /**
+   * YAML listings plus the ones approved from the queue.
+   *
+   * Queue listings come first: they are the newest thing in the
+   * directory, and the point of approving one from a phone is seeing it
+   * appear.
+   */
+  const everything = [...await publishedFromQueue(), ...catalog.businesses]
+  const cityRows = everything.filter((b) => b.city === inCity)
 
   const matching = cityRows
     .filter((b) => (category ? b.categoryTop === category : true))
@@ -40,7 +50,7 @@ export default defineEventHandler((event) => {
     address: b.address,
     categoryTop: b.categoryTop,
     categoryName: categoryLabel(b.category),
-    districtName: districtLabel(b.district),
+    districtName: b.district ? districtLabel(b.district) : undefined,
     city: b.city,
     price: b.price,
     photo: b.photos[0]?.file ?? null,
@@ -63,7 +73,7 @@ export default defineEventHandler((event) => {
     cities: catalog.cities.map((c) => ({
       slug: c.slug,
       name: c.name,
-      count: catalog.businesses.filter((b) => b.city === c.slug).length,
+      count: everything.filter((b) => b.city === c.slug).length,
     })),
     city: inCity,
     cityName: cityLabel(inCity),

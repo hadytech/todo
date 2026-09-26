@@ -636,6 +636,118 @@ if (bareUp) {
 bareServer.kill('SIGTERM')
 execFileSync('rm', ['-rf', bare])
 
+// ==================================================== approving from the site
+//
+// A suggestion used to sit in the table until somebody ran a script on a
+// laptop, which in practice meant it sat there. This is the queue worked
+// from a browser.
+console.log('\nTekşiruv navbati:\n')
+
+const ADMIN = 'sinov-kaliti-juda-uzun-va-tasodifiy-0123456789'
+
+// The page is shut when no token is configured, and shut is the default.
+const shutPage = await page.evaluate(() =>
+  fetch('/api/admin/queue').then((r) => r.json()))
+check('with no ADMIN_TOKEN the queue is closed',
+  shutPage.admin === false && shutPage.configured === false,
+  JSON.stringify(shutPage).slice(0, 60))
+
+const shutDecide = await asPage(page, 'POST', '/api/admin/decide',
+  { id: '00000000-0000-4000-8000-000000000000', action: 'reject' })
+check('and deciding is refused', shutDecide.status === 404, `status ${shutDecide.status}`)
+
+// Restart the server with a token, which is the configured case.
+server.kill('SIGTERM')
+await new Promise((r) => setTimeout(r, 500))
+const ADMIN_PORT = PORT + 5
+const adminServer = spawn(process.execPath, ['.output/server/index.mjs'], {
+  env: {
+    ...process.env,
+    DATABASE_URL: url,
+    ADMIN_TOKEN: ADMIN,
+    PORT: String(ADMIN_PORT),
+    NITRO_PORT: String(ADMIN_PORT),
+    HOST: '127.0.0.1',
+  },
+  stdio: ['ignore', 'pipe', 'pipe'],
+})
+const adminOrigin = `http://127.0.0.1:${ADMIN_PORT}`
+let adminUp = false
+const adminDeadline = Date.now() + 30_000
+while (Date.now() < adminDeadline && !adminUp) {
+  adminUp = await fetch(`${adminOrigin}/api/auth/me`).then((r) => r.ok).catch(() => false)
+  if (!adminUp) await new Promise((r) => setTimeout(r, 300))
+}
+check('the server restarts with a token configured', adminUp)
+
+const admin = await browser.newContext()
+const adminPage = await admin.newPage()
+await adminPage.goto(`${adminOrigin}/tekshiruv`, { waitUntil: 'networkidle' })
+
+check('the page asks for a key', await adminPage.locator('#admin-token').count() === 1)
+check('the queue is not readable before signing in',
+  (await (await adminPage.evaluate(() => fetch('/api/admin/queue').then((r) => r.json())))).admin === false)
+
+const wrong = await adminPage.evaluate(() =>
+  fetch('/api/admin/session', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ token: 'notöğri' }),
+  }).then((r) => r.status))
+check('a wrong key is refused', wrong === 401, `status ${wrong}`)
+
+await adminPage.locator('#admin-token').fill(ADMIN)
+await adminPage.getByRole('button', { name: /^Kiriş$/ }).click()
+await adminPage.waitForTimeout(1200)
+
+const pendingRows = adminPage.locator('ol > li')
+check('the queue lists what is waiting', await pendingRows.count() > 0,
+  `${await pendingRows.count()} ta`)
+check('a suggestion shows its comment',
+  (await pendingRows.first().innerText()).length > 20)
+
+// Approving needs a category, which is the one thing a reviewer must set.
+const firstRow = pendingRows.first()
+const publishBtn = firstRow.getByRole('button', { name: /Eʼlon qiliş/ })
+const catSelect = firstRow.locator('select')
+check('approving is blocked until a type is chosen or present',
+  (await catSelect.inputValue()) !== '' || await publishBtn.isDisabled())
+
+await catSelect.selectOption('ovqatlanish/qahvaxona')
+await adminPage.waitForTimeout(200)
+await publishBtn.click()
+await adminPage.waitForTimeout(1500)
+
+const publishedRow = execFileSync('psql', ['-t', '-A', url, '-c',
+  "select status || '|' || coalesce(slug,'') from submissions where status = 'published' limit 1",
+], { encoding: 'utf8' }).trim()
+check('it is marked published with a slug',
+  /^published\|[a-z0-9-]+$/.test(publishedRow), publishedRow)
+
+const slug = publishedRow.split('|')[1]
+const live = await (await fetch(`${adminOrigin}/api/business/${slug}`)).json()
+check('the approved place has a page', Boolean(live?.name), live?.name ?? 'yöq')
+
+const listed = await (await fetch(`${adminOrigin}/api/list`)).json()
+check('and it is in the feed',
+  listed.items.some((i) => i.slug === slug),
+  `${listed.items.length} ta qator`)
+
+// Rejecting takes a row out without publishing it.
+const before = Number(execFileSync('psql', ['-t', '-A', url,
+  '-c', "select count(*) from submissions where status = 'pending'"], { encoding: 'utf8' }).trim())
+if (before > 0) {
+  const nextRow = adminPage.locator('ol > li').first()
+  await nextRow.getByRole('button', { name: /Rad etiş/ }).click()
+  await adminPage.waitForTimeout(1200)
+  const after = Number(execFileSync('psql', ['-t', '-A', url,
+    '-c', "select count(*) from submissions where status = 'rejected'"], { encoding: 'utf8' }).trim())
+  check('rejecting removes it from the queue', after > 0, `${after} ta rad etilgan`)
+}
+
+await admin.close()
+adminServer.kill('SIGTERM')
+
 // --------------------------------------------------------- nothing was broken
 check('no page errors', pageErrors.length === 0, pageErrors.join('; '))
 check('nothing was blocked by the CSP', cspViolations.length === 0, cspViolations.join('; '))
