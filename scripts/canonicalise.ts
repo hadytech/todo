@@ -25,14 +25,31 @@ import { toCanonical, findOfficialSpellings } from '../lib/alphabet'
 const fix = process.argv.includes('--fix')
 
 /**
- * lib/alphabet.ts and its tests are exempt: their `oʻ`/`gʻ` literals are
- * the definition of the thing being converted, so rewriting them would
- * delete the mapping and quietly make every test vacuous.
+ * Two exemptions.
+ *
+ * lib/alphabet.ts and its tests: their `oʻ`/`gʻ` literals are the
+ * definition of the thing being converted, so rewriting them would delete
+ * the mapping and quietly make every test vacuous.
+ *
+ * `*.generated.ts`: nobody writes these, and one of them deliberately
+ * carries the official-Latin form of every listing — `Koʻkaldosh` — for
+ * JSON-LD's alternateName. That spelling is the point of the field.
+ * Rewriting it would corrupt derived data to satisfy a rule about prose.
  */
-const EXEMPT = /^lib\/alphabet\./
+const EXEMPT = /^lib\/alphabet\.|\.generated\.ts$/
 
-const files = execSync('git ls-files', { encoding: 'utf8' })
+/**
+ * Tracked files, plus untracked ones git is not ignoring.
+ *
+ * `git ls-files` alone lists only what is already committed, so a brand
+ * new file is invisible to this check until after it lands — which is
+ * exactly how a generated file reached CI with old spellings in it while
+ * the same command passed locally. Adding `--others` means a file is
+ * checked the moment it exists.
+ */
+const files = execSync('git ls-files --cached --others --exclude-standard', { encoding: 'utf8' })
   .trim().split('\n')
+  .filter(Boolean)
   .filter((f) => /\.(yaml|yml|vue|ts|md|sh)$/.test(f))
   .filter((f) => !EXEMPT.test(f))
 
