@@ -73,3 +73,18 @@ jobs:
         run: npm run check:budget
       - name: HTML tekşiruvi
         run: npm run check:html
+
+      # Last, because it overwrites .output/ with a server build and the
+      # two checks above read the static one from there.
+      #
+      # This is the only step that exercises the thing the site is for —
+      # rating a place and saying why, with no account — end to end: a real
+      # server, a real Postgres, a real browser. Three bugs shipped past
+      # everything above it: reviews invisible on a fresh page load because
+      # a prerendered payload defeated the refresh, the map killed by a
+      # Content-Security-Policy that looked right, and a photo's GPS tag
+      # surviving into the database.
+      - name: Hisobsiz şarh va joy qöşiş
+        run: |
+          NITRO_PRESET=node-server npm run build
+          npm run smoke:reviews

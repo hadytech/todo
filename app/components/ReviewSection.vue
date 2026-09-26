@@ -1,9 +1,18 @@
 <script setup lang="ts">
 import { MIN_REVIEWS_FOR_AVERAGE } from '../../lib/rating'
 
+/**
+ * What the server signs an unnamed guest review with. Matched here so the
+ * edit form starts empty rather than pre-filled with a placeholder the
+ * person never typed.
+ */
+const GUEST_LABEL = 'Mehmon'
+
 const props = defineProps<{ slug: string; businessName: string }>()
 
-const { user, enabled, refresh } = useAuth()
+// `user` only decides whether to offer the guest name field: writing a
+// review needs no account, so there is nothing here to gate on.
+const { user, refresh } = useAuth()
 
 /**
  * Fetched on the server so the review text is in the HTML.
@@ -15,20 +24,68 @@ const { user, enabled, refresh } = useAuth()
  * window, not one per visit. Under the static preset there is no database
  * at build time and the section correctly renders as unavailable.
  */
-const { data, pending, refresh: reload } = await useFetch(`/api/reviews/${props.slug}`, {
+const { data, pending } = await useFetch(`/api/reviews/${props.slug}`, {
   lazy: true,
   default: () => ({ enabled: false, reviews: [], histogram: [0, 0, 0, 0, 0], average: null, count: 0 }),
 })
 
-onMounted(refresh)
+/**
+ * Re-read the reviews, with a plain fetch rather than useFetch's refresh.
+ *
+ * `refresh()` looks like the right call and silently is not: on a
+ * prerendered route Nuxt has already put a payload under this key, and the
+ * refresh resolves from it without going to the network — it returned the
+ * build-time answer, instantly, with no request in the network log. So
+ * every review on the site was invisible on a fresh page load and the page
+ * said "Şarhlar hozirça oçiq emas", because that is what CI's
+ * database-less build had baked in.
+ *
+ * A plain $fetch has no cache to be defeated by.
+ */
+const busy = ref(false)
+
+async function reload() {
+  busy.value = true
+  try {
+    data.value = await $fetch(`/api/reviews/${props.slug}`)
+  } catch {
+    // Leave whatever is on screen. A failed refresh should not replace
+    // reviews the visitor can already read with an error.
+  } finally {
+    busy.value = false
+  }
+}
+
+/**
+ * Always re-read the reviews once the page is interactive.
+ *
+ * These pages are prerendered, which means the payload that arrives with
+ * the HTML was produced by a build that had no database — so on a fresh
+ * load `useFetch` resolves from that payload and the page shows no
+ * reviews at all, however many exist. Worse, it cannot know which of them
+ * is the reader's own, because a build has no cookies.
+ *
+ * So the server-rendered answer is treated as a first paint and the real
+ * one is fetched here. Under ISR this costs one extra query per visit and
+ * buys nothing; under prerendering it is the only thing that makes
+ * reviews appear. Keeping both means the day the `isr` rule goes back
+ * into nuxt.config — alongside DATABASE_URL — the review text and the
+ * aggregateRating land in the HTML for crawlers with nothing here to
+ * change.
+ */
+onMounted(() => { refresh(); reload() })
 
 const mine = computed(() => data.value.reviews.find((r) => r.mine) ?? null)
 
-const form = reactive({ rating: 0, body: '', open: false, busy: false, error: '' })
+const form = reactive({ rating: 0, body: '', name: '', open: false, busy: false, error: '' })
 
 function startEdit() {
   form.rating = mine.value?.rating ?? 0
   form.body = mine.value?.body ?? ''
+  // Only for a guest: a signed-in review is signed with the account name,
+  // and offering to change it here would imply it could be.
+  form.name = mine.value && mine.value.guest ? form.name || mine.value.authorName : form.name
+  if (form.name === GUEST_LABEL) form.name = ''
   form.open = true
   form.error = ''
 }
@@ -42,7 +99,12 @@ async function submit() {
   try {
     await $fetch('/api/reviews', {
       method: 'POST',
-      body: { slug: props.slug, rating: form.rating, body: form.body },
+      body: {
+        slug: props.slug,
+        rating: form.rating,
+        body: form.body,
+        name: form.name.trim() || undefined,
+      },
     })
     form.open = false
     await reload()
@@ -68,7 +130,6 @@ async function remove() {
  * update that never reconciles is just a lie that renders fast.
  */
 async function vote(review: (typeof data.value.reviews)[number], value: number) {
-  if (!user.value) return navigateTo('/kirish')
   const next = review.myVote === value ? 0 : value
   const before = { up: review.up, down: review.down, myVote: review.myVote }
 
@@ -148,7 +209,7 @@ useHead(() => {
 
     <!-- No database behind the site: say so once, plainly, and offer
          nothing that cannot work. -->
-    <p v-if="data.enabled === false && !pending" class="mt-2 text-sm text-muted">
+    <p v-if="data.enabled === false && !pending && !busy" class="mt-2 text-sm text-muted">
       Şarhlar hozirça oçiq emas.
     </p>
 
@@ -185,24 +246,19 @@ useHead(() => {
         Örtaça baho {{ MIN_REVIEWS_FOR_AVERAGE }} ta şarhdan keyin körsatiladi.
       </p>
 
-      <!-- Write / edit -->
+      <!-- Write / edit. No account, no login wall: a star and a sentence
+           is the whole cost of leaving an opinion. -->
       <div class="mt-5">
-        <div v-if="!user && enabled" class="rounded-soft border border-line bg-surface p-4">
-          <p class="text-sm">{{ businessName }} haqida fikringiz bormi?</p>
-          <NuxtLink
-            to="/kirish"
-            class="mt-2 inline-block rounded-pill bg-accent px-4 py-2 text-sm font-medium text-accent-ink"
-          >Kiriş va şarh yoziş</NuxtLink>
+        <div v-if="!form.open" class="flex flex-wrap items-center gap-3">
+          <button
+            class="rounded-pill bg-accent px-4 py-2 text-sm font-medium text-accent-ink"
+            @click="startEdit"
+          >{{ mine ? 'Şarhimni tahrirlaş' : `${businessName} haqida yoziş` }}</button>
+          <span v-if="!mine" class="text-sm text-muted">Hisob kerak emas.</span>
         </div>
 
-        <button
-          v-else-if="user && !form.open"
-          class="rounded-pill border border-line px-4 py-2 text-sm hover:border-accent"
-          @click="startEdit"
-        >{{ mine ? 'Şarhimni tahrirlaş' : 'Şarh yoziş' }}</button>
-
         <form
-          v-else-if="user"
+          v-else
           class="rounded-soft border border-line bg-surface p-4 space-y-3"
           @submit.prevent="submit"
         >
@@ -232,7 +288,31 @@ useHead(() => {
             </p>
           </div>
 
+          <!-- Optional, and last: a required name is a smaller version of
+               a required account, and this review is worth having either
+               way. -->
+          <div v-if="!user">
+            <label :for="`name-${slug}`" class="block text-sm text-muted mb-1">
+              Ismingiz — majburiy emas
+            </label>
+            <input
+              :id="`name-${slug}`"
+              v-model="form.name"
+              maxlength="40"
+              autocomplete="off"
+              :placeholder="GUEST_LABEL"
+              class="w-full max-w-xs rounded-soft border border-line bg-canvas px-3 py-2"
+            >
+          </div>
+
           <p v-if="form.error" class="text-sm text-accent">{{ form.error }}</p>
+
+          <p class="text-xs text-muted">
+            Manzilingiz saqlanmaydi.
+            <NuxtLink to="/maxfiylik" class="underline hover:text-accent">
+              Maxfiylik haqida
+            </NuxtLink>
+          </p>
 
           <div class="flex flex-wrap gap-2">
             <button
@@ -257,7 +337,7 @@ useHead(() => {
       </div>
 
       <!-- The reviews themselves -->
-      <p v-if="pending" class="mt-6 text-sm text-muted">Yuklanyapti…</p>
+      <p v-if="pending || busy" class="mt-6 text-sm text-muted">Yuklanyapti…</p>
 
       <ol v-else-if="data.reviews.length" class="mt-6 space-y-5">
         <li
@@ -268,6 +348,14 @@ useHead(() => {
           <div class="flex items-center gap-2">
             <StarRating :value="r.rating" size="sm" />
             <span class="text-sm font-medium">{{ r.authorName }}</span>
+            <!-- An anonymous name is nobody's word but the writer's, and
+                 the page says so. Without this, typing "Yalp.uz" into the
+                 name field would borrow authority the site never gave. -->
+            <span
+              v-if="r.guest"
+              class="rounded-pill border border-line px-2 py-0.5 text-xs text-muted"
+              title="Hisobsiz yozilgan — ism tasdiqlanmagan"
+            >mehmon</span>
             <span v-if="r.mine" class="rounded-pill bg-accent-soft px-2 py-0.5 text-xs text-accent">
               siz
             </span>
@@ -311,7 +399,7 @@ useHead(() => {
         </li>
       </ol>
 
-      <p v-else-if="!pending" class="mt-6 text-sm text-muted">
+      <p v-else-if="!pending && !busy" class="mt-6 text-sm text-muted">
         Hali şarh yöq. Birinçi böling.
       </p>
     </template>

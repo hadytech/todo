@@ -1,6 +1,7 @@
 import { z } from 'zod'
-import { db } from '../../utils/db'
-import { requireUser } from '../../utils/auth'
+import { db, dbConfigured } from '../../utils/db'
+import { writerIdentity } from '../../utils/identity'
+import { requireSameOrigin } from '../../utils/sameorigin'
 
 const Body = z.object({
   reviewId: z.string().uuid(),
@@ -8,31 +9,45 @@ const Body = z.object({
   value: z.number().int().min(-1).max(1),
 })
 
+/**
+ * Mark a review useful or not. No account needed.
+ *
+ * One vote per author per review, enforced by the primary key on
+ * (review_id, voter) rather than by this handler.
+ */
 export default defineEventHandler(async (event) => {
-  const user = await requireUser(event)
+  if (!dbConfigured()) {
+    throw createError({ statusCode: 503, statusMessage: 'Şarhlar hozirça oçiq emas' })
+  }
+  requireSameOrigin(event)
+
   const parsed = Body.safeParse(await readBody(event))
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Notöğri ovoz' })
 
   const { reviewId, value } = parsed.data
+  const me = await writerIdentity(event)
   const sql = db()
 
   // Voting on your own review is not moderation, it is just a thumb on
   // the scale — and it is the cheapest possible manipulation, so it is
   // refused rather than silently ignored.
-  const [own] = await sql<{ mine: boolean }[]>`
-    select (user_id = ${user.id}) as mine from reviews
+  const [row] = await sql<{ mine: boolean }[]>`
+    select (user_id = ${me.user?.id ?? null} or author_key = ${me.authorKey ?? null}) as mine
+      from reviews
      where id = ${reviewId} and hidden_at is null
   `
-  if (!own) throw createError({ statusCode: 404, statusMessage: 'Sharh topilmadi' })
-  if (own.mine) throw createError({ statusCode: 403, statusMessage: 'Öz sharhingizga ovoz bera olmaysiz' })
+  if (!row) throw createError({ statusCode: 404, statusMessage: 'Şarh topilmadi' })
+  if (row.mine) {
+    throw createError({ statusCode: 403, statusMessage: 'Öz şarhingizga ovoz bera olmaysiz' })
+  }
 
   if (value === 0) {
-    await sql`delete from votes where review_id = ${reviewId} and user_id = ${user.id}`
+    await sql`delete from votes where review_id = ${reviewId} and voter = ${me.voter}`
   } else {
     await sql`
-      insert into votes (review_id, user_id, value)
-      values (${reviewId}, ${user.id}, ${value})
-      on conflict (review_id, user_id) do update set value = excluded.value
+      insert into votes (review_id, voter, value)
+      values (${reviewId}, ${me.voter}, ${value})
+      on conflict (review_id, voter) do update set value = excluded.value
     `
   }
 

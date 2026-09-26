@@ -1,10 +1,13 @@
 import { z } from 'zod'
 import { db, dbConfigured } from '../../utils/db'
 import { currentUser } from '../../utils/auth'
-import { checkSubmissionRate, clientIp } from '../../utils/ratelimit'
+import { checkSubmissionRate } from '../../utils/ratelimit'
+import { ipKey } from '../../utils/privacy'
+import { requireSameOrigin } from '../../utils/sameorigin'
 import { catalog } from '../../utils/catalog'
 import { normalisePhone } from '../../../lib/phone'
 import { MAX_ENCODED } from '../../../lib/photo'
+import { sanitisePhoto } from '../../../lib/imagemeta'
 
 /**
  * Accept a place suggested from the site.
@@ -55,6 +58,16 @@ const Body = z.object({
    * that only exists in the client is not a limit, and an unbounded
    * string field is a cheap way to fill a free database.
    */
+  /**
+   * A photo as a base64 data URL, already resized in the browser.
+   *
+   * The shape is checked here and the bytes are checked below by
+   * `sanitisePhoto`, which is the part that matters: this pattern only
+   * proves the string looks like a data URL, and a string that looks like
+   * a JPEG is not a JPEG. The size ceiling is enforced on this side as
+   * well as on the device, because a limit that only exists in the client
+   * is not a limit.
+   */
   photo: optional(
     z.string()
       .max(MAX_ENCODED, 'rasm juda katta')
@@ -83,6 +96,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  requireSameOrigin(event)
+
   const parsed = Body.safeParse(await readBody(event))
   if (!parsed.success) {
     const field = parsed.error.issues[0]?.path[0]
@@ -109,8 +124,36 @@ export default defineEventHandler(async (event) => {
     c.children.some((ch) => `${c.slug}/${ch.slug}` === b.category))
   if (!known) throw createError({ statusCode: 400, statusMessage: 'Kategoriya notöğri' })
 
-  const ip = clientIp(event)
-  await checkSubmissionRate(ip)
+  /**
+   * The photo, with its metadata taken off.
+   *
+   * A shopfront photographed on a phone carries an Exif block, and that
+   * block routinely holds the GPS coordinates where the shutter was
+   * pressed and the camera's serial number. Someone helping this
+   * directory is not consenting to publish where they were standing.
+   *
+   * The browser already strips it as a side effect of resizing through a
+   * canvas — but that is the happy path, and anyone can post here
+   * directly, so the guarantee is made on this side where it cannot be
+   * skipped. The same pass checks the bytes are really an image of the
+   * type they claim, which is what stops this queue being used to store
+   * something the site would later serve as a photo and a browser would
+   * sniff as a page.
+   */
+  let photo: string | null = null
+  if (b.photo) {
+    const clean = sanitisePhoto(b.photo)
+    if (!clean.ok) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Rasmni yuborib bölmadi — boşqa rasm tanlang',
+      })
+    }
+    photo = clean.dataUrl
+  }
+
+  const submitterKey = ipKey(event)
+  await checkSubmissionRate(submitterKey)
 
   const user = await currentUser(event).catch(() => null)
 
@@ -118,15 +161,15 @@ export default defineEventHandler(async (event) => {
     insert into submissions (
       name, category, district, address, lat, lng,
       phone, website, telegram, instagram,
-      hours_note, comment, contact, rating, photo, user_id, submitted_ip
+      hours_note, comment, contact, rating, photo, user_id, submitter_key
     ) values (
       ${b.name}, ${b.category}, ${b.district ?? null}, ${b.address ?? null},
       ${b.lat ?? null}, ${b.lng ?? null},
       ${normalisePhone(b.phone) ?? null}, ${b.website ?? null},
       ${b.telegram ?? null}, ${b.instagram ?? null},
       ${b.hoursNote ?? null}, ${b.comment ?? null}, ${b.contact ?? null},
-      ${b.rating ?? null}, ${b.photo ?? null},
-      ${user?.id ?? null}, ${ip}
+      ${b.rating ?? null}, ${photo},
+      ${user?.id ?? null}, ${submitterKey}
     )
     returning id
   `

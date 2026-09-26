@@ -24,11 +24,14 @@
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
 
-  /* Manrope for its flat terminals and open counters — it stays legible
-     small, and it carries ö ğ ç ş and Cyrillic, both of which this site
-     cannot do without. The stack behind it is what actually renders
-     until the file arrives. */
-  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  /* The device's own interface font, in the order each platform names
+     it. Nothing is downloaded and nothing off-origin is contacted, which
+     is a deliberate trade — see the note on the removed webfont in
+     nuxt.config.ts. Manrope stays first in the list so that self-hosting
+     it (scripts/vendor-font.sh) needs no change here. Every face in the
+     stack carries ö ğ ç ş and Cyrillic, which this site cannot do
+     without. */
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", sans-serif;
 
   --radius-soft: 0.875rem;
   --radius-pill: 999px;

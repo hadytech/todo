@@ -36,12 +36,15 @@ create table if not exists login_tokens (
   created_at  timestamptz not null default now(),
   expires_at  timestamptz not null,
   used_at     timestamptz,
-  -- Kept only to rate-limit. See server/utils/ratelimit.ts.
-  request_ip  text
+  -- A daily pseudonym for the requesting network, kept only to
+  -- rate-limit. Never the address itself — see lib/privacy.ts.
+  request_key text
 );
 
 create index if not exists login_tokens_email_idx on login_tokens (email, created_at desc);
-create index if not exists login_tokens_ip_idx    on login_tokens (request_ip, created_at desc);
+-- The index on request_key is created further down, with the alter that
+-- adds the column: `create table if not exists` skips an existing table,
+-- so on an upgrade the column does not exist yet at this point.
 
 create table if not exists sessions (
   token_hash  text primary key,
@@ -79,12 +82,18 @@ create index if not exists reviews_slug_idx on reviews (business_slug, created_a
 -- Upvote / downvote on a review, one per person per review. Changing your
 -- mind is an update; taking it back is a delete.
 
+-- The voter is one text column, not a user reference: 'u:<uuid>' for a
+-- signed-in account, 'a:<author key>' for an anonymous cookie. A vote's
+-- author is never joined to, cascaded from or displayed, so it does not
+-- need to be two typed nullable columns — it needs to be one value that
+-- is either equal to another or not. See the migration further down for
+-- how a database created before this reaches the same shape.
 create table if not exists votes (
   review_id   uuid not null references reviews (id) on delete cascade,
-  user_id     uuid not null references users (id) on delete cascade,
+  voter       text not null,
   value       smallint not null check (value in (-1, 1)),
   created_at  timestamptz not null default now(),
-  primary key (review_id, user_id)
+  primary key (review_id, voter)
 );
 
 create index if not exists votes_review_idx on votes (review_id);
@@ -147,7 +156,9 @@ create table if not exists submissions (
   -- demanding an account before someone may suggest a shop is exactly
   -- the barrier this table exists to remove.
   user_id      uuid references users (id) on delete set null,
-  submitted_ip text,
+  -- A daily pseudonym for the submitting network, kept only to
+  -- rate-limit. Never the address itself — see lib/privacy.ts.
+  submitter_key text,
 
   status       text not null default 'pending'
                  check (status in ('pending', 'imported', 'rejected')),
@@ -157,7 +168,7 @@ create table if not exists submissions (
 );
 
 create index if not exists submissions_status_idx on submissions (status, created_at);
-create index if not exists submissions_ip_idx     on submissions (submitted_ip, created_at desc);
+-- submitter_key's index, likewise, is created with the alter that adds it.
 
 -- ------------------------------------- submissions: photo and first rating
 --
@@ -183,3 +194,105 @@ alter table submissions add column if not exists rating smallint
 alter table submissions add column if not exists photo text;
 
 alter table submissions add column if not exists photo_imported_at timestamptz;
+
+-- ======================================================== anonymous writing
+--
+-- Rating a place and saying why is the whole point of the site, and until
+-- now both required an email account. That is backwards: the person who
+-- knows which barber is good is not the person who will make a login to
+-- say so, and a review nobody writes is worth less than a review signed
+-- "Mehmon".
+--
+-- So a review may be attributed to an account OR to an anonymous author
+-- key — the SHA-256 of a random cookie the server minted on the writer's
+-- first write. See server/utils/identity.ts for what that key is and is
+-- not. Accounts still exist and still mean something: they carry a name
+-- across devices and browsers, which a cookie cannot.
+--
+-- Additive: an existing database takes this without losing a row.
+
+alter table reviews alter column user_id drop not null;
+alter table reviews add column if not exists author_key  text;
+alter table reviews add column if not exists author_name text;
+
+-- Exactly one author, never both and never neither. Without this an
+-- unattributed review is representable, and an unattributed review is
+-- one the two uniqueness rules below cannot see.
+do $$ begin
+  alter table reviews add constraint reviews_one_author
+    check ((user_id is null) <> (author_key is null));
+exception when duplicate_object then null;
+end $$;
+
+-- One review per anonymous author per place, the same rule accounts have
+-- had from the start. The existing unique (business_slug, user_id) keeps
+-- covering accounts: Postgres treats NULLs as distinct, so anonymous rows
+-- do not collide with each other through it.
+create unique index if not exists reviews_anon_uniq
+  on reviews (business_slug, author_key) where author_key is not null;
+
+-- ------------------------------------------------------------ votes, again
+--
+-- The primary key was (review_id, user_id), and a nullable column cannot
+-- be part of a primary key. Rather than two nullable columns and two
+-- partial indexes, a vote's author becomes one text column: 'u:<uuid>'
+-- for an account, 'a:<author key>' for a cookie. A vote's identity is
+-- never joined to, cascaded from or displayed, so it does not need to be
+-- two typed columns — it needs to be one value that is either equal or
+-- not.
+
+do $$ begin
+  if exists (
+    select 1 from information_schema.columns
+     where table_schema = current_schema() and table_name = 'votes' and column_name = 'user_id'
+  ) then
+    alter table votes add column if not exists voter text;
+    update votes set voter = 'u:' || user_id where voter is null;
+    alter table votes drop constraint if exists votes_pkey;
+    alter table votes alter column voter set not null;
+    alter table votes drop column user_id;
+    alter table votes add primary key (review_id, voter);
+  end if;
+end $$;
+
+-- ============================================================= pseudonyms
+--
+-- Addresses are no longer stored. Rate limiting needs to recognise a
+-- repeat caller within a day; it does not need to know which network they
+-- are on, and a column that knows is a log of who read what — the record
+-- that gets demanded later, and the one a directory of opinions must not
+-- be able to hand over.
+--
+-- What replaces it is HMAC(secret, day || ':' || address), rotated daily,
+-- with the secret outside the database. A stolen dump is a column of
+-- noise. See lib/privacy.ts.
+--
+-- The old columns are dropped rather than converted: there is no key that
+-- can turn a stored address into the new form without first holding the
+-- address, and keeping them "just in case" is how a privacy change
+-- becomes a rename.
+
+-- The new columns are declared in the table definitions above, so all
+-- this has to do is take the old ones away from a database created
+-- before them. They are dropped rather than converted: no key can turn a
+-- stored address into the new form without first holding the address, and
+-- keeping them "just in case" is how a privacy change becomes a rename.
+alter table submissions  add  column if not exists submitter_key text;
+alter table submissions  drop column if exists submitted_ip;
+alter table login_tokens add  column if not exists request_key text;
+alter table login_tokens drop column if exists request_ip;
+
+drop index if exists submissions_ip_idx;
+drop index if exists login_tokens_ip_idx;
+create index if not exists submissions_key_idx  on submissions  (submitter_key, created_at desc);
+create index if not exists login_tokens_key_idx on login_tokens (request_key, created_at desc);
+
+-- Anonymous reviews are rate limited per author key and per day, which
+-- needs the same index accounts already have.
+-- The writer's daily pseudonym, kept only to throttle. Separate from
+-- author_key, which is durable and identifies the author to themselves;
+-- this one is unrecognisable tomorrow and identifies nothing.
+alter table reviews add column if not exists writer_key text;
+
+create index if not exists reviews_author_idx on reviews (author_key, created_at desc);
+create index if not exists reviews_writer_idx on reviews (writer_key, created_at desc);

@@ -422,6 +422,17 @@ useHead({
           </div>
         </div>
 
+        <!-- Where it is, in the main flow rather than behind the
+             disclosure. A name and a category describe a place; only a pin
+             lets anybody find it, and it was the one field of the six that
+             nobody could supply later from a desk. The control is two
+             buttons until it is used — the map itself is ~200KB and loads
+             only if somebody asks for it. -->
+        <div class="mt-5">
+          <p class="text-sm text-muted mb-2">Qayerda? — majburiy emas</p>
+          <LocationPicker v-model="location" @status="say" />
+        </div>
+
         <!-- Adding a place and having an opinion about it are the same
              act, so the form asks for both rather than sending someone
              back to the listing afterwards. -->
@@ -450,13 +461,9 @@ useHead({
 
         <details class="mt-5 rounded-soft border border-line px-4 py-3">
           <summary class="cursor-pointer text-sm text-muted">
-            Qayerda, telefon, iş vaqti va boşqalar
+            Tuman, manzil, telefon, iş vaqti va boşqalar
           </summary>
           <div class="mt-4 space-y-4">
-            <div>
-              <p class="text-sm text-muted mb-2">Qayerda?</p>
-              <LocationPicker v-model="location" @status="say" />
-            </div>
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
                 <label for="f-district" class="block text-sm text-muted mb-1">Tuman</label>
@@ -519,10 +526,18 @@ useHead({
           </div>
         </details>
 
+        <p class="mt-5 text-xs text-muted">
+          Hisob kerak emas. Manzilingiz saqlanmaydi, rasmdan joy va qurilma
+          maʼlumoti öçiriladi.
+          <NuxtLink to="/maxfiylik" class="underline hover:text-accent">
+            Maxfiylik haqida
+          </NuxtLink>
+        </p>
+
         <button
           type="submit"
           :disabled="!ready || busy"
-          class="mt-5 w-full rounded-pill bg-accent px-4 py-3 font-medium text-accent-ink
+          class="mt-3 w-full rounded-pill bg-accent px-4 py-3 font-medium text-accent-ink
                  disabled:opacity-60"
         >
           {{ busy
