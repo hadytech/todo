@@ -5,16 +5,34 @@
  */
 const route = useRoute()
 const config = useRuntimeConfig()
-const { district, category } = route.params as { district: string; category: string }
+const { city, district, category } = route.params as {
+  city: string; district: string; category: string
+}
 
-const { data } = await useFetch('/api/list', { query: { district, category } })
+const { data } = await useFetch('/api/list', {
+  query: { district, category, city },
+  key: `browse-${city}-${district}-${category}`,
+})
+
+/**
+ * The city segment used to be the literal `toshkent`. It is a parameter
+ * now, and it is validated rather than trusted: without this,
+ * `/anything/chilonzor/ovqatlanish` would render a real page under a city
+ * that does not exist, and every one of them would be a duplicate of the
+ * real one.
+ */
+if (data.value && data.value.city !== city) {
+  throw createError({ statusCode: 404, statusMessage: 'Bunday şahar yöq', fatal: true })
+}
 
 const districtName = computed(() => data.value?.districts.find((d) => d.slug === district)?.name ?? district)
 const categoryName = computed(() => data.value?.categories.find((c) => c.slug === category)?.name ?? category)
+const cityName = computed(() => data.value?.cityName ?? '')
 
-const title = computed(() => `${districtName.value} tumanidagi ${categoryName.value.toLowerCase()} — Toşkent`)
+const title = computed(() =>
+  `${districtName.value}dagi ${categoryName.value.toLowerCase()} — ${cityName.value}`)
 
-const pageUrl = `${config.public.siteUrl}/toshkent/${district}/${category}`
+const pageUrl = `${config.public.siteUrl}/${city}/${district}/${category}`
 
 /**
  * ItemList tells search engines this page IS the list, rather than
@@ -27,6 +45,7 @@ const structured = computed(() => [
     '@type': 'BreadcrumbList',
     itemListElement: [
       { name: 'yalp.uz', item: config.public.siteUrl },
+      { name: cityName.value, item: `${config.public.siteUrl}/${city}` },
       { name: districtName.value, item: `${config.public.siteUrl}/tuman/${district}` },
       { name: categoryName.value, item: pageUrl },
     ].map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, item: e.item })),
@@ -52,8 +71,9 @@ useHead({
     innerHTML: JSON.stringify(o),
   })),
   meta: [{ name: 'description', content: () =>
-    `${districtName.value}, Toşkentdagi ${categoryName.value.toLowerCase()} röyxati — manzil, telefon va iş vaqti.` }],
-  link: [{ rel: 'canonical', href: `${config.public.siteUrl}/toshkent/${district}/${category}` }],
+    `${districtName.value}, ${cityName.value}dagi ${categoryName.value.toLowerCase()} röyxati `
+    + '— manzil, telefon va iş vaqti.' }],
+  link: [{ rel: 'canonical', href: pageUrl }],
   // Belt and braces: the home page no longer links empty combinations,
   // but a page that ends up empty must not be indexed as thin content.
   ...(data.value?.items.length ? {} : { meta: [{ name: 'robots', content: 'noindex' }] }),

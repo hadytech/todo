@@ -10,13 +10,28 @@
  *
  *   /kategoriya/<cat>              one category, whole city
  *   /tuman/<district>              one district, all categories
- *   /toshkent/<district>/<cat>     the intersection
+ *   /<city>/<district>/<cat>       the intersection
  */
 const route = useRoute()
 const config = useRuntimeConfig()
 const category = route.params.category as string
 
-const { data } = await useFetch('/api/list', { query: { category } })
+/**
+ * `?shahar=` chooses the city; without it, the default one.
+ *
+ * A query parameter rather than a path segment because this page is
+ * prerendered per category, and a static host serves the same file
+ * whatever the query — so the city is resolved on the client after
+ * hydration. That is acceptable here and would not be on the feed: a
+ * category page opens from a link that already named the city.
+ */
+const route2 = useRoute()
+const city = computed(() => String(route2.query.shahar ?? '') || undefined)
+
+const { data } = await useFetch('/api/list', {
+  query: { category, city },
+  key: () => `kategoriya-${category}-${city.value ?? 'default'}`,
+})
 
 const categoryName = computed(() =>
   data.value?.categories.find((c) => c.slug === category)?.name ?? category)
@@ -83,7 +98,7 @@ useHead({
       <div class="flex items-baseline justify-between mb-2">
         <h2 class="font-semibold">{{ g.name }}</h2>
         <NuxtLink
-          :to="`/toshkent/${g.slug}/${category}`"
+          :to="`/${g.city}/${g.slug}/${category}`"
           class="text-sm text-accent"
         >Hammasi ({{ g.items.length }})</NuxtLink>
       </div>

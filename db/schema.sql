@@ -274,6 +274,11 @@ end $$;
 -- matters: every row that satisfied the old rule still satisfies this one.
 alter table submissions alter column category drop not null;
 
+-- Which city a suggestion is for. Absent on rows filed before the
+-- directory covered more than one, which is exactly what the default
+-- means: they were all Tashkent.
+alter table submissions add column if not exists city text not null default 'toshkent';
+
 -- ============================================================= pseudonyms
 --
 -- Addresses are no longer stored. Rate limiting needs to recognise a

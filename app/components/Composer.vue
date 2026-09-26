@@ -17,6 +17,12 @@ import { compressImage, encodedBytes, MAX_ENCODED } from '../../lib/photo'
  * those are either derivable, verifiable later by whoever imports the
  * suggestion, or nobody's business.
  */
+/**
+ * `city` is the tab this composer sits under. A place added from the
+ * Khorezm feed is a Khorezm place; without this it would silently be
+ * filed in Tashkent and never appear where it was added.
+ */
+const props = defineProps<{ city?: string }>()
 const emit = defineEmits<{ posted: [kind: 'review' | 'place', slug: string | null] }>()
 
 const { enabled, ensure } = useAuth()
@@ -135,7 +141,10 @@ async function post() {
         to: `/b/${payload.slug}`,
       }
     } else {
-      await $fetch('/api/submissions', { method: 'POST', body: payload })
+      await $fetch('/api/submissions', {
+        method: 'POST',
+        body: { ...payload, city: props.city },
+      })
       status.value = { tone: 'ok', text: 'Rahmat! Joy tekşirişga yuborildi.' }
     }
     emit('posted', payload.kind, payload.kind === 'review' ? payload.slug : null)

@@ -10,7 +10,12 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const district = route.params.district as string
 
-const { data } = await useFetch('/api/list', { query: { district } })
+// No `city` here on purpose: the endpoint reads it from the district,
+// which belongs to exactly one.
+const { data } = await useFetch('/api/list', { query: { district }, key: `tuman-${district}` })
+
+/** The district's own city, for the category links below. */
+const cityOf = computed(() => data.value?.city ?? '')
 
 const districtName = computed(() =>
   data.value?.districts.find((d) => d.slug === district)?.name ?? district)
@@ -80,7 +85,7 @@ useHead({
       <div class="flex items-baseline justify-between mb-2">
         <h2 class="font-semibold">{{ g.icon }} {{ g.name }}</h2>
         <NuxtLink
-          :to="`/toshkent/${district}/${g.slug}`"
+          :to="`/${cityOf}/${district}/${g.slug}`"
           class="text-sm text-accent"
         >Hammasi ({{ g.items.length }})</NuxtLink>
       </div>

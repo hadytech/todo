@@ -410,13 +410,13 @@ const freshPage = await fresh.newPage()
 await freshPage.goto(`${ORIGIN}/`, { waitUntil: 'networkidle' })
 await freshPage.waitForTimeout(600)
 const box2 = freshPage.locator('section textarea').first()
-await box2.fill('Registon qahvaxonasi, ertalabki non hali issiq böladi.')
+await box2.fill('Lolazor qahvaxonasi, ertalabki non hali issiq böladi.')
 await freshPage.waitForTimeout(900)
 
 const nameField = freshPage.locator('section input[type=text], section input:not([type])').first()
 check('a new place has its name proposed', await nameField.count() > 0)
 check('the proposal is the first clause, not the whole sentence',
-  (await nameField.inputValue()) === 'Registon qahvaxonasi',
+  (await nameField.inputValue()) === 'Lolazor qahvaxonasi',
   await nameField.inputValue())
 check('no category is asked for',
   await freshPage.locator('section select').count() === 0)
@@ -429,10 +429,129 @@ const row = execFileSync('psql', ['-t', '-A', url, '-c',
   "select name || '|' || coalesce(category,'(yöq)') || '|' || coalesce(rating::text,'') "
   + 'from submissions order by created_at desc limit 1',
 ], { encoding: 'utf8' }).trim().split('|')
-check('the new place was filed', row[0] === 'Registon qahvaxonasi', row[0])
+check('the new place was filed', row[0] === 'Lolazor qahvaxonasi', row[0])
 check('its category was guessed from the name', row[1] === 'ovqatlanish/qahvaxona', row[1])
 check('its first rating came with it', row[2] === '4', row[2])
 await fresh.close()
+
+// ============================================== two cities, two tabs
+//
+// The directory started as one city and the shape of everything — the
+// district list, the map bounds, the browse URLs — assumed it. These
+// check that the second city is a real place on the site rather than a
+// row in a YAML file nothing reads.
+console.log('\nIkki şahar:\n')
+
+await page.goto(`${ORIGIN}/`, { waitUntil: 'networkidle' })
+await page.waitForTimeout(400)
+
+/**
+ * The feed has rows at all.
+ *
+ * Nothing else checked this, and a query bug emptied the whole home page
+ * while every other check stayed green — the composer's suggestions come
+ * from the search index, not the feed.
+ */
+const rows = page.locator('article, a[href^="/b/"]')
+check('the feed shows listings', await rows.count() > 0, `${await rows.count()} ta qator`)
+
+const tabs = page.locator('nav[aria-label="Şahar tanlaş"] a')
+check('the feed has city tabs', await tabs.count() === 2, `${await tabs.count()} ta`)
+check('the default city is first and current',
+  (await tabs.first().getAttribute('aria-current')) === 'page',
+  (await tabs.first().innerText()).trim())
+
+const otherTab = tabs.nth(1)
+const otherName = (await otherTab.innerText()).trim()
+check('the second tab is Xorazm', /xorazm/i.test(otherName), otherName)
+check('each tab is its own page', (await otherTab.getAttribute('href')) === '/xorazm',
+  String(await otherTab.getAttribute('href')))
+
+// A file, not a filtered render: it has to be right before any JS runs.
+const xorazmHtml = await (await fetch(`${ORIGIN}/xorazm`)).text()
+check('the Xorazm page is served as its own document',
+  xorazmHtml.includes('Xorazm') && xorazmHtml.includes('Şahar tanlaş'))
+
+const xorazmList = await (await fetch(`${ORIGIN}/api/list?city=xorazm`)).json()
+check('Xorazm has its own districts', xorazmList.districts.length === 13,
+  `${xorazmList.districts.length} ta`)
+check('and none of Tashkent’s', !xorazmList.districts.some((d) => d.slug === 'chilonzor'))
+check('Tashkent still has twelve',
+  (await (await fetch(`${ORIGIN}/api/list`)).json()).districts.length === 12)
+
+// A district names its city, so asking for one is asking for the other.
+const byDistrict = await (await fetch(`${ORIGIN}/api/list?district=hazorasp`)).json()
+check('a Khorezm district resolves to Khorezm', byDistrict.city === 'xorazm', byDistrict.city)
+
+check('an unknown city 404s rather than rendering an empty feed',
+  (await fetch(`${ORIGIN}/mars`)).status === 404,
+  String((await fetch(`${ORIGIN}/mars`)).status))
+
+// ----------------------------------------------- the add form, without selects
+console.log('\nJoy qöşiş — tanlov tugmalari:\n')
+
+await page.goto(`${ORIGIN}/qoshish`, { waitUntil: 'networkidle' })
+await page.locator('input').first().fill('Registon qahvaxonasi')
+await page.waitForTimeout(900)
+
+check('no dropdown is left on the form',
+  await page.locator('select').count() === 0,
+  `${await page.locator('select').count()} ta select`)
+
+const topChips = page.locator('fieldset input[name="f-top"]')
+check('the type is a row of chips', await topChips.count() >= 5, `${await topChips.count()} ta`)
+check('the guess from the name is already selected',
+  await page.locator('fieldset input[name="f-top"][value="ovqatlanish"]').isChecked())
+
+const subChips = page.locator('fieldset input[name="f-sub"]')
+check('its sub-types appear without another tap', await subChips.count() >= 4,
+  `${await subChips.count()} ta`)
+await page.locator('fieldset input[name="f-sub"][value="qahvaxona"]').check({ force: true })
+check('a sub-type can be chosen with one tap',
+  await page.locator('fieldset input[name="f-sub"][value="qahvaxona"]').isChecked())
+
+// City and district live under the disclosure.
+await page.locator('details summary').first().click()
+await page.waitForTimeout(300)
+const cityChips = page.locator('fieldset input[name="f-city"]')
+check('the city is a choice on the form', await cityChips.count() === 2, `${await cityChips.count()} ta`)
+check('Tashkent districts are offered first',
+  await page.locator('fieldset input[name="f-district"][value="chilonzor"]').count() === 1)
+
+await page.locator('fieldset input[name="f-city"][value="xorazm"]').check({ force: true })
+await page.waitForTimeout(400)
+check('choosing Xorazm swaps the districts',
+  await page.locator('fieldset input[name="f-district"][value="hazorasp"]').count() === 1
+  && await page.locator('fieldset input[name="f-district"][value="chilonzor"]').count() === 0)
+
+// ------------------------------------------- a Khorezm place, end to end
+const khorezm = await asPage(page, 'POST', '/api/submissions', {
+  name: 'Urganç non dökoni',
+  category: CATEGORY,
+  city: 'xorazm',
+  district: 'urganch-shahri',
+  lat: 41.55,
+  lng: 60.63,
+  rating: 5,
+})
+check('a Khorezm place can be added', khorezm.status === 200, `status ${khorezm.status}`)
+
+const stored2 = execFileSync('psql', ['-t', '-A', url, '-c',
+  "select city || '|' || coalesce(district,'') from submissions order by created_at desc limit 1",
+], { encoding: 'utf8' }).trim()
+check('it is filed under Xorazm', stored2 === 'xorazm|urganch-shahri', stored2)
+
+const wrongPair = await asPage(page, 'POST', '/api/submissions', {
+  name: 'Notöğri juftlik', category: CATEGORY, city: 'toshkent', district: 'hazorasp',
+})
+check('a district from the other city is refused', wrongPair.status === 400,
+  `status ${wrongPair.status}`)
+
+const wrongPin = await asPage(page, 'POST', '/api/submissions', {
+  name: 'Notöğri nuqta', category: CATEGORY, city: 'xorazm', lat: 41.31, lng: 69.28,
+})
+check('a Tashkent pin on a Khorezm place is refused', wrongPin.status === 400,
+  `status ${wrongPin.status}`)
 
 // --------------------------------------------------------- nothing was broken
 check('no page errors', pageErrors.length === 0, pageErrors.join('; '))

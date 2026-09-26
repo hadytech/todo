@@ -109,7 +109,7 @@ const trail = computed(() => [
   {
     name: b.value!.categoryName,
     ascii: b.value!.categoryAscii,
-    to: `/toshkent/${b.value!.district}/${b.value!.categoryTop}`,
+    to: `/${b.value!.city}/${b.value!.district}/${b.value!.categoryTop}`,
   },
 ])
 

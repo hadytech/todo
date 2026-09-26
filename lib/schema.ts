@@ -67,16 +67,33 @@ const photo = z.object({
 
 export const businessSchema = z.object({
   name: z.string().min(2).max(120),
+  /**
+   * Which city or region. Slug from data/cities.yaml.
+   *
+   * Defaulted rather than required, so every listing written before there
+   * was more than one city stays valid and means what it always meant.
+   * `npm run validate` checks the value exists and that the district
+   * belongs to it — a Khorezm district on a Tashkent listing is the exact
+   * mistake this catches.
+   */
+  city: z.string().regex(/^[a-z0-9-]+$/).default('toshkent'),
   /** "top/sub", matching data/categories.yaml. */
   category: z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+$/, 'kategoriya "asosiy/ichki" körinishida bölsin'),
   /** Slug from data/districts.yaml. Optional on a draft. */
   district: z.string().regex(/^[a-z0-9-]+$/).optional(),
   address: z.string().min(4).max(300).optional(),
+  /**
+   * The pin. Checked against the city's own box in lib/load.ts, not here.
+   *
+   * It used to carry Tashkent's bounds inline, which was right while there
+   * was one city and silently wrong the moment there were two — every
+   * Khorezm listing would have failed the build with a message about a
+   * range nobody had written down. The generous outer bounds here only
+   * catch a swapped lat/lng or a missing minus.
+   */
   location: z.object({
-    // Tashkent bounding box. A typo'd coordinate lands the pin in the
-    // ocean and nobody notices until launch, so fail the build instead.
-    lat: z.number().min(41.15).max(41.45),
-    lng: z.number().min(69.10).max(69.55),
+    lat: z.number().min(37).max(46),
+    lng: z.number().min(55).max(74),
   }).optional(),
   description: z.string().max(1200).optional(),
   phones: z.array(
@@ -130,4 +147,31 @@ export const categoriesSchema = z.array(z.object({
 export const districtsSchema = z.array(z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
   name: z.string().min(2),
+  /** Slug from data/cities.yaml. */
+  city: z.string().regex(/^[a-z0-9-]+$/),
 })).min(1)
+
+/**
+ * Cities and regions the directory covers.
+ *
+ * `bbox` is a sanity range for coordinates, not a boundary: its job is to
+ * catch a pin that landed in the ocean, not to trace a border.
+ */
+export const citiesSchema = z.array(z.object({
+  slug: z.string().regex(/^[a-z0-9-]+$/),
+  name: z.string().min(2),
+  bbox: z.object({
+    latMin: z.number(), latMax: z.number(),
+    lngMin: z.number(), lngMax: z.number(),
+  }),
+  /** Exactly one city is the default: the one `/` shows. */
+  default: z.boolean().optional(),
+})).min(1).superRefine((cities, ctx) => {
+  const defaults = cities.filter((c) => c.default)
+  if (defaults.length !== 1) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `bitta şahar "default: true" bölişi kerak (hozir ${defaults.length} ta)`,
+    })
+  }
+})

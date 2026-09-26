@@ -1,26 +1,90 @@
-# Toshkent shahri tumanlari. Nomlar yangi alifboda (ö ğ ç ş),
-# sluglar esa ASCII — chunki ular URL'ga tushadi.
+# Tumanlar va şaharlar. Nomlar yangi alifboda (ö ğ ç ş), sluglar esa
+# ASCII — çunki ular URL'ga tuşadi.
+#
+# `city` — data/cities.yaml dagi slug. Slug butun sayt boyiça yagona
+# bölişi kerak: /tuman/<slug> yölida şahar segmenti yöq.
 - slug: bektemir
   name: Bektemir
+  city: toshkent
 - slug: chilonzor
   name: Çilonzor
+  city: toshkent
 - slug: mirobod
   name: Mirobod
+  city: toshkent
 - slug: mirzo-ulugbek
   name: Mirzo Uluğbek
+  city: toshkent
 - slug: olmazor
   name: Olmazor
+  city: toshkent
 - slug: sergeli
   name: Sergeli
+  city: toshkent
 - slug: shayxontohur
   name: Şayxontohur
+  city: toshkent
 - slug: uchtepa
   name: Uçtepa
+  city: toshkent
 - slug: yakkasaroy
   name: Yakkasaroy
+  city: toshkent
 - slug: yangihayot
   name: Yangihayot
+  city: toshkent
 - slug: yashnobod
   name: Yaşnobod
+  city: toshkent
 - slug: yunusobod
   name: Yunusobod
+  city: toshkent
+
+# ---------------------------------------------------------------- Xorazm
+#
+# Xorazm viloyati: 11 tuman va viloyatga böysunadigan 2 şahar.
+#
+# TEKŞIRILSIN: bu röyxat mening bilimimdan yozildi — bu muhitdan tarmoqqa
+# çiqiş yopiq, şuning uçun 2026 yilgi rasmiy röyxatga solip tekşira
+# olmadim. Eng yangi özgariş men bilgan: Tuproqqalʼa tumani (2018).
+# Rasmiy manba: Xorazm viloyat hokimligi yoki stat.uz.
+
+- slug: urganch-shahri
+  name: Urganç şahri
+  city: xorazm
+- slug: xiva-shahri
+  name: Xiva şahri
+  city: xorazm
+- slug: bogot
+  name: Boğot
+  city: xorazm
+- slug: gurlan
+  name: Gurlan
+  city: xorazm
+- slug: hazorasp
+  name: Hazorasp
+  city: xorazm
+- slug: qoshkopir
+  name: Qöşköpir
+  city: xorazm
+- slug: shovot
+  name: Şovot
+  city: xorazm
+- slug: tuproqqala
+  name: Tuproqqalʼa
+  city: xorazm
+- slug: urganch
+  name: Urganç tumani
+  city: xorazm
+- slug: xonqa
+  name: Xonqa
+  city: xorazm
+- slug: xiva
+  name: Xiva tumani
+  city: xorazm
+- slug: yangiariq
+  name: Yangiariq
+  city: xorazm
+- slug: yangibozor
+  name: Yangibozor
+  city: xorazm

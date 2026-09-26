@@ -56,7 +56,7 @@ const category = ref(String(route.query.kat ?? ''))
 
 /**
  * Filters narrow an existing query rather than browsing on their own —
- * browsing by category and district is what the /toshkent/... landing
+ * browsing by category and district is what the /<city>/... landing
  * pages are for, and they are prerendered and indexable.
  *
  * Matching is on the display name because that is what the index stores.

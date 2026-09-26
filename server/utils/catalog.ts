@@ -1,4 +1,4 @@
-import { loadBusinesses, loadCategories, loadDistricts, publishedOnly } from '../../lib/load'
+import { defaultCity, loadBusinesses, loadCategories, loadCities, loadDistricts, publishedOnly } from '../../lib/load'
 import { lastModifiedByFile } from '../../lib/gitdates'
 
 /**
@@ -20,6 +20,19 @@ export const catalog = {
   businesses: publishedOnly(businesses),
   categories: loadCategories(),
   districts: loadDistricts(),
+  cities: loadCities(),
+}
+
+/** The city `/` shows, and the one a listing means when it says nothing. */
+export const DEFAULT_CITY = defaultCity(catalog.cities)
+
+export function cityLabel(slug: string): string {
+  return catalog.cities.find((c) => c.slug === slug)?.name ?? slug
+}
+
+/** Districts of one city, in the order data/districts.yaml lists them. */
+export function districtsOf(city: string) {
+  return catalog.districts.filter((d) => d.city === city)
 }
 
 export function categoryLabel(path: string): string {

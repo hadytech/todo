@@ -13,7 +13,7 @@ const { enabled, ensure } = useAuth()
 await ensure()
 
 const form = reactive({
-  name: '', top: '', sub: '', district: '', address: '', phone: '',
+  name: '', top: '', sub: '', city: '', district: '', address: '', phone: '',
   hoursNote: '', website: '', comment: '', contact: '',
   website2: '', // honeypot — see the endpoint
 })
@@ -177,12 +177,37 @@ watch(() => form.name, (name) => {
 })
 watch(() => form.top, () => { form.sub = '' })
 
+/** Sub-categories of whichever type is chosen. */
+const subOptions = computed(() =>
+  facets.value?.categories.find((c) => c.slug === form.top)?.children ?? [])
+
+/**
+ * Districts of the chosen city, and only that city's.
+ *
+ * Showing all 25 at once would put Hazorasp next to Çilonzor in one list,
+ * which is not a choice anybody needs to make.
+ */
+const cityOptions = computed(() => facets.value?.cities ?? [])
+
+// The default city, chosen for you, so the common case is no taps at all.
+watchEffect(() => {
+  if (!form.city && cityOptions.value.length) {
+    form.city = (cityOptions.value.find((c) => c.default) ?? cityOptions.value[0]!).slug
+  }
+})
+const districtOptions = computed(() =>
+  cityOptions.value.find((c) => c.slug === form.city)?.districts ?? [])
+
+// Changing city invalidates the district under it.
+watch(() => form.city, () => { form.district = '' })
+
 const ready = computed(() => form.name.trim().length >= 2 && form.top && form.sub)
 
 function payload() {
   return {
     name: form.name,
     category: `${form.top}/${form.sub}`,
+    city: form.city || undefined,
     district: form.district || undefined,
     address: form.address || undefined,
     lat: location.value?.lat,
@@ -385,41 +410,22 @@ useHead({
           </label>
         </div>
 
-        <div class="mt-5 grid gap-3 sm:grid-cols-2">
-          <div>
-            <label for="f-top" class="block text-sm text-muted mb-1">Turi</label>
-            <select
-              id="f-top"
-              v-model="form.top"
-              required
-              class="w-full rounded-soft border border-line bg-surface px-3 py-2"
-              @change="categoryTouched = true"
-            >
-              <option value="" disabled>Tanlang…</option>
-              <option v-for="c in facets?.categories" :key="c.slug" :value="c.slug">
-                {{ c.name }}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label for="f-sub" class="block text-sm text-muted mb-1">Aniqroq</label>
-            <select
-              id="f-sub"
-              v-model="form.sub"
-              required
-              :disabled="!form.top"
-              class="w-full rounded-soft border border-line bg-surface px-3 py-2
-                     disabled:opacity-50"
-              @change="categoryTouched = true"
-            >
-              <option value="" disabled>{{ form.top ? 'Tanlang…' : '—' }}</option>
-              <option
-                v-for="ch in facets?.categories.find((c) => c.slug === form.top)?.children"
-                :key="ch.slug"
-                :value="ch.slug"
-              >{{ ch.name }}</option>
-            </select>
-          </div>
+        <div class="mt-5 space-y-4">
+          <ChipChoice
+            v-model="form.top"
+            name="f-top"
+            label="Turi"
+            :options="facets?.categories ?? []"
+            @update:model-value="categoryTouched = true"
+          />
+          <ChipChoice
+            v-model="form.sub"
+            name="f-sub"
+            label="Aniqroq"
+            :options="subOptions"
+            empty="Avval turini tanlang"
+            @update:model-value="categoryTouched = true"
+          />
         </div>
 
         <!-- Where it is, in the main flow rather than behind the
@@ -464,28 +470,29 @@ useHead({
             Tuman, manzil, telefon, iş vaqti va boşqalar
           </summary>
           <div class="mt-4 space-y-4">
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label for="f-district" class="block text-sm text-muted mb-1">Tuman</label>
-                <select
-                  id="f-district"
-                  v-model="form.district"
-                  class="w-full rounded-soft border border-line bg-surface px-3 py-2"
-                >
-                  <option value="">Bilmayman</option>
-                  <option v-for="d in facets?.districts" :key="d.slug" :value="d.slug">
-                    {{ d.name }}
-                  </option>
-                </select>
-              </div>
-              <div>
-                <label for="f-phone" class="block text-sm text-muted mb-1">Telefon</label>
-                <input
-                  id="f-phone" v-model="form.phone" type="tel" inputmode="tel"
-                  placeholder="90 123 45 67"
-                  class="w-full rounded-soft border border-line bg-surface px-3 py-2"
-                >
-              </div>
+            <!-- Chips wrap to as many rows as they need, so they get the
+                 full width rather than half of a two-column grid. -->
+            <ChipChoice
+              v-if="cityOptions.length > 1"
+              v-model="form.city"
+              name="f-city"
+              label="Şahar"
+              :options="cityOptions"
+            />
+            <ChipChoice
+              v-model="form.district"
+              name="f-district"
+              label="Tuman"
+              clearable="Bilmayman"
+              :options="districtOptions"
+            />
+            <div>
+              <label for="f-phone" class="block text-sm text-muted mb-1">Telefon</label>
+              <input
+                id="f-phone" v-model="form.phone" type="tel" inputmode="tel"
+                placeholder="90 123 45 67"
+                class="w-full rounded-soft border border-line bg-surface px-3 py-2"
+              >
             </div>
             <div>
               <label for="f-address" class="block text-sm text-muted mb-1">Manzil</label>

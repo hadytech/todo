@@ -1,0 +1,23 @@
+# Şaharlar va viloyatlar.
+#
+# Sayt Toşkent uçun qurilgan edi va maʼlumotnomaning butun şakli — tuman,
+# xarita çegarasi, qidiruv — bitta şahar degan öyda yozilgan. Endi ikkita:
+# Toşkent va Xorazm. Öşa öy şu faylga köçirildi, ançe keyin uçinçisini
+# qöşiş bitta yozuv bölsin uçun.
+#
+# `bbox` — koordinata tekşiruvi uçun. Kengroq olingan: maqsadi — noto'ğri
+# terilgan nuqtani (okeanga tuşib qolgan) toşiş, viloyat çegarasini
+# millimetrda çiziş emas.
+
+- slug: toshkent
+  name: Toşkent
+  # Toşkent şahri.
+  bbox: { latMin: 41.15, latMax: 41.45, lngMin: 69.10, lngMax: 69.55 }
+  default: true
+
+- slug: xorazm
+  name: Xorazm
+  # Xorazm viloyati. Urganç ~41.55/60.63, Xiva ~41.38/60.36,
+  # Gurlan ~41.85/60.38, Hazorasp ~41.32/61.07 — quti şularni va
+  # atrofini qamraydi.
+  bbox: { latMin: 40.90, latMax: 42.20, lngMin: 59.90, lngMax: 61.60 }

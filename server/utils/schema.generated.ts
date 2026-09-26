@@ -281,6 +281,11 @@ end $$;
 -- matters: every row that satisfied the old rule still satisfies this one.
 alter table submissions alter column category drop not null;
 
+-- Which city a suggestion is for. Absent on rows filed before the
+-- directory covered more than one, which is exactly what the default
+-- means: they were all Tashkent.
+alter table submissions add column if not exists city text not null default 'toshkent';
+
 -- ============================================================= pseudonyms
 --
 -- Addresses are no longer stored. Rate limiting needs to recognise a
@@ -325,4 +330,4 @@ create index if not exists reviews_writer_idx on reviews (writer_key, created_at
 `
 
 /** SHA-256 of the SQL above, used to skip a migration that already ran. */
-export const SCHEMA_DIGEST = '53fe9696e9e0adea7541c5a3f405bc2defdc8cc63bd0b8a42e013adeacf2d825'
+export const SCHEMA_DIGEST = '73fafb04d8833fdd09073f8e07b6d116725790d441227f4811484418112056ce'
