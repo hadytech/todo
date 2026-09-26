@@ -77,8 +77,10 @@ check('nothing beside the field pretends to submit it',
 await page.locator('#f-primary').click()
 await page.keyboard.type('Çorsu Sartaroşxonasi', { delay: 10 })
 await page.waitForTimeout(400)
+// The type chooser is a chip row now, not a <select>, so this looks for
+// the radio group rather than the old element id.
 check('typing a name reveals the form, without blurring',
-  await page.locator('#f-top').count() === 1)
+  await page.locator('fieldset input[name="f-top"]').count() > 0)
 check('the photo control appears', await page.getByText('Rasm qöşiş').count() === 1)
 check('the rating appears', await page.getByText('Bahoyingiz').count() === 1)
 
@@ -96,10 +98,17 @@ if (failures.length) {
   process.exit(1)
 }
 
-await page.selectOption('#f-top', 'gozallik')
+// Chips, by value. The stars are picked by id rather than by position:
+// chip rows are fieldsets too, so `fieldset label` no longer means the
+// rating — it means whichever group happened to render fourth.
+await page.locator('fieldset input[name="f-top"][value="gozallik"]').check({ force: true })
 await page.waitForTimeout(200)
-await page.selectOption('#f-sub', 'sartaroshxona')
-await page.locator('fieldset label').nth(4).click()
+await page.locator('fieldset input[name="f-sub"][value="sartaroshxona"]').check({ force: true })
+// The stars are labels wrapping a controlled radio, so the label is what
+// a person taps. Scoped to the rating's own fieldset — chip rows are
+// fieldsets too now, and a bare `fieldset label` means whichever renders
+// first.
+await page.locator('fieldset:has(#new-place-5) label').nth(4).click()
 await page.locator('#f-comment').fill('Navbat kam, narxi arzon')
 await page.waitForTimeout(300)
 

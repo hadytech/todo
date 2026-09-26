@@ -1,13 +1,19 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join, basename } from 'node:path'
 import { parse } from 'yaml'
-import { businessSchema, categoriesSchema, districtsSchema, type BusinessInput } from './schema'
+import { businessSchema, categoriesSchema, citiesSchema, districtsSchema, type BusinessInput } from './schema'
 import { toAscii, toSlug, toSearchKey, toStandardLatin, findLegacySpellings } from './alphabet'
 
 export const DATA_DIR = join(process.cwd(), 'data')
 
 export interface Category { slug: string; name: string; icon?: string; children: { slug: string; name: string }[] }
-export interface District { slug: string; name: string }
+export interface District { slug: string; name: string; city: string }
+export interface City {
+  slug: string
+  name: string
+  bbox: { latMin: number; latMax: number; lngMin: number; lngMax: number }
+  default?: boolean
+}
 
 /** A validated business with every alphabet form derived. */
 export interface Business extends BusinessInput {
@@ -37,6 +43,15 @@ export function loadDistricts(): District[] {
   return districtsSchema.parse(readYaml(join(DATA_DIR, 'districts.yaml')))
 }
 
+export function loadCities(): City[] {
+  return citiesSchema.parse(readYaml(join(DATA_DIR, 'cities.yaml')))
+}
+
+/** The city `/` shows. Exactly one is marked, enforced by the schema. */
+export function defaultCity(cities = loadCities()): City {
+  return cities.find((c) => c.default) ?? cities[0]!
+}
+
 /**
  * Reads, validates and enriches every business file.
  *
@@ -50,7 +65,10 @@ export function loadBusinesses(): { businesses: Business[]; issues: Issue[] } {
   const businesses: Business[] = []
 
   const categories = loadCategories()
-  const districts = new Set(loadDistricts().map((d) => d.slug))
+  const cities = loadCities()
+  const cityBySlug = new Map(cities.map((c) => [c.slug, c]))
+  const districtList = loadDistricts()
+  const districts = new Map(districtList.map((d) => [d.slug, d]))
   const categoryPairs = new Set(
     categories.flatMap((c) => c.children.map((ch) => `${c.slug}/${ch.slug}`)),
   )
@@ -96,8 +114,44 @@ export function loadBusinesses(): { businesses: Business[]; issues: Issue[] } {
     if (!categoryPairs.has(b.category)) {
       issues.push({ file: rel, message: `notaʼnish kategoriya: "${b.category}"`, level: 'error' })
     }
-    if (b.district && !districts.has(b.district)) {
-      issues.push({ file: rel, message: `notaʼnish tuman: "${b.district}"`, level: 'error' })
+    const city = cityBySlug.get(b.city)
+    if (!city) {
+      issues.push({ file: rel, message: `notaʼnış şahar: "${b.city}"`, level: 'error' })
+    }
+
+    const district = b.district ? districts.get(b.district) : undefined
+    if (b.district && !district) {
+      issues.push({ file: rel, message: `notaʼnış tuman: "${b.district}"`, level: 'error' })
+    }
+    // A Khorezm district on a Tashkent listing is the mistake that a
+    // per-field check cannot see: both values are real, only the pair is
+    // wrong, and the listing would quietly appear under the wrong tab.
+    if (district && district.city !== b.city) {
+      issues.push({
+        file: rel,
+        message: `"${b.district}" tumani "${district.city}" da, joy esa "${b.city}" da`,
+        level: 'error',
+      })
+    }
+    /**
+     * The pin, against its own city's box.
+     *
+     * The schema can only carry one range, and one range that covers both
+     * Tashkent and Khorezm covers most of the country — which would let a
+     * Khorezm coordinate onto a Tashkent listing without a word.
+     */
+    if (city && b.location) {
+      const { latMin, latMax, lngMin, lngMax } = city.bbox
+      const inside = b.location.lat >= latMin && b.location.lat <= latMax
+        && b.location.lng >= lngMin && b.location.lng <= lngMax
+      if (!inside) {
+        issues.push({
+          file: rel,
+          message: `nuqta ${city.name} çegarasidan taşqarida: `
+            + `${b.location.lat}, ${b.location.lng}`,
+          level: 'error',
+        })
+      }
     }
     for (const p of b.photos) {
       if (!existsSync(join(process.cwd(), 'public', 'photos', p.file))) {

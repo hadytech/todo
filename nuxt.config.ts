@@ -1,9 +1,19 @@
 import tailwindcss from '@tailwindcss/vite'
-import { loadBusinesses, loadCategories, publishedOnly } from './lib/load'
+import { defaultCity, loadBusinesses, loadCategories, loadCities, publishedOnly } from './lib/load'
 
 const { businesses } = loadBusinesses()
 const published = publishedOnly(businesses)
 const categories = loadCategories()
+const cities = loadCities()
+const DEFAULT_CITY = defaultCity(cities).slug
+
+/**
+ * A page per city, except the default one — that is `/`.
+ *
+ * Prerendered rather than filtered on the client: a tab that has to fetch
+ * before it can show anything shows the wrong city first, every time.
+ */
+const cityRoutes = cities.filter((c) => c.slug !== DEFAULT_CITY).map((c) => `/${c.slug}`)
 
 /**
  * Category x district landing pages. These are the pages that actually
@@ -11,8 +21,13 @@ const categories = loadCategories()
  * from day one rather than bolted on later.
  */
 const landingRoutes = categories.flatMap((c) =>
-  [...new Set(published.filter((b) => b.categoryTop === c.slug).map((b) => b.district))]
-    .map((d) => `/toshkent/${d}/${c.slug}`),
+  [...new Set(published
+    .filter((b) => b.categoryTop === c.slug)
+    // The city is part of the path now, so the pair has to come from the
+    // listing rather than from a literal — otherwise every Khorezm
+    // district would get a page under /toshkent/.
+    .map((b) => `${b.city}/${b.district}`))]
+    .map((pair) => `/${pair}/${c.slug}`),
 )
 
 /**
@@ -168,6 +183,7 @@ export default defineNuxtConfig({
           // dead page, which is the trade.
           ? ['/api/facets', '/api/list', ...published.map((b) => `/api/business/${b.slug}`)]
           : []),
+        ...cityRoutes,
         ...landingRoutes,
         ...districtRoutes,
         ...categoryRoutes,

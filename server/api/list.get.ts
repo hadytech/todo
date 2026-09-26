@@ -1,12 +1,36 @@
-import { catalog, categoryLabel, districtLabel, pendingCount } from '../utils/catalog'
+import {
+  catalog, categoryLabel, cityLabel, DEFAULT_CITY, districtLabel, pendingCount,
+} from '../utils/catalog'
 
 /** Lightweight list for the home page and the browse pages. */
 export default defineEventHandler((event) => {
-  const { category, district, limit } = getQuery(event) as {
-    category?: string; district?: string; limit?: string
+  const { category, district, limit, city } = getQuery(event) as {
+    category?: string; district?: string; limit?: string; city?: string
   }
 
-  const matching = catalog.businesses
+  /**
+   * One city at a time, always.
+   *
+   * A directory that mixes Tashkent and Khorezm in one list is a worse
+   * answer than either half: nobody is looking for "a bakery, anywhere in
+   * the country". So an absent `city` means the default one rather than
+   * all of them, and the counts below are scoped the same way — a tab
+   * that says 6 must not be counting the other tab's listings.
+   */
+  /**
+   * A district names its city, so asking for one is asking for the other.
+   *
+   * Without this, /tuman/hazorasp would filter Khorezm's district inside
+   * Tashkent's listings and come back empty — a real page, correctly
+   * rendered, showing nothing, with no clue why.
+   */
+  const districtCity = district
+    ? catalog.districts.find((d) => d.slug === district)?.city
+    : undefined
+  const inCity = city || districtCity || DEFAULT_CITY.slug
+  const cityRows = catalog.businesses.filter((b) => b.city === inCity)
+
+  const matching = cityRows
     .filter((b) => (category ? b.categoryTop === category : true))
     .filter((b) => (district ? b.district === district : true))
 
@@ -17,6 +41,7 @@ export default defineEventHandler((event) => {
     categoryTop: b.categoryTop,
     categoryName: categoryLabel(b.category),
     districtName: districtLabel(b.district),
+    city: b.city,
     price: b.price,
     photo: b.photos[0]?.file ?? null,
   })
@@ -32,7 +57,19 @@ export default defineEventHandler((event) => {
   return {
     items,
     categories: catalog.categories,
-    districts: catalog.districts,
+    // Only this city's districts: a Tashkent visitor has no use for a
+    // filter chip labelled Hazorasp, and an empty one is worse than none.
+    districts: catalog.districts.filter((d) => d.city === inCity),
+    cities: catalog.cities.map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      count: catalog.businesses.filter((b) => b.city === c.slug).length,
+    })),
+    city: inCity,
+    cityName: cityLabel(inCity),
+    // Which slug means `/`. The client builds tab links from this rather
+    // than hard-coding "toshkent", so moving the default is a data change.
+    defaultCity: DEFAULT_CITY.slug,
     total: matching.length,
     /**
      * Entries whose names are recorded but whose details are unverified.
@@ -42,8 +79,8 @@ export default defineEventHandler((event) => {
      */
     pending: pendingCount,
     counts: {
-      categories: tally(catalog.businesses.map((b) => b.categoryTop)),
-      districts: tally(catalog.businesses.map((b) => b.district)),
+      categories: tally(cityRows.map((b) => b.categoryTop)),
+      districts: tally(cityRows.map((b) => b.district)),
     },
   }
 })

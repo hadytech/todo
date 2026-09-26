@@ -5,7 +5,7 @@ import { currentUser } from '../../utils/auth'
 import { checkSubmissionRate } from '../../utils/ratelimit'
 import { ipKey } from '../../utils/privacy'
 import { requireSameOrigin } from '../../utils/sameorigin'
-import { catalog } from '../../utils/catalog'
+import { catalog, DEFAULT_CITY } from '../../utils/catalog'
 import { normalisePhone } from '../../../lib/phone'
 import { guessCategory } from '../../../lib/guess'
 import { MAX_ENCODED } from '../../../lib/photo'
@@ -39,13 +39,21 @@ const Body = z.object({
    * is the wrong trade, and this table is an inbox rather than a listing.
    */
   category: optional(z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+$/)),
+  /** Slug from data/cities.yaml. Absent means the default city. */
+  city: optional(z.string().regex(/^[a-z0-9-]+$/)),
   district: optional(z.string().regex(/^[a-z0-9-]+$/)),
   address: optional(z.string().trim().max(300)),
 
-  // Tashkent's bounding box, the same one the YAML schema enforces. A
-  // pin outside it is a mistake, not a listing in another city.
-  lat: z.number().min(41.15).max(41.45).optional(),
-  lng: z.number().min(69.10).max(69.55).optional(),
+  /**
+   * The pin, checked against the chosen city's box below rather than here.
+   *
+   * These bounds used to be Tashkent's, inline. With two cities that is a
+   * rule which rejects every correct Khorezm pin and says nothing useful
+   * about why — so the shape is checked here and the place is checked
+   * where the city is known.
+   */
+  lat: z.number().min(37).max(46).optional(),
+  lng: z.number().min(55).max(74).optional(),
 
   // Phone is accepted in whatever shape someone types it and normalised
   // below. Rejecting "90 123 45 67" because it lacks +998 is the kind of
@@ -150,6 +158,35 @@ export default defineEventHandler(async (event) => {
   }
 
   /**
+   * Which city, and whether the rest of the submission agrees with it.
+   *
+   * A district belongs to exactly one city and a pin falls inside one
+   * box, so an inbox row that disagrees with itself is a row a maintainer
+   * has to guess about later. Cheaper to refuse it now, while the person
+   * who knows is still on the page.
+   */
+  const city = catalog.cities.find((c) => c.slug === (b.city ?? DEFAULT_CITY.slug))
+  if (!city) throw createError({ statusCode: 400, statusMessage: 'Bunday şahar yöq' })
+
+  const district = b.district
+    ? catalog.districts.find((d) => d.slug === b.district)
+    : undefined
+  if (district && district.city !== city.slug) {
+    throw createError({ statusCode: 400, statusMessage: 'Tuman tanlangan şaharda emas' })
+  }
+
+  if (b.lat !== undefined && b.lng !== undefined) {
+    const { latMin, latMax, lngMin, lngMax } = city.bbox
+    const inside = b.lat >= latMin && b.lat <= latMax && b.lng >= lngMin && b.lng <= lngMax
+    if (!inside) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: `Nuqta ${city.name} içida bölsin`,
+      })
+    }
+  }
+
+  /**
    * The photo, with its metadata taken off.
    *
    * A shopfront photographed on a phone carries an Exif block, and that
@@ -186,7 +223,7 @@ export default defineEventHandler(async (event) => {
     insert into submissions (
       name, category, district, address, lat, lng,
       phone, website, telegram, instagram,
-      hours_note, comment, contact, rating, photo, user_id, submitter_key
+      hours_note, comment, contact, rating, photo, user_id, submitter_key, city
     ) values (
       ${b.name}, ${category}, ${b.district ?? null}, ${b.address ?? null},
       ${b.lat ?? null}, ${b.lng ?? null},
@@ -194,7 +231,7 @@ export default defineEventHandler(async (event) => {
       ${b.telegram ?? null}, ${b.instagram ?? null},
       ${b.hoursNote ?? null}, ${b.comment ?? null}, ${b.contact ?? null},
       ${b.rating ?? null}, ${photo},
-      ${user?.id ?? null}, ${submitterKey}
+      ${user?.id ?? null}, ${submitterKey}, ${city.slug}
     )
     returning id
   `

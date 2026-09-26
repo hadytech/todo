@@ -15,4 +15,20 @@ export default defineEventHandler(() => ({
     children: c.children.map((ch) => ({ slug: ch.slug, name: ch.name })),
   })),
   districts: catalog.districts,
+  /**
+   * Cities, each with its own districts.
+   *
+   * Carried together rather than as two flat lists the client has to
+   * re-join: the add form has to show one city's districts and only one
+   * city's, and a join written in three components is a join written
+   * wrong in at least one of them.
+   */
+  cities: catalog.cities.map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    default: c.default ?? false,
+    districts: catalog.districts
+      .filter((d) => d.city === c.slug)
+      .map((d) => ({ slug: d.slug, name: d.name })),
+  })),
 }))
