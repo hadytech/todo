@@ -1,11 +1,13 @@
 name: Validate
 
-# Runs on every pull request. This is what makes "anyone can send a PR"
-# safe: malformed data cannot reach the site.
+# Runs on every pull request and every push, `main` included. The pull
+# request run is what makes "anyone can send a PR" safe: malformed data
+# cannot reach the site. The `main` run is what keeps the branch Vercel
+# deploys from under the same gates — Vercel builds and ships whatever
+# lands there without consulting this workflow, so nothing else would.
 on:
   pull_request:
   push:
-    branches-ignore: [main]
 
 jobs:
   check:
@@ -71,3 +73,18 @@ jobs:
         run: npm run check:budget
       - name: HTML tekşiruvi
         run: npm run check:html
+
+      # Last, because it overwrites .output/ with a server build and the
+      # two checks above read the static one from there.
+      #
+      # This is the only step that exercises the thing the site is for —
+      # rating a place and saying why, with no account — end to end: a real
+      # server, a real Postgres, a real browser. Three bugs shipped past
+      # everything above it: reviews invisible on a fresh page load because
+      # a prerendered payload defeated the refresh, the map killed by a
+      # Content-Security-Policy that looked right, and a photo's GPS tag
+      # surviving into the database.
+      - name: Hisobsiz şarh va joy qöşiş
+        run: |
+          NITRO_PRESET=node-server npm run build
+          npm run smoke:reviews

@@ -26,10 +26,11 @@
     "brand": "tsx scripts/build-brand.ts",
     "vendor:font": "scripts/vendor-font.sh",
     "prep": "npm run brand && npm run index && npm run og",
-    "db:schema": "psql \"$DATABASE_URL\" -f db/schema.sql",
+    "db:schema": "psql -v ON_ERROR_STOP=1 \"$DATABASE_URL\" -f db/schema.sql",
     "submissions": "tsx scripts/submissions.ts",
     "canonicalise": "tsx scripts/canonicalise.ts",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "smoke:reviews": "node scripts/smoke-reviews.mjs"
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",

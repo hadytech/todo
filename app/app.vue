@@ -85,6 +85,7 @@ if (!indexable) {
             </p>
             <nav class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-muted">
               <NuxtLink to="/qoshish" class="hover:text-ink">Joy qöşiş</NuxtLink>
+              <NuxtLink to="/maxfiylik" class="hover:text-ink">Maxfiylik</NuxtLink>
               <a :href="repoUrl" rel="noopener" class="hover:text-ink">Manba kodi</a>
             </nav>
           </div>

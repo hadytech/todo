@@ -2,7 +2,9 @@ import { z } from 'zod'
 import { db } from '../../utils/db'
 import { hashToken, newToken, LOGIN_TOKEN_TTL_MIN } from '../../utils/auth'
 import { loginMail, sendMail } from '../../utils/mail'
-import { checkLoginRate, clientIp } from '../../utils/ratelimit'
+import { checkLoginRate } from '../../utils/ratelimit'
+import { ipKey } from '../../utils/privacy'
+import { requireSameOrigin } from '../../utils/sameorigin'
 
 const Body = z.object({
   email: z.string().trim().toLowerCase().email().max(254),
@@ -15,25 +17,29 @@ const Body = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  requireSameOrigin(event)
+
   const parsed = Body.safeParse(await readBody(event))
   if (!parsed.success) {
     throw createError({ statusCode: 400, statusMessage: 'Elektron pocta manzili notöğri' })
   }
   const { email, name } = parsed.data
 
-  const ip = clientIp(event)
-  await checkLoginRate(email, ip)
+  // A daily pseudonym for the requesting network, never the address. It
+  // is enough to throttle on and it is not a log of who asked to sign in.
+  const requestKey = ipKey(event)
+  await checkLoginRate(email, requestKey)
 
   const token = newToken()
   const sql = db()
 
   await sql`
-    insert into login_tokens (token_hash, email, expires_at, request_ip)
+    insert into login_tokens (token_hash, email, expires_at, request_key)
     values (
       ${hashToken(token)},
       ${email},
       now() + ${`${LOGIN_TOKEN_TTL_MIN} minutes`}::interval,
-      ${ip}
+      ${requestKey}
     )
   `
 

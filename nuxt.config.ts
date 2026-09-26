@@ -66,19 +66,27 @@ export default defineNuxtConfig({
         { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
         { rel: 'apple-touch-icon', href: '/icon-180.png' },
         { rel: 'manifest', href: '/site.webmanifest' },
-        // Google Fonts serves the stylesheet from one host and the font
-        // file from another, so both need warming or the file waits on a
-        // second connection it could have opened in parallel.
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        {
-          rel: 'stylesheet',
-          // display=swap renders the fallback immediately rather than
-          // holding the text blank while the font downloads — on a slow
-          // connection that is the difference between a readable page and
-          // an empty one.
-          href: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap',
-        },
+        /**
+         * No webfont.
+         *
+         * Manrope used to come from Google Fonts, which meant every
+         * visitor's browser told Google they had opened yalp.uz — before
+         * a single word of the page was readable, on every page, with no
+         * way to decline. That is not a small thing to hand a third party
+         * in exchange for letterforms, and it is not something a privacy
+         * page can explain away.
+         *
+         * So the site asks for nothing off-origin at all (see
+         * /maxfiylik), and the type comes from the device. On a Tashkent
+         * phone the system stack also renders immediately, with no swap
+         * and no download, which is worth more on a slow connection than
+         * any particular set of curves.
+         *
+         * `scripts/vendor-font.sh` self-hosts Manrope for anyone who
+         * wants it back; self-hosted is the only acceptable way to have
+         * it, and that script needs network access this build does not
+         * have.
+         */
       ],
       script: [{
         /**
@@ -114,6 +122,10 @@ export default defineNuxtConfig({
       routes: [
         '/',
         '/qidiruv',
+        // Static text on every preset: it depends on nothing at runtime,
+        // and a page that explains what the site stores should be the one
+        // page that cannot fail to load.
+        '/maxfiylik',
         /**
          * Only on the static build. Both of these render differently
          * depending on whether a database is reachable, and CI has no
@@ -122,13 +134,18 @@ export default defineNuxtConfig({
          */
         ...(staticBuild ? ['/qoshish', '/kirish'] : []),
         /**
-         * Business pages carry reviews, and reviews are the content
-         * people actually search for. Freezing them at build time would
-         * mean a crawler only ever sees the reviews that existed when CI
-         * last ran, so under Vercel they are rendered on demand and
-         * cached (see routeRules) instead of prerendered.
+         * Prerendered on every preset.
+         *
+         * These were rendered on demand under Vercel so that review text
+         * would be in the HTML rather than frozen at build time. That is
+         * the right shape once reviews exist — but there is no database
+         * connected yet, so on-demand rendering buys nothing today and
+         * costs a whole class of failure: a page that depends on a
+         * function being routed correctly can 404, and a file cannot.
+         *
+         * Put the `isr` rule back alongside DATABASE_URL.
          */
-        ...(staticBuild ? published.map((b) => `/b/${b.slug}`) : []),
+        ...published.map((b) => `/b/${b.slug}`),
         /**
          * The API routes, written out as files.
          *
@@ -162,7 +179,71 @@ export default defineNuxtConfig({
     },
   },
 
+  /**
+   * Headers, on every response from the server preset.
+   *
+   * These are the cheap half of "secure": they cost nothing, they are
+   * invisible when nothing is wrong, and each one closes a specific hole.
+   *
+   * The static preset cannot set them — a static host serves files and
+   * has no place to put a header — which is one more reason the server
+   * build is the one DNS points at. `_headers` would cover Netlify and
+   * Cloudflare Pages but not GitHub Pages, so it is not written here as a
+   * second half-measure that looks like coverage.
+   */
   routeRules: staticBuild ? {} : {
+    /**
+     * Applied to everything the server renders.
+     *
+     * The CSP is the load-bearing one. `script-src 'self' 'unsafe-inline'`
+     * is not the strong version — Nuxt hydration ships an inline payload
+     * script and a nonce would have to be threaded through the render —
+     * but it still means a stored string cannot pull executable code from
+     * another origin, which is what a review-body injection would need.
+     * Tightening it to a nonce is worth doing and is a separate change.
+     *
+     * `frame-ancestors 'none'` and `form-action 'self'` are the ones that
+     * matter for the write endpoints: nothing may frame this site to
+     * clickjack a rating out of somebody, and no form on this page may
+     * post anywhere else.
+     */
+    '/**': {
+      headers: {
+        'content-security-policy': [
+          "default-src 'self'",
+          "base-uri 'self'",
+          "object-src 'none'",
+          "frame-ancestors 'none'",
+          "form-action 'self'",
+          /**
+           * `data:` because a photo a visitor picks is previewed from a
+           * data URL and stored photos are data URLs. `blob:` because
+           * MapLibre decodes tiles into blobs — leaving it out does not
+           * produce an error message, it produces a blank map, which is
+           * the kind of regression a CSP is famous for.
+           */
+          "img-src 'self' data: blob:",
+          "script-src 'self' 'unsafe-inline'",
+          // MapLibre runs its tile decoding in a worker it creates from a
+          // blob. Same story: omit this and the map silently dies.
+          "worker-src 'self' blob:",
+          "style-src 'self' 'unsafe-inline'",
+          "font-src 'self'",
+          // No third party is contacted, so nothing needs to be allowed
+          // beyond this origin. See /maxfiylik.
+          "connect-src 'self'",
+        ].join('; '),
+        // No MIME sniffing: a stored file must be treated as the type it
+        // was served with, never as one a browser guessed.
+        'x-content-type-options': 'nosniff',
+        // Leaving this site should not tell the next one which listing
+        // was being read. Origin-only on cross-origin navigation.
+        'referrer-policy': 'strict-origin-when-cross-origin',
+        // Nothing here needs any of these, and a page that cannot ask
+        // cannot be tricked into asking.
+        'permissions-policy': 'geolocation=(), camera=(), microphone=(), payment=()',
+      },
+    },
     /**
      * Rendered once, then served from cache for ten minutes.
      *
@@ -172,7 +253,6 @@ export default defineNuxtConfig({
      * page per window rather than once per visit. That is what keeps a
      * free Postgres tier comfortably inside its compute allowance.
      */
-    '/b/**': { isr: 600 },
     // Rendered per request: a form must not be served from a cache that
     // predates the database it posts to.
     '/qoshish': { isr: false },

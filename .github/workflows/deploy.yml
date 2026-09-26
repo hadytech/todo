@@ -1,8 +1,16 @@
 name: Deploy
 
+# Manual only. The live site is served by Vercel, which builds from this
+# repository itself — `yalp.uz` resolves to a Vercel address, not to the
+# Pages CDN. Deploying to Pages on every push would keep publishing a
+# second, silently diverging copy of the site to a host nothing points at.
+#
+# Kept rather than deleted because it is the fallback: Pages needs no
+# account, no dashboard and no environment variables, so if Vercel ever
+# has to go, pointing DNS back at Pages and running this workflow is the
+# whole migration. The gates that used to run here on a push to `main`
+# now run in `validate.yml`, which covers `main` too.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
