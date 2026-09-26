@@ -286,6 +286,37 @@ alter table submissions alter column category drop not null;
 -- means: they were all Tashkent.
 alter table submissions add column if not exists city text not null default 'toshkent';
 
+-- ------------------------------------------------- approving from the site
+--
+-- A fourth state: \`published\`.
+--
+-- \`imported\` means a maintainer ran \`npm run submissions\` on a laptop and
+-- the place is now a YAML file in git. That is still the destination for
+-- anything worth keeping — the directory's facts belong under review.
+-- But it needs a terminal, a checkout and a connection string, which
+-- means in practice suggestions sat in this table for as long as nobody
+-- was at a desk.
+--
+-- \`published\` is the same decision made from a phone: the row is served
+-- as a real listing straight from here. \`npm run submissions import\`
+-- still moves it into YAML later and flips it to \`imported\`, at which
+-- point the file is the source and this row stops being served.
+do $$ begin
+  alter table submissions drop constraint if exists submissions_status_check;
+  alter table submissions add constraint submissions_status_check
+    check (status in ('pending', 'published', 'imported', 'rejected'));
+end $$;
+
+-- The URL a published suggestion is served at. Unique across suggestions;
+-- collisions with a YAML listing are resolved when the slug is assigned.
+alter table submissions add column if not exists slug text;
+create unique index if not exists submissions_slug_uniq
+  on submissions (slug) where slug is not null;
+
+-- Who decided, so a queue worked by more than one person still says who
+-- did what. Null for rows decided by the import script.
+alter table submissions add column if not exists reviewed_by text;
+
 -- ============================================================= pseudonyms
 --
 -- Addresses are no longer stored. Rate limiting needs to recognise a
@@ -330,4 +361,4 @@ create index if not exists reviews_writer_idx on reviews (writer_key, created_at
 `
 
 /** SHA-256 of the SQL above, used to skip a migration that already ran. */
-export const SCHEMA_DIGEST = '73fafb04d8833fdd09073f8e07b6d116725790d441227f4811484418112056ce'
+export const SCHEMA_DIGEST = '9692664ae60a5c4b39caa22e061f7b7cacc3f4e36ebe7651e292d0fb8c1ca739'
