@@ -1,4 +1,5 @@
 import { createHash, createHmac } from 'node:crypto'
+import { databaseUrl } from './dburl'
 
 /**
  * Turning an IP address into something that can be counted but not read.
@@ -84,7 +85,10 @@ let fallback: string | null = null
 export function ipSecret(env: Record<string, string | undefined> = process.env): string {
   const explicit = env.IP_SALT
   if (explicit) return createHash('sha256').update(explicit).digest('hex')
-  const url = env.DATABASE_URL
+  // The same resolution order the connection itself uses. If these two
+  // ever disagreed, the pseudonyms would rotate on a deploy that only
+  // renamed a variable, and every rate limit would silently reset.
+  const url = databaseUrl(env)
   if (url) return createHash('sha256').update(`yalp-ip:${url}`).digest('hex')
   fallback ??= createHash('sha256').update(String(Math.random())).digest('hex')
   return fallback

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { db } from '../../utils/db'
+import { ensureSchema } from '../../utils/migrate'
 import { hashToken, newToken, LOGIN_TOKEN_TTL_MIN } from '../../utils/auth'
 import { loginMail, sendMail } from '../../utils/mail'
 import { checkLoginRate } from '../../utils/ratelimit'
@@ -17,6 +18,7 @@ const Body = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  await ensureSchema()
   requireSameOrigin(event)
 
   const parsed = Body.safeParse(await readBody(event))

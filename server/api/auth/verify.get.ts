@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { db } from '../../utils/db'
+import { ensureSchema } from '../../utils/migrate'
 import { hashToken, newToken, setSessionCookie, SESSION_TTL_DAYS } from '../../utils/auth'
 
 const Query = z.object({
@@ -14,6 +15,7 @@ function back(event: Parameters<typeof sendRedirect>[0], status: string, to = '/
 }
 
 export default defineEventHandler(async (event) => {
+  await ensureSchema()
   const parsed = Query.safeParse(getQuery(event))
   if (!parsed.success) return back(event, 'xato', '/kirish')
 

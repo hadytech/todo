@@ -48,16 +48,19 @@ const check = (name, ok, detail = '') => {
   if (!ok) failures.push(name)
 }
 
-// Self-contained: apply the schema (safe to re-run) and empty the tables,
-// so this can be pointed at a blank database and just work.
-execFileSync('psql', ['-q', '-v', 'ON_ERROR_STOP=1', url, '-f', 'db/schema.sql'], {
-  encoding: 'utf8',
-  stdio: ['ignore', 'ignore', 'pipe'],
-})
+/**
+ * A completely blank database, on purpose.
+ *
+ * The schema is NOT applied here. The server applies it itself on first
+ * use (server/utils/migrate.ts), and that is the thing this most needs to
+ * prove: connecting a database is the whole setup, with no second step on
+ * anybody's laptop. If the migration does not happen, every check below
+ * fails on a missing table.
+ */
 execFileSync('psql', [
   '-q', '-v', 'ON_ERROR_STOP=1', url,
-  '-c', 'truncate reviews, votes, users, submissions, login_tokens cascade',
-], { encoding: 'utf8' })
+  '-c', 'drop schema public cascade; create schema public',
+], { encoding: 'utf8', stdio: ['ignore', 'ignore', 'pipe'] })
 
 const server = spawn(process.execPath, ['.output/server/index.mjs'], {
   env: {
@@ -102,6 +105,31 @@ page.on('console', (m) => {
 })
 
 const body = 'Meva-sabzavot arzon, ertalab borsangiz tanlov köp böladi.'
+
+console.log('\nÖzini-özi sozlaş — boş bazada:\n')
+
+const tables = () => execFileSync('psql', ['-t', '-A', url, '-c',
+  "select count(*) from information_schema.tables where table_schema = 'public'",
+], { encoding: 'utf8' }).trim()
+
+check('the database really did start empty', tables() === '0', `${tables()} jadval`)
+
+// One request to the endpoint the interface branches on. Nothing else.
+const me = await (await fetch(`${ORIGIN}/api/auth/me`)).json()
+check('the write side reports itself enabled', me.enabled === true, JSON.stringify(me))
+check('the schema applied itself on first use', Number(tables()) > 5, `${tables()} jadval`)
+
+const digest = execFileSync('psql', ['-t', '-A', url, '-c',
+  'select digest from schema_state where id = 1',
+], { encoding: 'utf8' }).trim()
+check('the applied version was recorded', /^[0-9a-f]{64}$/.test(digest), digest.slice(0, 12))
+
+// Idempotence across instances: a second call must not re-run the DDL or
+// trip over its own `create index if not exists`.
+const again = await Promise.all(
+  Array.from({ length: 4 }, () => fetch(`${ORIGIN}/api/auth/me`).then((r) => r.status)),
+)
+check('concurrent callers do not collide', again.every((s) => s === 200), again.join(','))
 
 console.log('\nHisobsiz şarh yoziş:\n')
 

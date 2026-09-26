@@ -1,4 +1,5 @@
 import { db, dbConfigured } from '../../utils/db'
+import { ensureSchema } from '../../utils/migrate'
 import { readerIdentity, GUEST_NAME } from '../../utils/identity'
 import { wilson, display, type Stats } from '../../../lib/rating'
 import { catalog } from '../../utils/catalog'
@@ -52,6 +53,7 @@ export default defineEventHandler(async (event) => {
   if (!dbConfigured()) {
     return { enabled: false, reviews: [], count: 0, average: null, histogram: [0, 0, 0, 0, 0] }
   }
+  await ensureSchema()
 
   const sql = db()
   const me = await readerIdentity(event)
