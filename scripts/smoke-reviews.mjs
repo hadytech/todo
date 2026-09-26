@@ -553,6 +553,89 @@ const wrongPin = await asPage(page, 'POST', '/api/submissions', {
 check('a Tashkent pin on a Khorezm place is refused', wrongPin.status === 400,
   `status ${wrongPin.status}`)
 
+// ========================================== the function without the data dir
+//
+// The bundle ships JavaScript and no `data/` directory. Everything that
+// reads the catalogue used to do it with readFileSync at module load, so
+// every endpoint importing it answered 500 in production while every
+// check here stayed green — the pages that show that data are prerendered
+// in CI, where the files are right there.
+//
+// This runs the built server from a directory that has no `data/`, which
+// is what the deployed function actually is.
+console.log('\nMaʼlumot papkasisiz server:\n')
+
+const bare = `${process.env.TMPDIR ?? '/tmp'}/yalp-nodata-${process.pid}`
+execFileSync('rm', ['-rf', bare])
+execFileSync('mkdir', ['-p', bare])
+execFileSync('cp', ['-r', '.output', bare])
+check('the copy really has no data directory',
+  !existsSync(`${bare}/data`) && existsSync(`${bare}/.output/server/index.mjs`))
+
+const BARE_PORT = PORT + 3
+const bareServer = spawn(process.execPath, ['.output/server/index.mjs'], {
+  cwd: bare,
+  env: {
+    ...process.env,
+    DATABASE_URL: url,
+    PORT: String(BARE_PORT),
+    NITRO_PORT: String(BARE_PORT),
+    HOST: '127.0.0.1',
+  },
+  stdio: ['ignore', 'pipe', 'pipe'],
+})
+const bareLog = []
+bareServer.stdout.on('data', (d) => bareLog.push(String(d)))
+bareServer.stderr.on('data', (d) => bareLog.push(String(d)))
+
+const bareOrigin = `http://127.0.0.1:${BARE_PORT}`
+let bareUp = false
+const bareDeadline = Date.now() + 30_000
+while (Date.now() < bareDeadline && !bareUp) {
+  bareUp = await fetch(`${bareOrigin}/api/auth/me`).then((r) => r.ok).catch(() => false)
+  if (!bareUp) await new Promise((r) => setTimeout(r, 300))
+}
+check('it starts at all', bareUp)
+
+if (bareUp) {
+  for (const path of [
+    '/api/facets',
+    '/api/list?limit=2',
+    `/api/business/${SLUG}`,
+    `/api/reviews/${SLUG}`,
+  ]) {
+    const res = await fetch(`${bareOrigin}${path}`)
+    check(`${path} answers`, res.ok, `HTTP ${res.status}`)
+  }
+
+  const facetsThere = await (await fetch(`${bareOrigin}/api/facets`)).json()
+  check('the vocabulary the add form needs is there',
+    facetsThere.categories?.length > 0 && facetsThere.cities?.length > 1,
+    `${facetsThere.categories?.length} turi, ${facetsThere.cities?.length} şahar`)
+
+  const addThere = await fetch(`${bareOrigin}/api/submissions`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', origin: bareOrigin },
+    body: JSON.stringify({ name: 'Papkasiz joy', category: CATEGORY, rating: 5 }),
+  })
+  check('a place can still be added', addThere.ok, `HTTP ${addThere.status}`)
+
+  // Registration built its link from NUXT_PUBLIC_SITE_URL and threw on a
+  // value with no scheme, which reached the visitor as "Server Error".
+  const signup = await fetch(`${bareOrigin}/api/auth/request`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', origin: bareOrigin },
+    body: JSON.stringify({ email: 'sinov@yalp.uz', name: 'Sinov' }),
+  })
+  check('registering works', signup.ok, `HTTP ${signup.status}`)
+  check('the login link points at the host that was asked',
+    bareLog.join('').includes(`${bareOrigin}/api/auth/verify`),
+    bareLog.join('').match(/http[^\s]*auth\/verify[^\s]*/)?.[0]?.slice(0, 60) ?? 'topilmadi')
+}
+
+bareServer.kill('SIGTERM')
+execFileSync('rm', ['-rf', bare])
+
 // --------------------------------------------------------- nothing was broken
 check('no page errors', pageErrors.length === 0, pageErrors.join('; '))
 check('nothing was blocked by the CSP', cspViolations.length === 0, cspViolations.join('; '))
