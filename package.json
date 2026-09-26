@@ -31,7 +31,8 @@
     "canonicalise": "tsx scripts/canonicalise.ts",
     "smoke": "node scripts/smoke.mjs",
     "smoke:reviews": "node scripts/smoke-reviews.mjs",
-    "schema": "tsx scripts/build-schema.ts"
+    "schema": "tsx scripts/build-schema.ts",
+    "check:uzbek": "tsx scripts/check-uzbek.ts"
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",

@@ -42,7 +42,7 @@ export interface ReviewRow {
  */
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
-  if (!slug) throw createError({ statusCode: 400, statusMessage: 'Slug kerak' })
+  if (!slug) throw createError({ statusCode: 400, statusMessage: 'Joy manzili kerak' })
 
   // A review is only meaningful against a listing that exists. Without
   // this the endpoint is an open write target for arbitrary keys.

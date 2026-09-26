@@ -73,7 +73,7 @@ useHead({
       </p>
       <p class="mt-2 text-sm text-muted">
         Xatni oçib havolani bosing. Havola 20 daqiqa amal qiladi.
-        Xat kelmasa, spam papkasini tekşiring.
+        Xat kelmasa, spam jildini tekşiring.
       </p>
     </template>
 
@@ -124,7 +124,7 @@ useHead({
       </form>
 
       <p class="mt-4 text-xs text-muted">
-        Manzilingiz faqat kiriş uçun işlatiladi va saytda hech qaçon
+        Manzilingiz faqat kiriş uçun işlatiladi va saytda heç qaçon
         körsatilmaydi.
       </p>
     </template>

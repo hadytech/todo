@@ -53,6 +53,13 @@ jobs:
       # which is neither alphabet and which nothing caught.
       - name: Alifbo imlosi
         run: npm run canonicalise
+      # canonicalise guards the whole repository but only against `oʻ`/`gʻ` —
+      # it cannot look for ch/sh with this much English around. This reads
+      # only the strings a visitor sees, where the rule is unambiguous.
+      # `ishlamayapti`, `Birinchi` and `pocta` all shipped past the check
+      # above.
+      - name: Özbekçe matnlar
+        run: npm run check:uzbek
       # The server build first: it produces .vercel/output, while the
       # static build below produces .output/public that the budget and
       # HTML checks read. Running them the other way round would have the

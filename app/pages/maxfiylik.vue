@@ -24,7 +24,7 @@ const REPO = 'https://github.com/hadytech/todo'
     <h1 class="text-2xl font-bold">Maxfiylik</h1>
     <p class="mt-2 text-muted">
       Qisqasi: baho va şarh yoziş uçun hisob kerak emas, IP manzilingiz
-      saqlanmaydi, sayt uçinçi tomonga hiç narsa yubormaydi.
+      saqlanmaydi, sayt uçinçi tomonga heç narsa yubormaydi.
     </p>
 
     <section class="mt-8">
@@ -53,7 +53,7 @@ const REPO = 'https://github.com/hadytech/todo'
         <div>
           <dt class="font-medium">Faqat öqiyotgan bölsangiz</dt>
           <dd class="text-muted">
-            Hiç qanday cookie berilmaydi. U faqat birinçi yozganingizda
+            Heç qanday cookie berilmaydi. U faqat birinçi yozganingizda
             paydo böladi.
           </dd>
         </div>
@@ -61,7 +61,7 @@ const REPO = 'https://github.com/hadytech/todo'
           <dt class="font-medium">Qaytarib olmoqçi bölsangiz</dt>
           <dd class="text-muted">
             Şarhni «Öçiriş» bilan olib taşlaysiz. Brauzer cookielarini
-            taşlaş ham yetarli: sizni yozganingizga boğlaydigan boşqa hiç
+            taşlaş ham yetarli: sizni yozganingizga boğlaydigan boşqa heç
             narsa yöq — demak yozganingizni sizga qaytarib boğlaydigan ham
             yöq. Buning narxi halol aytilsin: cookieni taşlasangiz, eski
             şarhingizni tahrirlaş imkoni ham ketadi.
@@ -73,7 +73,7 @@ const REPO = 'https://github.com/hadytech/todo'
     <section class="mt-8">
       <h2 class="font-semibold text-lg">IP manzil</h2>
       <p class="mt-3 text-sm leading-relaxed text-muted">
-        Saqlanmaydi. Hiç qaysi jadvalda manzil uçun ustun yöq.
+        Saqlanmaydi. Heç qaysi jadvalda manzil uçun ustun yöq.
       </p>
       <p class="mt-2 text-sm leading-relaxed text-muted">
         Saqlanadigan narsa —
@@ -81,7 +81,7 @@ const REPO = 'https://github.com/hadytech/todo'
         har kuni almaşadigan taxallus. U spam va bot uçun kerak — bir
         kunda qança şarh, qança taklif kelganini sanaş uçun. Uni
         teskari öqib bölmaydi, çunki HMAC kaliti bazada emas. Şuning uçun
-        baza sizib ketsa ham, u yerdan hiç kimning manzili çiqmaydi. Kalit
+        baza sizib ketsa ham, u yerdan heç kimning manzili çiqmaydi. Kalit
         har kuni almaşgani uçun bir hafta oralab qilingan ikki iş bir-biri
         bilan boğlanmaydi.
       </p>
@@ -109,14 +109,14 @@ const REPO = 'https://github.com/hadytech/todo'
       <ul class="mt-3 space-y-2 text-sm leading-relaxed text-muted list-disc pl-5">
         <li>Reklama tarmoqlari yöq, kuzatuv pikselleri yöq.</li>
         <li>
-          Sahifa yuklanganda boşqa saytdan hiç narsa çaqirilmaydi: skript ham,
-          karta ham özimizda, şrift esa umuman yuklanmaydi — qurilmangizdagi
+          Sahifa yuklanganda boşqa saytdan heç narsa çaqirilmaydi: skript ham,
+          xarita ham özimizda, şrift esa umuman yuklanmaydi — qurilmangizdagi
           şrift işlatiladi. Ilgari şrift Google Fonts'dan kelardi, yaʼni har
           sahifa açilganda brauzeringiz Google'ga xabar berardi; şu olib
           taşlandi.
         </li>
-        <li>Analitika ölçagiçi sozlanmagan; sozlansa, u bu sahifada aytiladi.</li>
-        <li>Cookie faqat ikkita, ikkovi ham özimizning: biri şarh muallifi uçun, ikkinçisi hisobga kirsangiz sessiya uçun. Hiç biri saytlar orasida kuzatmaydi.</li>
+        <li>Tahlil ölçagiçi sozlanmagan; sozlansa, u bu sahifada aytiladi.</li>
+        <li>Cookie faqat ikkita, ikkovi ham özimizning: biri şarh muallifi uçun, ikkinçisi hisobga kirsangiz sessiya uçun. Heç biri saytlar orasida kuzatmaydi.</li>
       </ul>
     </section>
 
@@ -127,7 +127,7 @@ const REPO = 'https://github.com/hadytech/todo'
         kiriş havolasi yuboriladi. Nima beradi: ismingiz barça
         qurilmangizda bitta böladi va cookieni taşlasangiz ham
         şarhlaringiz sizda qoladi. Nima saqlanadi: manzilingiz va
-        körsatadigan ismingiz. Manzilingiz saytda hiç qaçon körinmaydi.
+        körsatadigan ismingiz. Manzilingiz saytda heç qaçon körinmaydi.
       </p>
     </section>
 
@@ -144,7 +144,7 @@ const REPO = 'https://github.com/hadytech/todo'
         <a
           :href="REPO" rel="noopener"
           class="rounded-pill border border-line px-4 py-2 text-sm hover:border-accent inline-block"
-        >Kodni körish</a>
+        >Kodni köriş</a>
       </p>
     </section>
   </div>
