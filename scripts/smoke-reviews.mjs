@@ -688,6 +688,39 @@ check('the page asks for a key', await adminPage.locator('#admin-token').count()
 check('the queue is not readable before signing in',
   (await (await adminPage.evaluate(() => fetch('/api/admin/queue').then((r) => r.json())))).admin === false)
 
+/**
+ * The paste that arrives with a newline on it.
+ *
+ * This is how the key was reported as wrong when it was right: a
+ * long-press copy on a phone takes the trailing newline, the dashboard
+ * field keeps it, and an exact byte comparison refuses a value that
+ * reads as identical to everybody looking at it.
+ */
+const padded = await adminPage.evaluate((t) =>
+  fetch('/api/admin/session', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ token: `\n ${t}  ` }),
+  }).then((r) => r.status), ADMIN)
+check('a key pasted with stray whitespace still works', padded === 200, `status ${padded}`)
+
+// That must not have made it lenient about the token itself.
+const nearly = await adminPage.evaluate((t) =>
+  fetch('/api/admin/session', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ token: t.toUpperCase() }),
+  }).then((r) => r.status), ADMIN)
+check('but a different key is still refused', nearly === 401, `status ${nearly}`)
+
+// Sign back out so the sign-in below starts from nothing.
+await adminPage.evaluate(() =>
+  fetch('/api/admin/session', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({}),
+  }))
+
 const wrong = await adminPage.evaluate(() =>
   fetch('/api/admin/session', {
     method: 'POST',

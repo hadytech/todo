@@ -108,12 +108,20 @@ useHead({
     <!-- Signing in -->
     <form v-else-if="data && !data.admin" class="mt-5 space-y-3" @submit.prevent="signIn">
       <label for="admin-token" class="block text-sm text-muted">Kalit</label>
+      <!-- Every assist turned off. A phone keyboard that capitalises the
+           first letter, corrects a word or inserts a smart quote turns a
+           correct key into a wrong one, and the person sees only that it
+           was refused. -->
       <input
         id="admin-token"
-        v-model="token"
+        v-model.trim="token"
         type="password"
         autocomplete="off"
-        class="w-full rounded-soft border border-line bg-surface px-3 py-2.5"
+        autocapitalize="none"
+        autocorrect="off"
+        spellcheck="false"
+        class="w-full rounded-soft border border-line bg-surface px-3 py-2.5
+               font-mono text-sm"
       >
       <p v-if="error" class="text-sm text-accent font-medium">{{ error }}</p>
       <button
