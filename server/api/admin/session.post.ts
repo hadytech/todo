@@ -28,7 +28,20 @@ export default defineEventHandler(async (event) => {
     })
   }
   if (!tokenMatches(token)) {
-    throw createError({ statusCode: 401, statusMessage: 'Kalit töğri kelmadi' })
+    /**
+     * Says what to check, not what was wrong.
+     *
+     * Surrounding whitespace is already forgiven, so what is left is a
+     * genuinely different value — and the two ways that happens are a
+     * half-copied paste and a capital letter somewhere. Naming them
+     * leaks nothing and saves the one thing this page cannot afford to
+     * cost: another round trip to somebody holding a phone.
+     */
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Kalit töğri kelmadi — Vercel\'dagi ADMIN_TOKEN '
+        + 'qiymati bilan bir xilmi? Katta-kiçik harflar ham sanaladi.',
+    })
   }
 
   setAdminCookie(event, token)

@@ -28,17 +28,43 @@ function digest(value: string): Buffer {
   return createHash('sha256').update(value).digest()
 }
 
+/**
+ * What a token is, once the ways it gets mangled in transit are undone.
+ *
+ * A token is copied from a message, pasted into a dashboard field, then
+ * copied again and pasted into a form — on a phone, where a long-press
+ * copy routinely takes the trailing newline with it and a paste can
+ * arrive wrapped in whitespace nobody can see. An exact byte comparison
+ * then reports "wrong key" for a key that is, to every human reading it,
+ * identical.
+ *
+ * So: surrounding whitespace goes, and so do the invisible characters
+ * that survive a copy — a non-breaking space, a zero-width space, a
+ * byte-order mark. None of them can be part of a secret anybody typed on
+ * purpose, and treating them as significant only ever locks the right
+ * person out.
+ *
+ * Nothing inside the token is touched: case, punctuation and length all
+ * still matter.
+ */
+export function normaliseToken(value: string): string {
+  return value
+    .replace(/[\u00a0\u200b-\u200d\ufeff]/g, '')
+    .trim()
+}
+
 export function adminConfigured(): boolean {
-  return Boolean(process.env.ADMIN_TOKEN)
+  return Boolean(normaliseToken(process.env.ADMIN_TOKEN ?? ''))
 }
 
 /** True when `candidate` is the configured token. */
 export function tokenMatches(candidate: string): boolean {
-  const secret = process.env.ADMIN_TOKEN
-  if (!secret || !candidate) return false
+  const secret = normaliseToken(process.env.ADMIN_TOKEN ?? '')
+  const given = normaliseToken(candidate ?? '')
+  if (!secret || !given) return false
   // Hashing first makes both sides the same length, so timingSafeEqual
   // cannot throw and the comparison leaks nothing about the length.
-  return timingSafeEqual(digest(candidate), digest(secret))
+  return timingSafeEqual(digest(given), digest(secret))
 }
 
 export function isAdmin(event: Parameters<typeof getCookie>[0]): boolean {
@@ -55,7 +81,9 @@ export function requireAdmin(event: Parameters<typeof getCookie>[0]): void {
 }
 
 export function setAdminCookie(event: Parameters<typeof setCookie>[0], token: string): void {
-  setCookie(event, ADMIN_COOKIE, token, {
+  // Normalised, so what comes back on the next request is what will be
+  // compared — not whatever padding the paste arrived with.
+  setCookie(event, ADMIN_COOKIE, normaliseToken(token), {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
